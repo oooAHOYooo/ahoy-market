@@ -148,70 +148,93 @@ export class MarketStore {
     const releases = [
       {
         id: 'rel_samuel_witch_1',
-        slug: 'moonlight-tides',
-        title: 'Moonlight Tides',
+        slug: 'seen-better-days',
+        title: 'Seen Better Days',
         artist: 'Samuel Dylan Witch',
         artist_slug: 'samuel-dylan-witch',
         description: 'Atmospheric nautical folk and tape-saturated harmonies recorded on the Connecticut coastline.',
+        price_cents: 100,
+        artwork_url: 'https://i.ytimg.com/vi/XDH0X-dF4GM/maxresdefault.jpg',
+        type: 'single',
+        created_at: new Date().toISOString(),
+        tracks: [
+          {
+            id: 'trk_seen_better_days',
+            track_number: 1,
+            title: 'Seen Better Days',
+            artist: 'Samuel Dylan Witch',
+            duration_seconds: 190,
+            preview_url: 'https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3',
+            full_audio_url: 'https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3',
+          }
+        ]
+      },
+      {
+        id: 'rel_samuel_witch_2',
+        slug: 'beneath-the-willow-tree',
+        title: 'Beneath the Willow Tree',
+        artist: 'Samuel Dylan Witch',
+        artist_slug: 'samuel-dylan-witch',
+        description: 'Intimate acoustic ballad with reflective songwriting and vintage warmth.',
+        price_cents: 100,
+        artwork_url: 'https://i.ytimg.com/vi/koPyEhqksBk/maxresdefault.jpg',
+        type: 'single',
+        created_at: new Date().toISOString(),
+        tracks: [
+          {
+            id: 'trk_beneath_the_willow_tree',
+            track_number: 1,
+            title: 'Beneath the Willow Tree',
+            artist: 'Samuel Dylan Witch',
+            duration_seconds: 197,
+            preview_url: 'https://ahoycollection.s3.us-east-2.amazonaws.com/Beneath+the+Willow+Tree.mp3',
+            full_audio_url: 'https://ahoycollection.s3.us-east-2.amazonaws.com/Beneath+the+Willow+Tree.mp3',
+          }
+        ]
+      },
+      {
+        id: 'rel_cambell_rice_1',
+        slug: 'sunflower',
+        title: 'Sunflower',
+        artist: 'Cambell Rice',
+        artist_slug: 'cambell-rice',
+        description: 'Vibrant indie folk featuring lush acoustic arrangements and sparkling melodies.',
+        price_cents: 100,
+        artwork_url: 'https://m.media-amazon.com/images/I/61APLxryThL._UXNaN_FMjpg_QL85_.jpg',
+        type: 'single',
+        created_at: new Date().toISOString(),
+        tracks: [
+          {
+            id: 'trk_sunflower',
+            track_number: 1,
+            title: 'Sunflower',
+            artist: 'Cambell Rice',
+            duration_seconds: 130,
+            preview_url: 'https://ahoycollection.s3.us-east-2.amazonaws.com/Campbell+Rice-Sunflower.mp3',
+            full_audio_url: 'https://ahoycollection.s3.us-east-2.amazonaws.com/Campbell+Rice-Sunflower.mp3',
+          }
+        ]
+      },
+      {
+        id: 'rel_youth_xl_1',
+        slug: 'summer-bummer',
+        title: 'Summer Bummer',
+        artist: 'Youth XL',
+        artist_slug: 'youth-xl',
+        description: 'Upbeat indie-pop anthems filled with sun-drenched synths and driving rhythms.',
         price_cents: 100,
         artwork_url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=600&q=80',
         type: 'single',
         created_at: new Date().toISOString(),
         tracks: [
           {
-            id: 'trk_moonlight_tides_1',
+            id: 'trk_summer_bummer',
             track_number: 1,
-            title: 'Moonlight Tides',
-            artist: 'Samuel Dylan Witch',
-            duration_seconds: 214,
-            preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-            full_audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-          }
-        ]
-      },
-      {
-        id: 'rel_jake_custer_1',
-        slug: 'harbor-drift',
-        title: 'Harbor Drift',
-        artist: 'Jake Custer',
-        artist_slug: 'jake-custer',
-        description: 'Acoustic fingerstyle guitar intertwined with ambient maritime field recordings.',
-        price_cents: 100,
-        artwork_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
-        type: 'single',
-        created_at: new Date().toISOString(),
-        tracks: [
-          {
-            id: 'trk_harbor_drift_1',
-            track_number: 1,
-            title: 'Harbor Drift',
-            artist: 'Jake Custer',
-            duration_seconds: 188,
-            preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-            full_audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-          }
-        ]
-      },
-      {
-        id: 'rel_the_tines_1',
-        slug: 'fog-signals',
-        title: 'Fog Signals',
-        artist: 'The Tines',
-        artist_slug: 'the-tines',
-        description: 'Post-rock and dream-pop textures drifting across late-night radio frequencies.',
-        price_cents: 200,
-        artwork_url: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=600&q=80',
-        type: 'single',
-        created_at: new Date().toISOString(),
-        tracks: [
-          {
-            id: 'trk_fog_signals_1',
-            track_number: 1,
-            title: 'Fog Signals',
-            artist: 'The Tines',
-            duration_seconds: 245,
-            preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-            full_audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+            title: 'Summer Bummer',
+            artist: 'Youth XL',
+            duration_seconds: 239,
+            preview_url: 'https://ahoycollection.s3.amazonaws.com/Youth+XL+-+Summer+Bummer.mp3',
+            full_audio_url: 'https://ahoycollection.s3.amazonaws.com/Youth+XL+-+Summer+Bummer.mp3',
           }
         ]
       }

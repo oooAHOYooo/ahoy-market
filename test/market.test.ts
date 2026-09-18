@@ -30,7 +30,7 @@ describe('AHOY Market API & Entitlement Flow', () => {
     const body = res.json();
     expect(body.releases.length).toBeGreaterThan(0);
     expect(body.releases[0].tracks.length).toBeGreaterThan(0);
-    expect(body.releases[0].title).toBe('Moonlight Tides');
+    expect(body.releases[0].title).toBe('Seen Better Days');
   });
 
   it('requires AHOY ID authentication to purchase', async () => {
@@ -78,7 +78,7 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(libRes.statusCode).toBe(200);
     const libBody = libRes.json();
     expect(libBody.tracks.length).toBe(1);
-    expect(libBody.tracks[0].title).toBe('Moonlight Tides');
+    expect(libBody.tracks[0].title).toBe('Seen Better Days');
 
     // 4. Verify Player Entitlements API query
     const playerEntRes = await app.inject({
@@ -88,15 +88,15 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(playerEntRes.statusCode).toBe(200);
     const playerEntBody = playerEntRes.json();
     expect(playerEntBody.count).toBe(1);
-    expect(playerEntBody.tracks[0].id).toBe('trk_moonlight_tides_1');
-    expect(playerEntBody.tracks[0].stream_url).toContain('trk_moonlight_tides_1');
+    expect(playerEntBody.tracks[0].id).toBe('trk_seen_better_days');
+    expect(playerEntBody.tracks[0].stream_url).toContain('trk_seen_better_days');
 
     // 5. Stream endpoint redirect for entitled user
     const streamRes = await app.inject({
       method: 'GET',
-      url: `/api/stream/trk_moonlight_tides_1?ahoy_id=${encodeURIComponent(ahoyId)}`,
+      url: `/api/stream/trk_seen_better_days?ahoy_id=${encodeURIComponent(ahoyId)}`,
     });
     expect(streamRes.statusCode).toBe(302);
-    expect(streamRes.headers.location).toBe('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+    expect(streamRes.headers.location).toBe('https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3');
   });
 });
