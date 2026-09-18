@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AHOY Market — Own the Music. Keep the File.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1118;
+      --surface: #141e2a;
+      --surface-card: #192636;
+      --surface-border: #23354a;
+      --text: #f4ede4;
+      --text-muted: #9bb0c4;
+      --accent: #e07a5f;
+      --accent-hover: #f28a6f;
+      --accent-glow: rgba(224, 122, 95, 0.25);
+      --gold: #d4a373;
+      --teal: #2a9d8f;
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    /* Top Navigation */
+    header {
+      border-bottom: 1px solid var(--surface-border);
+      background: rgba(11, 17, 24, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: #0b1118;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 1.15rem;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .auth-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b1118;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--surface-card);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+    }
+    .btn-secondary:hover {
+      background: var(--surface);
+      border-color: var(--text-muted);
+    }
+
+    .user-pill {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .sovereign-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 4rem 1.5rem 2.5rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(180deg, #ffffff, #c7d2e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Content Area */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 5rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--surface-border);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Release Grid */
+    .release-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .release-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .release-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+
+    .card-art-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 65%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .card-art-wrap img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .release-card:hover .card-art-wrap img {
+      transform: scale(1.03);
+    }
+
+    .preview-play-btn {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(11, 17, 24, 0.85);
+      border: 1px solid var(--surface-border);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s;
+    }
+
+    .preview-play-btn:hover {
+      background: var(--accent);
+      color: #0b1118;
+      transform: scale(1.1);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-type {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+    }
+
+    .card-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #4ade80;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-artist {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: #8da4bb;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      border-top: 1px solid var(--surface-border);
+      padding-top: 1rem;
+    }
+
+    .buy-btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* Library section */
+    .library-section {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .library-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .library-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .library-table th {
+      text-align: left;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .library-table td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+    }
+
+    .track-cell {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .track-art-small {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: grid;
+      place-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .receipt-box {
+      background: var(--bg);
+      border: 1px dashed var(--surface-border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* Global Player Bar */
+    .audio-player-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20, 30, 42, 0.95);
+      border-top: 1px solid var(--surface-border);
+      backdrop-filter: blur(12px);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      z-index: 99;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .audio-player-bar.active {
+      transform: translateY(0);
+    }
+
+    .player-now-playing {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 200px;
+    }
+
+    .player-thumb {
+      width: 42px;
+      height: 42px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    footer {
+      border-top: 1px solid var(--surface-border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-mark">⚓</div>
+        <div class="brand-text">
+          <span class="brand-title">AHOY MARKET</span>
+          <span class="brand-sub">Sovereign Storefront</span>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="https://app.ahoy.ooo" target="_blank" class="nav-link">Streamer (app.ahoy.ooo)</a>
+        <a href="https://player.ahoy.ooo" target="_blank" class="nav-link">Player (player.ahoy.ooo)</a>
+        <a href="#library" class="nav-link" id="nav-library-link">My Library</a>
+
+        <div id="auth-container" class="auth-badge">
+          <!-- Injected via JavaScript -->
+          <a href="/api/auth/login" class="btn btn-primary">Sign in with AHOY ID</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="hero-eyebrow">AHOY Digital Storefront</span>
+    <h1>Own the music. Keep the file.</h1>
+    <p>Direct artist-approved releases. Purchased songs write permanent ownership to your Sovereign AHOY ID and sync directly into your AHOY Player.</p>
+    <div class="hero-stats">
+      <span>✓ 100% Artist-Approved</span>
+      <span>✓ Lossless & MP3 Downloads</span>
+      <span>✓ Instant AHOY Player Sync</span>
+    </div>
+  </section>
+
+  <main>
+    <div class="section-title">
+      <h2>Featured Releases</h2>
+      <span style="font-size: 0.85rem; color: var(--gold);">Direct From Artists</span>
+    </div>
+
+    <div id="release-grid" class="release-grid">
+      <!-- Injected via JS -->
+      <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading releases...</div>
+    </div>
+
+    <section id="library" class="library-section">
+      <div class="section-title" style="border: none; margin-bottom: 0.5rem;">
+        <h2>My Sovereign Library</h2>
+        <span id="library-count" style="font-size: 0.85rem; color: var(--gold);">0 tracks owned</span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Songs unlocked with your Sovereign AHOY ID. Open in AHOY Player for instant playback.
+      </p>
+
+      <div id="library-content">
+        <div class="library-empty">
+          Sign in with your AHOY ID to view and stream your purchased library.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Audio Player Bar -->
+  <div id="audio-bar" class="audio-player-bar">
+    <div class="player-now-playing">
+      <img id="player-thumb" src="" class="player-thumb" alt="Artwork" />
+      <div>
+        <div id="player-title" style="font-weight: 600; font-size: 0.9rem;"></div>
+        <div id="player-artist" style="font-size: 0.75rem; color: var(--text-muted);"></div>
+      </div>
+    </div>
+    <audio id="audio-element" controls style="flex: 1; max-width: 500px; height: 36px;"></audio>
+    <button id="player-close-btn" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Close</button>
+  </div>
+
+  <!-- Purchase Modal -->
+  <div id="purchase-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Complete Purchase</h3>
+        <button id="modal-close" class="modal-close">&times;</button>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        You are purchasing permanent digital ownership of this release.
+      </p>
+      <div class="receipt-box" id="modal-receipt">
+        <!-- Injected via JS -->
+      </div>
+      <div id="modal-auth-warning" style="display: none; color: var(--accent); font-size: 0.85rem; margin-bottom: 1rem;">
+        ⚠️ You need to sign in with your AHOY ID before completing your purchase.
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <button id="confirm-buy-btn" class="btn btn-primary" style="flex: 1; justify-content: center;">
+          ⚡ Confirm & Unlock ($1.00)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>AHOY Market &copy; 2026 — Part of the AHOY Indie Media Ecosystem</p>
+  </footer>
+
+  <script>
+    let currentUser = null;
+    let selectedRelease = null;
+    const audioElement = document.getElementById('audio-element');
+    const audioBar = document.getElementById('audio-bar');
+
+    async function init() {
+      await checkAuth();
+      await loadReleases();
+      if (currentUser?.authenticated) {
+        await loadLibrary();
+      }
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        currentUser = await res.json();
+        renderAuth();
+      } catch (e) {
+        console.error('Auth check error:', e);
+      }
+    }
+
+    function renderAuth() {
+      const container = document.getElementById('auth-container');
+      if (currentUser && currentUser.authenticated) {
+        container.innerHTML = `
+          <div class="user-pill">
+            <span class="sovereign-dot"></span>
+            <span>${currentUser.user.name || currentUser.user.email || currentUser.user.ahoy_id}</span>
+          </div>
+          <button class="btn btn-secondary" onclick="logout()">Sign out</button>
+        `;
+      } else {
+        container.innerHTML = `
+          <a href="/api/auth/login" class="btn btn-primary">Sign in with AHOY ID</a>
+        `;
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      currentUser = null;
+      renderAuth();
+      document.getElementById('library-content').innerHTML = `
+        <div class="library-empty">
+          Sign in with your AHOY ID to view and stream your purchased library.
+        </div>
+      `;
+    }
+
+    async function loadReleases() {
+      try {
+        const res = await fetch('/api/releases');
+        const data = await res.json();
+        const grid = document.getElementById('release-grid');
+        grid.innerHTML = '';
+
+        data.releases.forEach(r => {
+          const card = document.createElement('article');
+          card.className = 'release-card';
+          const track = r.tracks[0];
+          card.innerHTML = `
+            <div class="card-art-wrap">
+              <img src="${r.artwork_url}" alt="${r.title}">
+              <button class="preview-play-btn" onclick="playPreview('${r.id}', '${escapeHtml(r.title)}', '${escapeHtml(r.artist)}', '${r.artwork_url}', '${track.preview_url}')" title="Preview track">
+                ▶
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="card-meta">
+                <span class="card-type">${r.type}</span>
+                <span class="card-price">$${(r.price_cents / 100).toFixed(2)}</span>
+              </div>
+              <h3 class="card-title">${escapeHtml(r.title)}</h3>
+              <div class="card-artist">${escapeHtml(r.artist)}</div>
+              <p class="card-desc">${escapeHtml(r.description)}</p>
+              <div class="card-actions">
+                <button class="btn btn-primary buy-btn" onclick="openBuyModal('${r.id}')">
+                  Buy for $${(r.price_cents / 100).toFixed(2)}
+                </button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        console.error('Error loading releases:', e);
+      }
+    }
+
+    function playPreview(id, title, artist, art, url) {
+      document.getElementById('player-thumb').src = art;
+      document.getElementById('player-title').textContent = title;
+      document.getElementById('player-artist').textContent = artist + ' (Preview)';
+      audioElement.src = url;
+      audioBar.classList.add('active');
+      audioElement.play();
+    }
+
+    document.getElementById('player-close-btn').addEventListener('click', () => {
+      audioElement.pause();
+      audioBar.classList.remove('active');
+    });
+
+    async function openBuyModal(releaseId) {
+      const res = await fetch(`/api/releases/${releaseId}`);
+      const data = await res.json();
+      selectedRelease = data.release;
+
+      const receipt = document.getElementById('modal-receipt');
+      receipt.innerHTML = `
+        <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
+          <span>${escapeHtml(selectedRelease.title)}</span>
+          <span>$${(selectedRelease.price_cents / 100).toFixed(2)}</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.8rem;">
+          Artist: ${escapeHtml(selectedRelease.artist)}<br>
+          Format: Full Lossless Audio + MP3<br>
+          Entitlement: Sovereign AHOY ID
+        </div>
+      `;
+
+      const warning = document.getElementById('modal-auth-warning');
+      const confirmBtn = document.getElementById('confirm-buy-btn');
+
+      if (!currentUser?.authenticated) {
+        warning.style.display = 'block';
+        confirmBtn.textContent = 'Sign in with AHOY ID to Buy';
+        confirmBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
+      } else {
+        warning.style.display = 'none';
+        confirmBtn.textContent = `⚡ Confirm Purchase ($${(selectedRelease.price_cents / 100).toFixed(2)})`;
+        confirmBtn.onclick = confirmPurchase;
+      }
+
+      document.getElementById('purchase-modal').classList.add('open');
+    }
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('purchase-modal').classList.remove('open');
+    });
+
+    async function confirmPurchase() {
+      if (!selectedRelease) return;
+      const btn = document.getElementById('confirm-buy-btn');
+      btn.disabled = true;
+      btn.textContent = 'Processing Sovereign Purchase...';
+
+      try {
+        const res = await fetch('/api/checkout/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            release_id: selectedRelease.id,
+            payment_method: 'instant_sovereign',
+          }),
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert(`🎉 Success! "${selectedRelease.title}" is now unlocked on your AHOY ID (${result.ahoy_id}).`);
+          document.getElementById('purchase-modal').classList.remove('open');
+          await loadLibrary();
+        } else {
+          alert(`Purchase error: ${result.message || result.error}`);
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Network error during purchase.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function loadLibrary() {
+      try {
+        const res = await fetch('/api/me/library');
+        if (!res.ok) return;
+        const data = await res.json();
+        const content = document.getElementById('library-content');
+        const countSpan = document.getElementById('library-count');
+
+        countSpan.textContent = `${data.tracks.length} tracks owned`;
+
+        if (!data.tracks.length) {
+          content.innerHTML = `
+            <div class="library-empty">
+              You have not purchased any releases yet. Support an artist above to start your library!
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <table class="library-table">
+            <thead>
+              <tr>
+                <th>Track</th>
+                <th>Artist</th>
+                <th>Purchased</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.tracks.forEach(t => {
+          html += `
+            <tr>
+              <td>
+                <div class="track-cell">
+                  <img src="${t.artwork_url}" class="track-art-small" alt="${escapeHtml(t.title)}">
+                  <div>
+                    <div style="font-weight: 600;">${escapeHtml(t.title)}</div>
+                    <div style="font-size: 0.75rem; color: #4ade80;">✓ Entitled (${t.id})</div>
+                  </div>
+                </div>
+              </td>
+              <td>${escapeHtml(t.artist)}</td>
+              <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(t.granted_at).toLocaleDateString()}</td>
+              <td>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
+                    ▶ Play
+                  </button>
+                  <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                    Open in Player
+                  </a>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        content.innerHTML = html;
+      } catch (e) {
+        console.error('Error loading library:', e);
+      }
+    }
+
+    function playTrack(title, artist, art, url) {
+      document.getElementById('player-thumb').src = art;
+      document.getElementById('player-title').textContent = title;
+      document.getElementById('player-artist').textContent = artist + ' (Full Audio)';
+      audioElement.src = url;
+      audioBar.classList.add('active');
+      audioElement.play();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    init();
+  </script>
+</body>
+</html>
