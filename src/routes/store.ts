@@ -164,4 +164,28 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     // If not entitled, fallback to preview
     return reply.redirect(track.preview_url);
   });
+
+  // GET /api/download/:trackId -> Download raw audio file for entitled user
+  app.get('/api/download/:trackId', async (request: FastifyRequest<{ Params: { trackId: string }; Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
+    const { trackId } = request.params;
+    const track = store.getTrack(trackId);
+    if (!track) return reply.code(404).send({ error: 'track_not_found' });
+
+    const auth = getAuthUser(request);
+    const queryAhoyId = request.query.ahoy_id;
+    const effectiveAhoyId = auth?.ahoy_id || queryAhoyId;
+
+    const isEntitled = effectiveAhoyId ? store.hasEntitlement(effectiveAhoyId, trackId) : false;
+    if (!isEntitled) {
+      return reply.code(403).send({
+        error: 'entitlement_required',
+        message: 'You must own this release to download the master audio file.',
+      });
+    }
+
+    // Set download headers and redirect to full audio
+    const filename = `${track.artist} - ${track.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-');
+    reply.header('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+    return reply.redirect(track.full_audio_url);
+  });
 };

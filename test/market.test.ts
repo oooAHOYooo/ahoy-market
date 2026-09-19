@@ -98,5 +98,22 @@ describe('AHOY Market API & Entitlement Flow', () => {
     });
     expect(streamRes.statusCode).toBe(302);
     expect(streamRes.headers.location).toBe('https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3');
+
+    // 6. Download endpoint redirect & content disposition for entitled user
+    const dlRes = await app.inject({
+      method: 'GET',
+      url: `/api/download/trk_seen_better_days?ahoy_id=${encodeURIComponent(ahoyId)}`,
+    });
+    expect(dlRes.statusCode).toBe(302);
+    expect(dlRes.headers['content-disposition']).toContain('attachment');
+    expect(dlRes.headers.location).toBe('https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3');
+
+    // 7. Download endpoint rejects unentitled user
+    const unentitledDlRes = await app.inject({
+      method: 'GET',
+      url: '/api/download/trk_seen_better_days?ahoy_id=ahoy_random_stranger',
+    });
+    expect(unentitledDlRes.statusCode).toBe(403);
+    expect(unentitledDlRes.json().error).toBe('entitlement_required');
   });
 });

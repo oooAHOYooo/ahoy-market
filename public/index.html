@@ -852,10 +852,13 @@
               <td>${escapeHtml(t.artist)}</td>
               <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(t.granted_at).toLocaleDateString()}</td>
               <td>
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                   <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
                     ▶ Play
                   </button>
+                  <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(data.ahoy_id)}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; text-decoration: none;" download>
+                    ⬇ Download MP3
+                  </a>
                   <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
                     Open in Player
                   </a>
