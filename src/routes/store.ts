@@ -10,21 +10,29 @@ const purchaseInput = z.object({
   payment_method: z.enum(['instant_sovereign', 'test_card', 'stripe']).default('instant_sovereign'),
 });
 
+const boostInput = z.object({
+  artist_slug: z.string().min(1),
+  amount_cents: z.number().int().min(50, 'Minimum boost is $0.50'),
+  supporter_name: z.string().max(100).optional(),
+  message: z.string().max(500).optional(),
+  payment_method: z.enum(['instant_sovereign', 'test_card', 'stripe']).default('instant_sovereign'),
+});
+
 export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (app: FastifyInstance) => {
   // Helper to extract session or ahoy_id from request
-  const getAuthUser = (request: FastifyRequest): { ahoy_id: string; email?: string | null } | null => {
+  const getAuthUser = (request: FastifyRequest): { ahoy_id: string; email?: string | null; name?: string | null } | null => {
     // 1. Bearer Token
     const authHeader = request.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const sess = store.getSession(authHeader.substring(7));
-      if (sess) return { ahoy_id: sess.ahoy_id, email: sess.email };
+      if (sess) return { ahoy_id: sess.ahoy_id, email: sess.email, name: sess.name };
     }
 
     // 2. Cookie
     const cookieToken = request.cookies['ahoy_market_session'];
     if (cookieToken) {
       const sess = store.getSession(cookieToken);
-      if (sess) return { ahoy_id: sess.ahoy_id, email: sess.email };
+      if (sess) return { ahoy_id: sess.ahoy_id, email: sess.email, name: sess.name };
     }
 
     // 3. Header (e.g. from AHOY Player with user's verified ahoy_id)
@@ -49,6 +57,97 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     const release = store.getRelease(request.params.idOrSlug);
     if (!release) return reply.code(404).send({ error: 'release_not_found' });
     return { release };
+  });
+
+  // GET /api/artists -> List artists with boost totals
+  app.get('/api/artists', async () => {
+    const artists = store.getArtists();
+    return { artists };
+  });
+
+  // GET /api/artists/:idOrSlug -> Get single artist with releases & stats
+  app.get('/api/artists/:idOrSlug', async (request: FastifyRequest<{ Params: { idOrSlug: string } }>, reply: FastifyReply) => {
+    const artist = store.getArtist(request.params.idOrSlug);
+    if (!artist) return reply.code(404).send({ error: 'artist_not_found' });
+    return { artist };
+  });
+
+  // GET /api/artists/:slug/boosts -> Get recent boosts for an artist
+  app.get('/api/artists/:slug/boosts', async (request: FastifyRequest<{ Params: { slug: string }; Querystring: { limit?: string } }>, reply: FastifyReply) => {
+    const limit = parseInt(request.query.limit || '20', 10);
+    const boosts = store.getArtistBoosts(request.params.slug, limit);
+    return {
+      artist_slug: request.params.slug,
+      count: boosts.length,
+      boosts,
+    };
+  });
+
+  // POST /api/boost -> Boost / Tip an artist directly with AHOY ID
+  app.post('/api/boost', async (request: FastifyRequest, reply: FastifyReply) => {
+    const auth = getAuthUser(request);
+    if (!auth) {
+      return reply.code(401).send({
+        error: 'authentication_required',
+        message: 'You must sign in with your Sovereign AHOY ID to boost an artist.',
+        login_url: `${config.publicBaseUrl}/api/auth/login`,
+      });
+    }
+
+    const parsed = boostInput.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: 'invalid_boost_payload', details: parsed.error.format() });
+    }
+
+    const artist = store.getArtist(parsed.data.artist_slug);
+    if (!artist) {
+      return reply.code(404).send({ error: 'artist_not_found' });
+    }
+
+    const supporterName = parsed.data.supporter_name || auth.name || auth.ahoy_id;
+    const boost = store.recordBoost({
+      ahoy_id: auth.ahoy_id,
+      artist_slug: artist.slug,
+      amount_cents: parsed.data.amount_cents,
+      supporter_name: supporterName,
+      message: parsed.data.message || null,
+      payment_method: parsed.data.payment_method,
+    });
+
+    const userStats = store.getUserBoostStats(auth.ahoy_id);
+
+    return reply.code(201).send({
+      success: true,
+      boost,
+      artist: {
+        slug: artist.slug,
+        name: artist.name,
+      },
+      user_stats: userStats,
+    });
+  });
+
+  // GET /api/me/boost-stats -> Get user's total boost patronage & badge
+  app.get('/api/me/boost-stats', async (request: FastifyRequest<{ Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
+    const auth = getAuthUser(request);
+    const queryAhoyId = request.query.ahoy_id;
+    const effectiveAhoyId = queryAhoyId || auth?.ahoy_id;
+
+    if (!effectiveAhoyId) {
+      return reply.code(401).send({ error: 'authentication_required' });
+    }
+
+    const stats = store.getUserBoostStats(effectiveAhoyId);
+    return { stats };
+  });
+
+  // GET /api/leaderboard/boosters -> Global top patrons leaderboard
+  app.get('/api/leaderboard/boosters', async (request: FastifyRequest<{ Querystring: { limit?: string } }>) => {
+    const limit = parseInt(request.query.limit || '10', 10);
+    const leaderboard = store.getGlobalBoostersLeaderboard(limit);
+    return {
+      leaderboard,
+    };
   });
 
   // POST /api/checkout/purchase -> Buy a song or album with AHOY ID

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AHOY Market — Own the Music. Keep the File.</title>
+  <title>AHOY Market — Own the Music. Boost the Artists.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +12,7 @@
       --bg: #0b1118;
       --surface: #141e2a;
       --surface-card: #192636;
+      --surface-card-hover: #1f3045;
       --surface-border: #23354a;
       --text: #f4ede4;
       --text-muted: #9bb0c4;
@@ -20,6 +21,7 @@
       --accent-glow: rgba(224, 122, 95, 0.25);
       --gold: #d4a373;
       --teal: #2a9d8f;
+      --green: #4ade80;
       --font-display: 'Cinzel', serif;
       --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
@@ -53,6 +55,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .brand {
@@ -64,8 +68,8 @@
     }
 
     .brand-mark {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       background: linear-gradient(135deg, var(--accent), var(--gold));
       border-radius: 8px;
       display: grid;
@@ -100,7 +104,8 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.25rem;
+      flex-wrap: wrap;
     }
 
     .nav-link {
@@ -109,16 +114,11 @@
       font-size: 0.9rem;
       font-weight: 500;
       transition: color 0.2s;
+      cursor: pointer;
     }
 
-    .nav-link:hover {
+    .nav-link:hover, .nav-link.active {
       color: var(--text);
-    }
-
-    .auth-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
     }
 
     .btn {
@@ -156,6 +156,17 @@
       border-color: var(--text-muted);
     }
 
+    .btn-boost {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0b1118;
+      font-weight: 700;
+    }
+    .btn-boost:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+      transform: translateY(-1px);
+    }
+
     .user-pill {
       background: var(--surface-card);
       border: 1px solid var(--surface-border);
@@ -171,15 +182,15 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #4ade80;
+      background: var(--green);
       box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
     }
 
     /* Hero */
     .hero {
-      padding: 4rem 1.5rem 2.5rem;
+      padding: 3.5rem 1.5rem 2rem;
       text-align: center;
-      max-width: 800px;
+      max-width: 840px;
       margin: 0 auto;
     }
 
@@ -195,7 +206,7 @@
 
     .hero h1 {
       font-family: var(--font-display);
-      font-size: 2.8rem;
+      font-size: clamp(2rem, 5vw, 3rem);
       font-weight: 700;
       letter-spacing: 0.02em;
       line-height: 1.2;
@@ -208,23 +219,56 @@
     .hero p {
       font-size: 1.15rem;
       color: var(--text-muted);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .hero-stats {
       display: flex;
       justify-content: center;
-      gap: 2rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
       margin-top: 1.5rem;
       font-size: 0.85rem;
       color: var(--text-muted);
+    }
+
+    /* Section Tabs */
+    .section-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem auto 3rem;
+      max-width: 600px;
+      background: var(--surface);
+      padding: 0.4rem;
+      border-radius: 12px;
+      border: 1px solid var(--surface-border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--surface-card);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     /* Content Area */
     main {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 5rem;
+      padding: 0 1.5rem 5rem;
       width: 100%;
       flex: 1;
     }
@@ -240,15 +284,15 @@
       padding-bottom: 0.75rem;
     }
 
-    /* Release Grid */
-    .release-grid {
+    /* Grids */
+    .release-grid, .artist-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 2rem;
       margin-bottom: 4rem;
     }
 
-    .release-card {
+    .release-card, .artist-card {
       background: var(--surface-card);
       border: 1px solid var(--surface-border);
       border-radius: 12px;
@@ -258,7 +302,7 @@
       transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
-    .release-card:hover {
+    .release-card:hover, .artist-card:hover {
       transform: translateY(-4px);
       border-color: var(--accent);
     }
@@ -266,7 +310,7 @@
     .card-art-wrap {
       position: relative;
       width: 100%;
-      padding-top: 65%;
+      padding-top: 60%;
       overflow: hidden;
       background: #000;
     }
@@ -281,7 +325,7 @@
       transition: transform 0.3s ease;
     }
 
-    .release-card:hover .card-art-wrap img {
+    .release-card:hover .card-art-wrap img, .artist-card:hover .card-art-wrap img {
       transform: scale(1.03);
     }
 
@@ -333,7 +377,7 @@
     .card-price {
       font-size: 1.2rem;
       font-weight: 700;
-      color: #4ade80;
+      color: var(--green);
     }
 
     .card-title {
@@ -364,33 +408,79 @@
       padding-top: 1rem;
     }
 
-    .buy-btn {
-      flex: 1;
-      justify-content: center;
+    /* Artist Card Specifics */
+    .artist-header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
-    /* Library section */
-    .library-section {
+    .artist-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--surface-border);
+    }
+
+    .artist-stats-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(212, 163, 115, 0.15);
+      color: var(--gold);
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Leaderboard & Stats */
+    .patron-card {
       background: var(--surface);
       border: 1px solid var(--surface-border);
       border-radius: 12px;
       padding: 2rem;
-      margin-bottom: 4rem;
+      margin-bottom: 3rem;
     }
 
-    .library-empty {
+    .patron-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .stat-box {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 1.25rem;
       text-align: center;
-      padding: 3rem 1rem;
-      color: var(--text-muted);
     }
 
-    .library-table {
+    .stat-val {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      font-family: var(--font-display);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .leaderboard-table, .library-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
     }
 
-    .library-table th {
+    .leaderboard-table th, .library-table th {
       text-align: left;
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -400,7 +490,7 @@
       border-bottom: 1px solid var(--surface-border);
     }
 
-    .library-table td {
+    .leaderboard-table td, .library-table td {
       padding: 1rem;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       font-size: 0.9rem;
@@ -478,6 +568,49 @@
       font-size: 0.9rem;
     }
 
+    .boost-pill-row {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .boost-pill {
+      flex: 1;
+      padding: 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .boost-pill.active {
+      background: var(--gold);
+      color: #0b1118;
+      border-color: var(--gold);
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
     /* Global Player Bar */
     .audio-player-bar {
       position: fixed;
@@ -539,7 +672,10 @@
       <nav class="nav-links">
         <a href="https://app.ahoy.ooo" target="_blank" class="nav-link">Streamer (app.ahoy.ooo)</a>
         <a href="https://player.ahoy.ooo" target="_blank" class="nav-link">Player (player.ahoy.ooo)</a>
-        <a href="#library" class="nav-link" id="nav-library-link">My Library</a>
+        <a onclick="switchTab('releases')" class="nav-link">Releases</a>
+        <a onclick="switchTab('artists')" class="nav-link">Artists & Boosts</a>
+        <a onclick="switchTab('patrons')" class="nav-link">Leaderboard</a>
+        <a onclick="switchTab('library')" class="nav-link" id="nav-library-link">My Library</a>
 
         <div id="auth-container" class="auth-badge">
           <!-- Injected via JavaScript -->
@@ -550,36 +686,91 @@
   </header>
 
   <section class="hero">
-    <span class="hero-eyebrow">AHOY Digital Storefront</span>
-    <h1>Own the music. Keep the file.</h1>
-    <p>Direct artist-approved releases. Purchased songs write permanent ownership to your Sovereign AHOY ID and sync directly into your AHOY Player.</p>
+    <span class="hero-eyebrow">AHOY Sovereign Commerce</span>
+    <h1>Own the music. Boost the artists.</h1>
+    <p>Artist-approved music store and direct patronage. Purchases and boosts link directly to your Sovereign AHOY ID and unlock immediate playback in AHOY Player.</p>
     <div class="hero-stats">
-      <span>✓ 100% Artist-Approved</span>
+      <span>✓ 100% Direct Artist Support</span>
       <span>✓ Lossless & MP3 Downloads</span>
-      <span>✓ Instant AHOY Player Sync</span>
+      <span>✓ Instant Sovereign ID Ownership</span>
+      <span>✓ AHOY Player Sync</span>
     </div>
   </section>
 
+  <div class="section-nav">
+    <button id="tab-releases-btn" class="tab-btn active" onclick="switchTab('releases')">🎵 Releases</button>
+    <button id="tab-artists-btn" class="tab-btn" onclick="switchTab('artists')">⚡ Artists & Boosts</button>
+    <button id="tab-patrons-btn" class="tab-btn" onclick="switchTab('patrons')">🏆 Leaderboard</button>
+    <button id="tab-library-btn" class="tab-btn" onclick="switchTab('library')">📦 My Library</button>
+  </div>
+
   <main>
-    <div class="section-title">
-      <h2>Featured Releases</h2>
-      <span style="font-size: 0.85rem; color: var(--gold);">Direct From Artists</span>
-    </div>
+    <!-- Tab 1: Releases -->
+    <section id="tab-releases">
+      <div class="section-title">
+        <h2>Digital Releases</h2>
+        <span style="font-size: 0.85rem; color: var(--gold);">Direct Artist Audio</span>
+      </div>
+      <div id="release-grid" class="release-grid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading releases...</div>
+      </div>
+    </section>
 
-    <div id="release-grid" class="release-grid">
-      <!-- Injected via JS -->
-      <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading releases...</div>
-    </div>
+    <!-- Tab 2: Artists & Boosts -->
+    <section id="tab-artists" style="display: none;">
+      <div class="section-title">
+        <h2>Roster & Artist Tip Jars</h2>
+        <span style="font-size: 0.85rem; color: var(--gold);">Instant Sovereign Boosts</span>
+      </div>
+      <div id="artist-grid" class="artist-grid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading artists...</div>
+      </div>
+    </section>
 
-    <section id="library" class="library-section">
-      <div class="section-title" style="border: none; margin-bottom: 0.5rem;">
+    <!-- Tab 3: Leaderboard & Patron Stats -->
+    <section id="tab-patrons" style="display: none;">
+      <div class="patron-card" id="user-patron-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+          <div>
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold); letter-spacing: 0.1em; font-weight: 700;">My Patron Level</span>
+            <h3 id="user-patron-level" style="font-family: var(--font-display); font-size: 1.4rem;">Deckhand Supporter</h3>
+          </div>
+          <span class="user-pill"><span class="sovereign-dot"></span> <span id="user-patron-id"></span></span>
+        </div>
+        <div class="patron-stats-grid">
+          <div class="stat-box">
+            <div class="stat-val" id="user-total-boosted">$0.00</div>
+            <div class="stat-label">Total Boosted</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="user-boost-count">0</div>
+            <div class="stat-label">Boosts Sent</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" id="user-unique-artists">0</div>
+            <div class="stat-label">Artists Backed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2>Top Patrons & Boosters</h2>
+        <span style="font-size: 0.85rem; color: var(--gold);">Ecosystem Leaderboard</span>
+      </div>
+      <div id="leaderboard-content">
+        <div style="text-align: center; padding: 2rem;">Loading leaderboard...</div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Library -->
+    <section id="tab-library" style="display: none;">
+      <div class="section-title" style="margin-bottom: 0.5rem;">
         <h2>My Sovereign Library</h2>
         <span id="library-count" style="font-size: 0.85rem; color: var(--gold);">0 tracks owned</span>
       </div>
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Songs unlocked with your Sovereign AHOY ID. Open in AHOY Player for instant playback.
+        Releases permanently unlocked on your Sovereign AHOY ID. Open in AHOY Player for immediate high-fidelity playback.
       </p>
-
       <div id="library-content">
         <div class="library-empty">
           Sign in with your AHOY ID to view and stream your purchased library.
@@ -606,22 +797,57 @@
     <div class="modal">
       <div class="modal-header">
         <h3 class="modal-title">Complete Purchase</h3>
-        <button id="modal-close" class="modal-close">&times;</button>
+        <button class="modal-close" onclick="closeModal('purchase-modal')">&times;</button>
       </div>
       <p style="color: var(--text-muted); font-size: 0.9rem;">
         You are purchasing permanent digital ownership of this release.
       </p>
-      <div class="receipt-box" id="modal-receipt">
-        <!-- Injected via JS -->
-      </div>
+      <div class="receipt-box" id="modal-receipt"></div>
       <div id="modal-auth-warning" style="display: none; color: var(--accent); font-size: 0.85rem; margin-bottom: 1rem;">
         ⚠️ You need to sign in with your AHOY ID before completing your purchase.
       </div>
-      <div style="display: flex; gap: 0.75rem;">
-        <button id="confirm-buy-btn" class="btn btn-primary" style="flex: 1; justify-content: center;">
-          ⚡ Confirm & Unlock ($1.00)
-        </button>
+      <button id="confirm-buy-btn" class="btn btn-primary" style="width: 100%; justify-content: center;">
+        ⚡ Confirm & Unlock ($1.00)
+      </button>
+    </div>
+  </div>
+
+  <!-- Boost Modal -->
+  <div id="boost-modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="boost-modal-title">Boost Artist</h3>
+        <button class="modal-close" onclick="closeModal('boost-modal')">&times;</button>
       </div>
+      <p style="color: var(--text-muted); font-size: 0.85rem;" id="boost-modal-artist-bio"></p>
+
+      <div style="margin-top: 1rem;">
+        <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Select Tip / Boost Amount</label>
+        <div class="boost-pill-row">
+          <button class="boost-pill" onclick="selectBoostAmount(100)">$1</button>
+          <button class="boost-pill active" onclick="selectBoostAmount(500)">$5</button>
+          <button class="boost-pill" onclick="selectBoostAmount(1000)">$10</button>
+          <button class="boost-pill" onclick="selectBoostAmount(2000)">$20</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Custom Amount ($)</label>
+        <input type="number" id="boost-custom-amount" class="form-input" placeholder="e.g. 15.00" min="0.5" step="0.5" oninput="onCustomAmountInput(this.value)" />
+      </div>
+
+      <div>
+        <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Supporter Note / Message</label>
+        <textarea id="boost-message" class="form-textarea" rows="2" placeholder="Leave a message for the artist..."></textarea>
+      </div>
+
+      <div id="boost-auth-warning" style="display: none; color: var(--accent); font-size: 0.85rem; margin-bottom: 1rem;">
+        ⚠️ You need to sign in with your AHOY ID to record your patronage and badge.
+      </div>
+
+      <button id="confirm-boost-btn" class="btn btn-boost" style="width: 100%; justify-content: center;" onclick="confirmBoost()">
+        ⚡ Send $5.00 Boost
+      </button>
     </div>
   </div>
 
@@ -632,14 +858,44 @@
   <script>
     let currentUser = null;
     let selectedRelease = null;
+    let selectedArtist = null;
+    let currentBoostAmountCents = 500;
     const audioElement = document.getElementById('audio-element');
     const audioBar = document.getElementById('audio-bar');
 
     async function init() {
       await checkAuth();
       await loadReleases();
+      await loadArtists();
+      await loadLeaderboard();
+
+      // Check query parameters (e.g. ?boost=samuel-dylan-witch)
+      const params = new URLSearchParams(window.location.search);
+      const boostArtist = params.get('boost') || params.get('artist');
+      if (boostArtist) {
+        switchTab('artists');
+        setTimeout(() => openBoostModal(boostArtist), 300);
+      }
+
       if (currentUser?.authenticated) {
         await loadLibrary();
+        await loadUserBoostStats();
+      }
+    }
+
+    function switchTab(tab) {
+      ['releases', 'artists', 'patrons', 'library'].forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-${t}-btn`);
+        if (sec) sec.style.display = (t === tab) ? 'block' : 'none';
+        if (btn) btn.classList.toggle('active', t === tab);
+      });
+      if (tab === 'library' && currentUser?.authenticated) {
+        loadLibrary();
+      }
+      if (tab === 'patrons') {
+        loadLeaderboard();
+        if (currentUser?.authenticated) loadUserBoostStats();
       }
     }
 
@@ -674,6 +930,7 @@
       await fetch('/api/auth/logout', { method: 'POST' });
       currentUser = null;
       renderAuth();
+      document.getElementById('user-patron-card').style.display = 'none';
       document.getElementById('library-content').innerHTML = `
         <div class="library-empty">
           Sign in with your AHOY ID to view and stream your purchased library.
@@ -708,8 +965,11 @@
               <div class="card-artist">${escapeHtml(r.artist)}</div>
               <p class="card-desc">${escapeHtml(r.description)}</p>
               <div class="card-actions">
-                <button class="btn btn-primary buy-btn" onclick="openBuyModal('${r.id}')">
+                <button class="btn btn-primary buy-btn" style="flex:1; justify-content:center;" onclick="openBuyModal('${r.id}')">
                   Buy for $${(r.price_cents / 100).toFixed(2)}
+                </button>
+                <button class="btn btn-boost" onclick="openBoostModal('${r.artist_slug}')" title="Boost this artist">
+                  ⚡ Boost
                 </button>
               </div>
             </div>
@@ -718,6 +978,113 @@
         });
       } catch (e) {
         console.error('Error loading releases:', e);
+      }
+    }
+
+    async function loadArtists() {
+      try {
+        const res = await fetch('/api/artists');
+        const data = await res.json();
+        const grid = document.getElementById('artist-grid');
+        grid.innerHTML = '';
+
+        data.artists.forEach(a => {
+          const card = document.createElement('article');
+          card.className = 'artist-card';
+          card.innerHTML = `
+            <div class="card-art-wrap" style="padding-top: 45%;">
+              <img src="${a.banner_url}" alt="${a.name}">
+            </div>
+            <div class="card-body">
+              <div class="artist-header-row">
+                <img src="${a.avatar_url}" class="artist-avatar" alt="${a.name}">
+                <div>
+                  <h3 class="card-title" style="margin: 0;">${escapeHtml(a.name)}</h3>
+                  <span class="card-type">${escapeHtml(a.genre)}</span>
+                </div>
+              </div>
+              <p class="card-desc">${escapeHtml(a.bio)}</p>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span class="artist-stats-badge">⚡ $${(a.total_boost_cents / 100).toFixed(2)} Total Boosted</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">${a.boost_count} Boosts</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-boost" style="flex: 1; justify-content: center;" onclick="openBoostModal('${a.slug}')">
+                  ⚡ Boost & Tip ${escapeHtml(a.name)}
+                </button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        console.error('Error loading artists:', e);
+      }
+    }
+
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch('/api/leaderboard/boosters');
+        const data = await res.json();
+        const container = document.getElementById('leaderboard-content');
+
+        if (!data.leaderboard.length) {
+          container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No patron boosts recorded yet. Be the first to boost an artist!</div>`;
+          return;
+        }
+
+        let html = `
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Patron</th>
+                <th>Boosts</th>
+                <th>Total Support</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        const rankBadges = ['🥇', '🥈', '🥉'];
+        data.leaderboard.forEach(entry => {
+          const rankDisplay = rankBadges[entry.rank - 1] || `#${entry.rank}`;
+          html += `
+            <tr>
+              <td style="font-size: 1.1rem; font-weight: 700;">${rankDisplay}</td>
+              <td>
+                <div style="font-weight: 600;">${escapeHtml(entry.supporter_name)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(entry.ahoy_id)}</div>
+              </td>
+              <td style="color: var(--text-muted);">${entry.boost_count}</td>
+              <td style="font-weight: 700; color: var(--gold);">$${(entry.total_cents / 100).toFixed(2)}</td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+      } catch (e) {
+        console.error('Error loading leaderboard:', e);
+      }
+    }
+
+    async function loadUserBoostStats() {
+      if (!currentUser?.authenticated) return;
+      try {
+        const res = await fetch(`/api/me/boost-stats?ahoy_id=${encodeURIComponent(currentUser.user.ahoy_id)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const card = document.getElementById('user-patron-card');
+        card.style.display = 'block';
+
+        document.getElementById('user-patron-id').textContent = currentUser.user.name || currentUser.user.ahoy_id;
+        document.getElementById('user-patron-level').textContent = data.stats.patron_level;
+        document.getElementById('user-total-boosted').textContent = `$${(data.stats.total_cents / 100).toFixed(2)}`;
+        document.getElementById('user-boost-count').textContent = data.stats.boost_count;
+        document.getElementById('user-unique-artists').textContent = data.stats.unique_artists;
+      } catch (e) {
+        console.error('Error loading user boost stats:', e);
       }
     }
 
@@ -769,9 +1136,59 @@
       document.getElementById('purchase-modal').classList.add('open');
     }
 
-    document.getElementById('modal-close').addEventListener('click', () => {
-      document.getElementById('purchase-modal').classList.remove('open');
-    });
+    async function openBoostModal(artistSlugOrId) {
+      const res = await fetch(`/api/artists/${artistSlugOrId}`);
+      const data = await res.json();
+      if (!data.artist) return;
+      selectedArtist = data.artist;
+
+      document.getElementById('boost-modal-title').textContent = `Boost ${selectedArtist.name}`;
+      document.getElementById('boost-modal-artist-bio').textContent = selectedArtist.bio;
+
+      const warning = document.getElementById('boost-auth-warning');
+      const confirmBtn = document.getElementById('confirm-boost-btn');
+
+      selectBoostAmount(500);
+
+      if (!currentUser?.authenticated) {
+        warning.style.display = 'block';
+        confirmBtn.textContent = 'Sign in with AHOY ID to Boost';
+        confirmBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname + '?boost=' + selectedArtist.slug)}`;
+      } else {
+        warning.style.display = 'none';
+        confirmBtn.onclick = confirmBoost;
+      }
+
+      document.getElementById('boost-modal').classList.add('open');
+    }
+
+    function selectBoostAmount(cents) {
+      currentBoostAmountCents = cents;
+      document.querySelectorAll('.boost-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.textContent === `$${cents / 100}`);
+      });
+      document.getElementById('boost-custom-amount').value = '';
+      updateBoostButtonText();
+    }
+
+    function onCustomAmountInput(val) {
+      const num = parseFloat(val);
+      if (num && num > 0) {
+        currentBoostAmountCents = Math.round(num * 100);
+        document.querySelectorAll('.boost-pill').forEach(pill => pill.classList.remove('active'));
+      }
+      updateBoostButtonText();
+    }
+
+    function updateBoostButtonText() {
+      if (currentUser?.authenticated) {
+        document.getElementById('confirm-boost-btn').textContent = `⚡ Send $${(currentBoostAmountCents / 100).toFixed(2)} Boost`;
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
 
     async function confirmPurchase() {
       if (!selectedRelease) return;
@@ -792,7 +1209,7 @@
         const result = await res.json();
         if (res.ok) {
           alert(`🎉 Success! "${selectedRelease.title}" is now unlocked on your AHOY ID (${result.ahoy_id}).`);
-          document.getElementById('purchase-modal').classList.remove('open');
+          closeModal('purchase-modal');
           await loadLibrary();
         } else {
           alert(`Purchase error: ${result.message || result.error}`);
@@ -802,6 +1219,46 @@
         alert('Network error during purchase.');
       } finally {
         btn.disabled = false;
+      }
+    }
+
+    async function confirmBoost() {
+      if (!selectedArtist) return;
+      const btn = document.getElementById('confirm-boost-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending Sovereign Boost...';
+
+      const message = document.getElementById('boost-message').value;
+
+      try {
+        const res = await fetch('/api/boost', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            artist_slug: selectedArtist.slug,
+            amount_cents: currentBoostAmountCents,
+            message: message || undefined,
+            payment_method: 'instant_sovereign',
+          }),
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert(`⚡ Boost Sent! Thank you for supporting ${selectedArtist.name}. Your new rank: ${result.user_stats.patron_level}!`);
+          closeModal('boost-modal');
+          document.getElementById('boost-message').value = '';
+          await loadArtists();
+          await loadLeaderboard();
+          await loadUserBoostStats();
+        } else {
+          alert(`Boost error: ${result.message || result.error}`);
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Network error while boosting.');
+      } finally {
+        btn.disabled = false;
+        updateBoostButtonText();
       }
     }
 

@@ -63,6 +63,46 @@ export type UserSession = {
   created_at: string;
 };
 
+export type Artist = {
+  id: string;
+  slug: string;
+  name: string;
+  bio: string;
+  avatar_url: string;
+  banner_url: string;
+  genre: string;
+  created_at: string;
+};
+
+export type Boost = {
+  id: string;
+  ahoy_id: string;
+  artist_slug: string;
+  amount_cents: number;
+  supporter_name: string | null;
+  message: string | null;
+  payment_method: string;
+  payment_ref: string;
+  created_at: string;
+};
+
+export type BoostStats = {
+  ahoy_id: string;
+  total_cents: number;
+  boost_count: number;
+  unique_artists: number;
+  patron_level: string;
+  recent_boosts: Boost[];
+};
+
+export type BoosterLeaderboardEntry = {
+  ahoy_id: string;
+  supporter_name: string;
+  total_cents: number;
+  boost_count: number;
+  rank: number;
+};
+
 export class MarketStore {
   private db: Database.Database;
 
@@ -75,6 +115,17 @@ export class MarketStore {
 
   private initTables() {
     this.db.exec(`
+      CREATE TABLE IF NOT EXISTS artists (
+        id TEXT PRIMARY KEY,
+        slug TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL,
+        bio TEXT NOT NULL,
+        avatar_url TEXT NOT NULL,
+        banner_url TEXT NOT NULL,
+        genre TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS releases (
         id TEXT PRIMARY KEY,
         slug TEXT UNIQUE NOT NULL,
@@ -123,6 +174,18 @@ export class MarketStore {
         UNIQUE(ahoy_id, track_id)
       );
 
+      CREATE TABLE IF NOT EXISTS boosts (
+        id TEXT PRIMARY KEY,
+        ahoy_id TEXT NOT NULL,
+        artist_slug TEXT NOT NULL,
+        amount_cents INTEGER NOT NULL,
+        supporter_name TEXT,
+        message TEXT,
+        payment_method TEXT NOT NULL,
+        payment_ref TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS sessions (
         id TEXT PRIMARY KEY,
         session_token TEXT UNIQUE NOT NULL,
@@ -134,14 +197,82 @@ export class MarketStore {
         created_at TEXT NOT NULL
       );
 
+      CREATE INDEX IF NOT EXISTS ix_artists_slug ON artists(slug);
       CREATE INDEX IF NOT EXISTS ix_purchases_ahoy_id ON purchases(ahoy_id);
       CREATE INDEX IF NOT EXISTS ix_entitlements_ahoy_id ON entitlements(ahoy_id);
+      CREATE INDEX IF NOT EXISTS ix_boosts_ahoy_id ON boosts(ahoy_id);
+      CREATE INDEX IF NOT EXISTS ix_boosts_artist_slug ON boosts(artist_slug);
       CREATE INDEX IF NOT EXISTS ix_sessions_session_token ON sessions(session_token);
       CREATE INDEX IF NOT EXISTS ix_tracks_release_id ON tracks(release_id);
     `);
   }
 
   private seedDefaultCatalog() {
+    const existingArtists = this.db.prepare('SELECT COUNT(*) as count FROM artists').get() as { count: number };
+    if (existingArtists.count === 0) {
+      const artists: Artist[] = [
+        {
+          id: 'art_samuel_witch',
+          slug: 'samuel-dylan-witch',
+          name: 'Samuel Dylan Witch',
+          bio: 'Atmospheric nautical folk, sea songs, and tape-saturated acoustic harmonies from the Connecticut shoreline.',
+          avatar_url: 'https://i.ytimg.com/vi/XDH0X-dF4GM/maxresdefault.jpg',
+          banner_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+          genre: 'Nautical Folk / Indie',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'art_cambell_rice',
+          slug: 'cambell-rice',
+          name: 'Cambell Rice',
+          bio: 'Vibrant acoustic songwriting, intricate fingerstyle guitar, and sparkling coastal indie folk.',
+          avatar_url: 'https://m.media-amazon.com/images/I/61APLxryThL._UXNaN_FMjpg_QL85_.jpg',
+          banner_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80',
+          genre: 'Indie Folk / Singer-Songwriter',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'art_youth_xl',
+          slug: 'youth-xl',
+          name: 'Youth XL',
+          bio: 'High-energy sunny indie pop with fuzz pedals, analog synths, and infectious hook-filled anthems.',
+          avatar_url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=600&q=80',
+          banner_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+          genre: 'Indie Pop / Synth Pop',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'art_jake_custer',
+          slug: 'jake-custer',
+          name: 'Jake Custer',
+          bio: 'Roots rock, acoustic balladry, and soulful songwriting crafted in the Northeast woods.',
+          avatar_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
+          banner_url: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80',
+          genre: 'Roots Rock / Americana',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'art_the_tines',
+          slug: 'the-tines',
+          name: 'The Tines',
+          bio: 'Dream pop harmonies, chiming 12-string guitars, and shimmering indie soundscapes.',
+          avatar_url: 'https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?auto=format&fit=crop&w=600&q=80',
+          banner_url: 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=1200&q=80',
+          genre: 'Dream Pop / Jangle Pop',
+          created_at: new Date().toISOString(),
+        }
+      ];
+
+      const insertArtist = this.db.prepare(`
+        INSERT INTO artists (id, slug, name, bio, avatar_url, banner_url, genre, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      for (const a of artists) {
+        insertArtist.run(a.id, a.slug, a.name, a.bio, a.avatar_url, a.banner_url, a.genre, a.created_at);
+      }
+    }
+
     const existing = this.db.prepare('SELECT COUNT(*) as count FROM releases').get() as { count: number };
     if (existing.count > 0) return;
 
@@ -260,6 +391,146 @@ export class MarketStore {
     });
 
     tx();
+  }
+
+  getArtists(): (Artist & { total_boost_cents: number; boost_count: number })[] {
+    const rows = this.db.prepare(`
+      SELECT 
+        a.*,
+        COALESCE(SUM(b.amount_cents), 0) as total_boost_cents,
+        COUNT(b.id) as boost_count
+      FROM artists a
+      LEFT JOIN boosts b ON b.artist_slug = a.slug
+      GROUP BY a.id
+      ORDER BY a.name ASC
+    `).all() as (Artist & { total_boost_cents: number; boost_count: number })[];
+    return rows;
+  }
+
+  getArtist(slugOrId: string): (Artist & { total_boost_cents: number; boost_count: number; releases: Release[] }) | null {
+    const artist = this.db.prepare('SELECT * FROM artists WHERE id = ? OR slug = ?').get(slugOrId, slugOrId) as Artist | undefined;
+    if (!artist) return null;
+
+    const stats = this.db.prepare(`
+      SELECT 
+        COALESCE(SUM(amount_cents), 0) as total_boost_cents,
+        COUNT(id) as boost_count
+      FROM boosts
+      WHERE artist_slug = ?
+    `).get(artist.slug) as { total_boost_cents: number; boost_count: number };
+
+    const releases = this.db.prepare('SELECT * FROM releases WHERE artist_slug = ? ORDER BY created_at DESC').all(artist.slug) as Release[];
+
+    return {
+      ...artist,
+      total_boost_cents: stats.total_boost_cents || 0,
+      boost_count: stats.boost_count || 0,
+      releases,
+    };
+  }
+
+  recordBoost(data: {
+    ahoy_id: string;
+    artist_slug: string;
+    amount_cents: number;
+    supporter_name?: string | null;
+    message?: string | null;
+    payment_method?: string;
+    payment_ref?: string;
+  }): Boost {
+    const boostId = `bst_${randomBytes(12).toString('hex')}`;
+    const now = new Date().toISOString();
+    const paymentMethod = data.payment_method || 'instant_sovereign';
+    const paymentRef = data.payment_ref || `pay_bst_${Date.now()}_${randomBytes(4).toString('hex')}`;
+
+    this.db.prepare(`
+      INSERT INTO boosts (id, ahoy_id, artist_slug, amount_cents, supporter_name, message, payment_method, payment_ref, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      boostId,
+      data.ahoy_id,
+      data.artist_slug,
+      data.amount_cents,
+      data.supporter_name || null,
+      data.message || null,
+      paymentMethod,
+      paymentRef,
+      now
+    );
+
+    return {
+      id: boostId,
+      ahoy_id: data.ahoy_id,
+      artist_slug: data.artist_slug,
+      amount_cents: data.amount_cents,
+      supporter_name: data.supporter_name || null,
+      message: data.message || null,
+      payment_method: paymentMethod,
+      payment_ref: paymentRef,
+      created_at: now,
+    };
+  }
+
+  getArtistBoosts(artistSlug: string, limit: number = 20): Boost[] {
+    return this.db.prepare(`
+      SELECT * FROM boosts
+      WHERE artist_slug = ?
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).all(artistSlug, limit) as Boost[];
+  }
+
+  getUserBoostStats(ahoyId: string): BoostStats {
+    const totalRow = this.db.prepare(`
+      SELECT 
+        COALESCE(SUM(amount_cents), 0) as total_cents,
+        COUNT(id) as boost_count,
+        COUNT(DISTINCT artist_slug) as unique_artists
+      FROM boosts
+      WHERE ahoy_id = ?
+    `).get(ahoyId) as { total_cents: number; boost_count: number; unique_artists: number };
+
+    const recent = this.db.prepare(`
+      SELECT * FROM boosts
+      WHERE ahoy_id = ?
+      ORDER BY created_at DESC
+      LIMIT 10
+    `).all(ahoyId) as Boost[];
+
+    const totalCents = totalRow.total_cents || 0;
+    let patronLevel = 'Deckhand Supporter';
+    if (totalCents >= 5000) patronLevel = 'Admiral Patron';
+    else if (totalCents >= 2000) patronLevel = 'Gold Patron';
+    else if (totalCents >= 1000) patronLevel = 'Silver Patron';
+    else if (totalCents >= 100) patronLevel = 'Bronze Patron';
+
+    return {
+      ahoy_id: ahoyId,
+      total_cents: totalCents,
+      boost_count: totalRow.boost_count || 0,
+      unique_artists: totalRow.unique_artists || 0,
+      patron_level: patronLevel,
+      recent_boosts: recent,
+    };
+  }
+
+  getGlobalBoostersLeaderboard(limit: number = 10): BoosterLeaderboardEntry[] {
+    const rows = this.db.prepare(`
+      SELECT 
+        ahoy_id,
+        COALESCE(MAX(supporter_name), ahoy_id) as supporter_name,
+        SUM(amount_cents) as total_cents,
+        COUNT(id) as boost_count
+      FROM boosts
+      GROUP BY ahoy_id
+      ORDER BY total_cents DESC
+      LIMIT ?
+    `).all(limit) as { ahoy_id: string; supporter_name: string; total_cents: number; boost_count: number }[];
+
+    return rows.map((r, idx) => ({
+      ...r,
+      rank: idx + 1,
+    }));
   }
 
   getReleases(): Release[] {
