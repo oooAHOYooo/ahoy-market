@@ -29,15 +29,13 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p data static/data
 
-# Set permissions
-RUN chmod +x run.py
-
 # Expose port (Render will set PORT env var)
 EXPOSE 10000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-10000}/ || exit 1
+    CMD ["python", "-c", "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:' + os.environ.get('PORT', '10000') + '/', timeout=25)"]
 
-# Run the application
-CMD ["python", "run.py"]
+# Run the production WSGI application.  The legacy run.py launcher is not part
+# of this repository, so use the checked-in Gunicorn configuration instead.
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:application"]
