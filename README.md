@@ -1,3 +1,23 @@
+# AHOY Marketplace
+
+Standalone home for the AHOY media marketplace and its supporting commerce platform.
+
+The `/marketplace` experience is an experimental digital catalog for artist-approved releases. It currently supports previews and a local “save for later” list. Digital checkout, payment, and fulfillment are intentionally not wired into this repository yet.
+
+This repository was split out of the main AHOY platform so marketplace work can move independently while retaining the backend, SPA, and packaging dependencies needed to run it.
+
+## Local development
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cd spa && npm install && npm run dev
+```
+
+For the full app, run `python dev.py` from the repository root. The marketplace route is `/marketplace`.
+
+---
+
 # 🎵 Ahoy Indie Media: Technical Platform Overview
 
 [![GitHub Actions](https://github.com/oooAHOYooo/ahoy-little-platform/workflows/auto-release/badge.svg)](https://github.com/oooAHOYooo/ahoy-little-platform/actions)
