@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+
+{% block title %}Videos - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="shows-page" x-data="showsPage()" x-init="init()">
+    <div class="shows-container">
+        <!-- Embedded Video Player Section -->
+        <section class="embedded-video-section" x-show="true">
+            <div class="video-player-wrapper">
+                <!-- Video Player -->
+                <div x-show="currentVideo" class="embedded-video-player">
+                    <video 
+                        :src="currentVideo?.video_url || currentVideo?.mp4_link"
+                        :poster="currentVideo?.thumbnail"
+                        preload="metadata"
+                        @loadedmetadata="onVideoLoaded()"
+                        @timeupdate="onTimeUpdate()"
+                        @ended="onVideoEnded()"
+                        @play="isPlaying = true"
+                        @pause="isPlaying = false"
+                        controls
+                        x-ref="videoPlayer"
+                        class="embedded-video">
+                        Your browser does not support the video tag.
+                    </video>
+                    
+                    <!-- Video Info Overlay -->
+                    <div class="video-info-overlay">
+                        <div class="video-info-content">
+                            <h2 class="video-title" x-text="currentVideo?.title || 'Untitled'"></h2>
+                            <div class="video-meta">
+                                <span class="video-host" x-text="currentVideo?.host || ''"></span>
+                                <span class="video-type" x-show="currentVideo?.type" 
+                                    x-text="String(currentVideo?.type || '').replace(/_/g, ' ')"></span>
+                            </div>
+                            <p class="video-description" x-text="currentVideo?.description || ''"></p>
+                        </div>
+                        <div class="video-actions-bar">
+                            <button @click="viewSolo()" class="action-btn view-solo-btn" title="View Solo">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span class="sr-only">View Solo</span>
+                            </button>
+                            <button @click="toggleBookmark({ type: 'show', id: currentVideo?.id, title: currentVideo?.title, artwork: currentVideo?.thumbnail })"
+                                class="action-btn bookmark-btn"
+                                :class="{ 'bookmarked': isBookmarked('show', currentVideo?.id) }"
+                                :aria-pressed="isBookmarked('show', currentVideo?.id)"
+                                :title="isBookmarked('show', currentVideo?.id) ? 'Remove bookmark' : 'Bookmark'">
+                                <i :class="isBookmarked('show', currentVideo?.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                                <span class="sr-only" x-text="isBookmarked('show', currentVideo?.id) ? 'Remove bookmark' : 'Bookmark'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Placeholder when no video selected -->
+                <div x-show="!currentVideo" class="video-placeholder">
+                    <div class="placeholder-content">
+                        <i class="fas fa-play-circle"></i>
+                        <h3>Select a video to play</h3>
+                        <p>Click on any video below to start watching</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Unified Header Section -->
+        <section class="unified-header shows-subheader">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="hero-media" x-show="featuredShow">
+                        <img
+                            :src="featuredShow.thumbnail || '/static/img/default-cover.jpg'"
+                            @error="ahoyThumbGen($event.target, featuredShow.title, featuredShow.category)"
+                            :alt="featuredShow.title"
+                            class="hero-thumbnail image-placeholder">
+                        <div class="hero-media-overlay">
+                            <button @click="playShow(featuredShow)"
+                                class="hero-play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="title-text">
+                        <h1>Videos</h1>
+                        <p>Music videos, skate parts, short films, episodes, and more</p>
+                    </div>
+                </div>
+
+                <div class="header-search desktop-only">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            x-model="searchQuery"
+                            @input="filterShows()"
+                            placeholder="Search shows, hosts, or descriptions..."
+                            class="search-input">
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="header-search mobile-only">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            x-model="searchQuery"
+                            @input="filterShows()"
+                            placeholder="Search shows..."
+                            class="search-input">
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-filters">
+                    <div class="filter-tabs">
+                        <button @click="setCategory('all')"
+                            :class="{'active': selectedCategory === 'all'}"
+                            class="filter-tab">
+                            All Videos
+                        </button>
+                        <button @click="setCategory('video_podcast')"
+                            :class="{'active': selectedCategory === 'video_podcast'}"
+                            class="filter-tab">
+                            Video Podcast
+                        </button>
+                        <button @click="setCategory('episode')"
+                            :class="{'active': selectedCategory === 'episode'}"
+                            class="filter-tab">
+                            Episodes
+                        </button>
+                        <button @click="setCategory('clip')"
+                            :class="{'active': selectedCategory === 'clip'}"
+                            class="filter-tab">
+                            Clips
+                        </button>
+                        <button @click="setCategory('music_video')"
+                            :class="{'active': selectedCategory === 'music_video'}"
+                            class="filter-tab">
+                            Music Videos
+                        </button>
+                        <button @click="setCategory('broadcast')"
+                            :class="{'active': selectedCategory === 'broadcast'}"
+                            class="filter-tab">
+                            Live Broadcasts
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="view-options">
+                        <button @click="viewMode = 'grid'"
+                            :class="{'active': viewMode === 'grid'}"
+                            class="view-btn">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button @click="viewMode = 'list'"
+                            :class="{'active': viewMode === 'list'}"
+                            class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <button @click="playRandomShow()"
+                        class="btn btn-primary btn-large">
+                        <i class="fas fa-play"></i> Watch Random Show
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shows Grid -->
+        <section class="shows-grid-section">
+            <div class="section-header">
+                <h2><i class="fas fa-th"></i> All Videos</h2>
+            </div>
+
+            <!-- Grid View -->
+            <div x-show="viewMode === 'grid'" class="shows-grid">
+                <template x-for="show in filteredShows" :key="show.id">
+                    <div class="show-card" @click="playShow(show)"
+                        :class="{'now-playing': currentVideo && currentVideo.id === show.id}">
+                        <div class="show-thumbnail">
+                            <img
+                                :src="show.thumbnail || '/static/img/default-cover.jpg'"
+                                @error="ahoyThumbGen($event.target, show.title, show.category)"
+                                :alt="show.title"
+                                loading="lazy"
+                                decoding="async"
+                                class="image-placeholder">
+                            <div class="show-overlay">
+                                <button @click.stop="playShow(show)"
+                                    class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <div class="show-actions">
+                                    <button @click.stop="viewSoloShow(show)"
+                                        class="action-btn view-solo-mini-btn"
+                                        title="View Solo">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                    <button class="action-btn bm-btn"
+                                        @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
+                                        :aria-pressed="isBookmarked('show', show.id)"
+                                        :class="{ 'bookmarked': isBookmarked('show', show.id) }"
+                                        title="Bookmark">
+                                        <span aria-hidden="true">
+                                            <i
+                                                x-show="isBookmarked('show', show.id)"
+                                                class="fas fa-bookmark"></i>
+                                            <i
+                                                x-show="!isBookmarked('show', show.id)"
+                                                class="far fa-bookmark"></i>
+                                        </span>
+                                        <span class="sr-only"
+                                            x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="show-info">
+                            <h4 x-text="show.title"></h4>
+                            <p class="show-host" x-text="show.host"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- List View -->
+            <div x-show="viewMode === 'list'" class="shows-list">
+                <div class="list-header">
+                    <span class="col-thumbnail">Thumbnail</span>
+                    <span class="col-title">Title</span>
+                    <span class="col-host">Host</span>
+                    <span class="col-actions">Actions</span>
+                </div>
+                <div class="list-items">
+                    <template x-for="show in filteredShows" :key="show.id">
+                        <div class="list-item" @click="playShow(show)"
+                            :class="{'now-playing': currentVideo && currentVideo.id === show.id}">
+                            <div class="col-thumbnail">
+                                <img
+                                    :src="show.thumbnail || '/static/img/default-cover.jpg'"
+                                    @error="ahoyThumbGen($event.target, show.title, show.category)"
+                                    :alt="show.title"
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="image-placeholder">
+                                <div class="play-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="col-title">
+                                <h4 x-text="show.title"></h4>
+                                <p
+                                    x-text="show.description?.substring(0, 100) + '...'"></p>
+                            </div>
+                            <span class="col-host" x-text="show.host"></span>
+                            <div class="col-actions">
+                                <button @click.stop="viewSoloShow(show)"
+                                    class="action-btn view-solo-mini-btn"
+                                    title="View Solo">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <span class="sr-only">View Solo</span>
+                                </button>
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
+                                    :aria-pressed="isBookmarked('show', show.id)"
+                                    :class="{ 'bookmarked': isBookmarked('show', show.id) }"
+                                    title="Bookmark">
+                                    <span aria-hidden="true">
+                                        <i
+                                            x-show="isBookmarked('show', show.id)"
+                                            class="fas fa-bookmark"></i>
+                                        <i
+                                            x-show="!isBookmarked('show', show.id)"
+                                            class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only"
+                                        x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section x-show="isLoading" class="loading-section">
+            <div class="spinner"></div>
+            <p>Loading videos...</p>
+        </section>
+
+        <!-- Empty State -->
+        <section x-show="!isLoading && filteredShows.length === 0"
+            class="empty-section">
+            <div class="empty-content">
+                <i class="fas fa-play-circle"></i>
+                <h3>No videos found</h3>
+                <p>Try adjusting your search or filters</p>
+                <button @click="clearFilters()" class="btn btn-primary">Clear
+                    Filters</button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+function showsPage() {
+    return {
+        // State
+        shows: [],
+        filteredShows: [],
+        featuredShow: null,
+        searchQuery: '',
+        selectedCategory: 'all',
+        viewMode: 'grid',
+        isLoading: true,
+        currentVideo: null,
+        hasPlayed: false,
+        isPlaying: false,
+        currentTime: 0,
+        
+        // Initialize
+        async init() {
+            await this.loadShows();
+            
+            // Check if there's a video ID in URL params to auto-play
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('play');
+            if (videoId) {
+                const video = this.shows.find(s => String(s.id) === String(videoId));
+                if (video) {
+                    // Use setTimeout to ensure DOM is ready
+                    setTimeout(() => {
+                        this.playShow(video);
+                    }, 100);
+                }
+            }
+            
+            // Handle browser back/forward navigation
+            window.addEventListener('popstate', (event) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const videoId = urlParams.get('play');
+                if (videoId) {
+                    const video = this.shows.find(s => String(s.id) === String(videoId));
+                    if (video) {
+                        this.currentVideo = video;
+                        this.hasPlayed = true;
+                        this.$nextTick(() => {
+                            if (this.$refs.videoPlayer) {
+                                this.$refs.videoPlayer.load();
+                                this.$refs.videoPlayer.play().catch(err => {
+                                    console.error('Error playing video:', err);
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    // Clear video if no play param
+                    this.currentVideo = null;
+                    if (this.$refs.videoPlayer) {
+                        this.$refs.videoPlayer.pause();
+                    }
+                }
+            });
+        },
+        
+        // Data loading
+        async loadShows() {
+            try {
+                this.isLoading = true;
+                const response = await fetch('/api/shows');
+                const data = await response.json();
+                this.shows = data.shows || [];
+                this.filteredShows = [...this.shows];
+                // Set a random featured show
+                if (this.shows.length > 0) {
+                    this.featuredShow = this.shows[Math.floor(Math.random() * this.shows.length)];
+                }
+                this.filterShows();
+                
+                // Images will load automatically via lazy loading
+            } catch (error) {
+                console.error('Error loading shows:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        // Filtering
+        filterShows() {
+            let filtered = [...this.shows];
+            
+            // Search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(show => 
+                    show.title.toLowerCase().includes(query) ||
+                    show.host.toLowerCase().includes(query) ||
+                    show.description?.toLowerCase().includes(query)
+                );
+            }
+            
+            // Category filter
+            if (this.selectedCategory === 'video_podcast') {
+                filtered = filtered.filter(show => (show.tags || []).includes('video-podcast'));
+            } else if (this.selectedCategory !== 'all') {
+                filtered = filtered.filter(show => show.type === this.selectedCategory);
+            }
+            
+            this.filteredShows = filtered;
+        },
+        
+        setCategory(category) {
+            this.selectedCategory = category;
+            this.filterShows();
+        },
+        
+        clearSearch() {
+            this.searchQuery = '';
+            this.filterShows();
+        },
+        
+        clearFilters() {
+            this.searchQuery = '';
+            this.selectedCategory = 'all';
+            this.filterShows();
+        },
+        
+        // Actions
+        playShow(show) {
+            // Play in embedded player instead of navigating
+            this.currentVideo = show;
+            this.hasPlayed = true;
+            
+            // Update URL without page reload for shareable links
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('play', show.id);
+            window.history.pushState({ play: show.id }, '', newUrl);
+            
+            this.$nextTick(() => {
+                if (this.$refs.videoPlayer) {
+                    this.$refs.videoPlayer.load();
+                    this.$refs.videoPlayer.play().catch(err => {
+                        console.error('Error playing video:', err);
+                    });
+                }
+            });
+            // Scroll to top to show the player
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        
+        viewSolo() {
+            if (this.currentVideo) {
+                window.location.href = `/player?id=${this.currentVideo.id}&type=show`;
+            }
+        },
+        
+        viewSoloShow(show) {
+            window.location.href = `/player?id=${show.id}&type=show`;
+        },
+        
+        onVideoLoaded() {
+            // Video metadata loaded
+        },
+        
+        onTimeUpdate() {
+            if (this.$refs.videoPlayer) {
+                this.currentTime = this.$refs.videoPlayer.currentTime;
+            }
+        },
+        
+        onVideoEnded() {
+            this.isPlaying = false;
+            // Optionally auto-play next video or clear
+        },
+        
+        playRandomShow() {
+            if (this.shows.length > 0) {
+                const randomShow = this.shows[Math.floor(Math.random() * this.shows.length)];
+                this.playShow(randomShow);
+            }
+        },
+        
+        scrollToFeatured() {
+            document.getElementById('featured').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        },
+        
+        refreshFeatured() {
+            if (this.shows.length > 0) {
+                this.featuredShow = this.shows[Math.floor(Math.random() * this.shows.length)];
+            }
+        },
+        
+        async saveShow(show) {
+            try {
+                const isCurrentlySaved = this.isSaved(show);
+                
+                // Use the unified bookmarks system
+                if (window.AhoyBookmarks) {
+                    const item = {
+                        type: 'show',
+                        id: show.id,
+                        title: show.title,
+                        artwork: show.thumbnail
+                    };
+                    window.AhoyBookmarks.toggle(item);
+                    show.saved = !isCurrentlySaved;
+                    this.showNotification(!isCurrentlySaved ? 'Bookmarked show' : 'Removed from bookmarks', 'success');
+                } else {
+                    // Fallback to API
+                    const response = await fetch('/api/bookmarks', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            media_id: String(show.id),
+                            media_type: 'show'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        show.saved = result.persisted !== false;
+                        this.showNotification('Bookmarked show', 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('Error bookmarking show:', error);
+                this.showNotification('Failed to bookmark show', 'error');
+            }
+        },
+        
+        isSaved(show) {
+            return show.saved || false;
+        },
+        
+        // Utility functions
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString();
+        },
+        
+        showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                font-weight: 500;
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        },
+        
+        // Bookmark methods
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+            }
+        },
+        
+        isBookmarked(type, id) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
+        }
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/unified-hero.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,117 @@
+/**
+ * Design Tokens - Dark Liquid Glass Aesthetic
+ * Central design system tokens for Ahoy Indie Media
+ */
+
+:root {
+  /* Core dark glass palette */
+  --glass-bg: rgba(12, 14, 18, 0.55);
+  --glass-bg-strong: rgba(12, 14, 18, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Accent colors */
+  --accent-primary: #6ddcff;
+  --accent-secondary: #9b8cff;
+
+  /* Glow effects */
+  --glow-opacity: 0.35;
+  --glow-primary: rgba(109, 220, 255, var(--glow-opacity));
+  --glow-secondary: rgba(155, 140, 255, calc(var(--glow-opacity) * 0.7));
+
+  /* Text colors */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+
+  /* Blur values */
+  --blur-strong: 24px;
+  --blur-soft: 14px;
+
+  /* Border radius */
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+
+  /* Shadows */
+  --shadow-glass:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Transitions */
+  --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.3s var(--transition-smooth);
+  --transition-normal: 0.6s var(--transition-smooth);
+
+  /* Spacing scale */
+  --sp-0: 0px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* Mobile layout tokens */
+  --mobile-gutter: 16px;          /* page/section horizontal padding (desktop) */
+  --mobile-card-pad: 12px;        /* internal card/row padding */
+  --mobile-top-offset: 36px;      /* clearance below top navbar */
+  --mobile-bottom-bar-height: 152px;
+  --mobile-bottom-clear: 152px;   /* clearance above bottom dock */
+  --mobile-bottom-clear-sm: 140px; /* for fixed-height bottom bars */
+}
+
+/* Sidebar / video-detail redesign tokens (additive — see design_handoff_video_detail/) */
+:root {
+  --ahoy-magenta: #ff0060;
+  --ahoy-pink-soft: #ff85a2;
+  --ahoy-indigo: #6366f1;
+  --bg-0: #0a0a0a;
+  --bg-1: #0f0f14;
+  --fg-1: rgba(255, 255, 255, 0.92);
+  --fg-2: rgba(255, 255, 255, 0.80);
+  --fg-3: rgba(255, 255, 255, 0.60);
+  --fg-4: rgba(255, 255, 255, 0.35);
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --card-radius: 20px;
+  --pill: 999px;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/* Mobile adjustments */
+@media (max-width: 1024px) {
+  :root {
+    --blur-strong: 18px;
+    --blur-soft: 12px;
+    --radius-xl: 24px;
+    --radius-lg: 18px;
+    --mobile-gutter: 0px;           /* flush edges on mobile */
+  }
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-deck {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+}

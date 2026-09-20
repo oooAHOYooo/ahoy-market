@@ -1,0 +1,4 @@
+git_url "https://github.com/oooAHOYooo/ahoy-ios-certs.git"
+type "appstore"
+app_identifier "com.ahoy.app"
+username "your@apple.id"

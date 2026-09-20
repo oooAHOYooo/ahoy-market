@@ -1,0 +1,667 @@
+{
+  "_help": {
+    "structure": "Organize updates by year > month > section. Each section can have multiple items.",
+    "sections": [
+      "music",
+      "videos",
+      "artists",
+      "platform",
+      "merch",
+      "events"
+    ],
+    "item_types": [
+      "content",
+      "feature",
+      "technical"
+    ],
+    "quick_add_tips": [
+      "New music track/album? \u2192 Add to 'music' section with type 'content'",
+      "New video/show? \u2192 Add to 'videos' section with type 'content'",
+      "New artist added? \u2192 Add to 'artists' section with type 'content'",
+      "App update? \u2192 Add to 'platform' section with type 'technical'",
+      "New feature? \u2192 Add to 'platform' section with type 'feature'",
+      "New merch product? \u2192 Add to 'merch' section with type 'content'",
+      "Upcoming event? \u2192 Add to 'events' section with type 'content'",
+      "Empty sections are fine - they won't show on the page"
+    ],
+    "minimal_update_examples": [
+      "Just added 3 new tracks \u2192 'music': [{'type': 'content', 'title': 'New Music Added', 'description': 'Three new tracks from indie artists', 'link': '/music'}]",
+      "Fixed a bug \u2192 'platform': [{'type': 'technical', 'title': 'Bug Fixes', 'description': 'Various bug fixes and improvements', 'link': '/'}]",
+      "New merch item \u2192 'merch': [{'type': 'content', 'title': 'New Product', 'description': 'Check out our latest merch', 'link': '/merch'}]"
+    ]
+  },
+  "updates": {
+    "2026": {
+      "jan": {
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "New The Rob Show Video Clips Added",
+              "description": "Three new video clips from The Rob Show are now available: Dominic Jace, Colleen Holt, and Tyler (2022).",
+              "date": "2026-01-30",
+              "link": "/player?id=the-rob-show-dominic-jace-clip&type=show",
+              "thumbnail": "/static/thumbnails/the-rob-show-dominic-jace-clip_a44a3430995d.jpg"
+            },
+            {
+              "type": "content",
+              "title": "New Pal-Bot Clips Added",
+              "description": "Two new clips from Pal-Bot 1 are now available - 'Causes Tension in Couples Relationship' and 'Surprise Engagement and a Robotic Dilemma'.",
+              "date": "2026-01-27",
+              "link": "/player?id=palbot-causes-tension&type=show",
+              "thumbnail": "/static/thumbnails/palbot-causes-tension_71f8226a4aae.jpg"
+            }
+          ]
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "New Artist Spotlight",
+              "description": "Check out our featured artist of the month and discover amazing new music.",
+              "date": "2026-01-01",
+              "link": "/artists"
+            }
+          ]
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": [
+            {
+              "type": "technical",
+              "title": "Mobile App Improvements",
+              "description": "Major enhancements to the mobile experience including native desktop applications, improved performance, and better offline capabilities.",
+              "date": "2026-01-05",
+              "features": [
+                "Native desktop applications for Windows, macOS, and Linux",
+                "50% faster page load times with optimized asset delivery",
+                "Offline mode with local SQLite database storage",
+                "Improved touch navigation with larger tap targets",
+                "Auto port detection for seamless local server startup",
+                "Platform-specific installers (DMG, NSIS, AppImage)"
+              ],
+              "link": "/downloads"
+            },
+            {
+              "type": "feature",
+              "title": "AHOY TV Channels Expanded",
+              "description": "Four new ahoy tv channels are now available, including short films, music videos, and live shows.",
+              "date": "2026-01-10",
+              "features": [
+                "Four new channels",
+                "Short films",
+                "Music videos",
+                "Live shows"
+              ],
+              "link": "/live-tv"
+            },
+            {
+              "type": "feature",
+              "title": "Shareable Video Links",
+              "description": "Videos now have human-readable URLs for easy sharing. Share your favorite clips with clean links like /player?id=palbot-causes-tension instead of cryptic IDs.",
+              "date": "2026-01-27",
+              "features": [
+                "Human-readable video slugs",
+                "Easy-to-share URLs",
+                "Automatic thumbnail generation",
+                "Local thumbnail caching for faster loads"
+              ],
+              "link": "/videos"
+            },
+            {
+              "type": "feature",
+              "title": "New Radio Station Launch",
+              "description": "We've launched a brand new radio station featuring indie artists from around the world. Tune in 24/7!",
+              "date": "2026-01-15",
+              "features": [
+                "24/7 streaming",
+                "Global indie artists",
+                "Continuous music"
+              ],
+              "link": "/radio"
+            }
+          ]
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Poet and Friends Show #7",
+              "description": "Join us for another Poet and Friends show on January 29th, 2026 at 7pm at Koffee. Don't miss this special event!",
+              "date": "2026-01-29",
+              "link": "/events/v/2026-01-29T18:30:00",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/goT3YIfLz1xL1ITZbScUh?fit=clip&w=920&auto=format"
+            }
+          ]
+        }
+      },
+      "feb": {
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": []
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": []
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": []
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Poet and Friends #8 \u2013 Stupid Cupid",
+              "description": "Poet and Friends are back at Koffee? Thursday, Feb 26, 6:30pm. 104 Audubon St, New Haven, CT. ",
+              "date": "2026-02-26",
+              "link": "/events/v/2026-02-26T18:30:00",
+              "link_external": "https://partiful.com/e/XTg8Cf9NAHSPE8VwslhdJ",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/XTg8Cf9NAHSPE8VwslhdJ?fit=clip&w=800&auto=format"
+            }
+          ]
+        }
+      },
+      "mar": {
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Poets & Friends — Full Video Recap Out Now",
+              "description": "Watch the full show recording from Poets & Friends #9 \u2014 now streaming on Ahoy.",
+              "date": "2026-03-30",
+              "link": "/videos?play=poets-and-friends-9",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/50ZHnbZBbi-ReHwK2D24a?fit=clip&w=460&auto=format"
+            },
+            {
+              "type": "content",
+              "title": "Poets & Friends #9 — Behind the Scenes",
+              "description": "Behind the scenes photography from Poets & Friends #9 held on March 26, 2026 at Koffee?, New Haven CT. Photos by various photographers.",
+              "date": "2026-03-27",
+              "link": "/studio/poets-and-friends-9-bts",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/50ZHnbZBbi-ReHwK2D24a?fit=clip&w=460&auto=format"
+            },
+            {
+              "type": "content",
+              "title": "Tyler Needs a Break — Ep 4: Sam Carlson",
+              "description": "New podcast release: Tyler Needs a Break — Episode 4 with Sam Carlson. Watch both clips and the full episode now.",
+              "date": "2026-03-23",
+              "link": "/podcasts/tyler-needs-a-break",
+              "thumbnail": "/static/thumbnails/tyler-needs-a-break-ep4-release-and-tour_87e1782cdf98.jpg",
+              "related_videos": [
+                {
+                  "title": "Release and Tour",
+                  "description": "Sam Carlson on releasing music and hitting the road.",
+                  "path": "/podcasts/tyler-needs-a-break/tyler-needs-a-break-ep4-release-and-tour",
+                  "thumbnail": "/static/thumbnails/tyler-needs-a-break-ep4-release-and-tour_87e1782cdf98.jpg"
+                },
+                {
+                  "title": "Booking Local Shows",
+                  "description": "Sam Carlson on booking local shows and navigating the scene.",
+                  "path": "/podcasts/tyler-needs-a-break/tyler-needs-a-break-ep4-booking-local-shows",
+                  "thumbnail": "/static/thumbnails/tyler-needs-a-break-ep4-booking-local-shows_542c179e335d.jpg"
+                }
+              ]
+            },
+            {
+              "type": "content",
+              "title": "New The Rob Show Clips: Jerry & Tom Berry",
+              "description": "Newly restored clips from The Rob Show featuring Jerry Ornelas and Tom Berry III are now streaming on Ahoy.",
+              "date": "2026-03-18",
+              "link": "/podcasts/the-rob-show",
+              "thumbnail": "https://storage.googleapis.com/ahoy-podcast-collection/Rob%20Show%20-%20Ep%2032%20-%20Tom%20Berry%20III.jpg",
+              "related_videos": [
+                {
+                  "title": "Jerry Ornelas — The Rob Show #34",
+                  "description": "Jerry Ornelas joins Rob Meglio for a deep and engaging conversation.",
+                  "path": "/podcasts/the-rob-show/23",
+                  "thumbnail": "https://storage.googleapis.com/ahoy-podcast-collection/ROB%20EPISODE%2034%20-%20JERRY%20ORNELAS.jpg"
+                },
+                {
+                  "title": "Tom Berry III — The Rob Show #32",
+                  "description": "Tom Berry III joins Rob Meglio to talk shop about the New Haven scene.",
+                  "path": "/podcasts/the-rob-show/21",
+                  "thumbnail": "https://storage.googleapis.com/ahoy-podcast-collection/Rob%20Show%20-%20Ep%2032%20-%20Tom%20Berry%20III.jpg"
+                }
+              ]
+            },
+            {
+              "type": "content",
+              "title": "New Podcast Series: Tyler Needs a Break",
+              "description": "Episodes 1 and 2 of 'Tyler Needs a Break' are out now! Join Tyler as he talks about his journey and the roots of Connecticut skating.",
+              "date": "2026-03-14",
+              "link": "/podcasts/tyler-needs-a-break",
+              "thumbnail": "/static/thumbnails/tyler-needs-a-break-ep1_01918dfa58dd.jpg",
+              "related_videos": [
+                {
+                  "title": "Roots of Connecticut Skating",
+                  "description": "Tyler Mirando traces the origins and culture of skateboarding in Connecticut.",
+                  "path": "/podcasts/tyler-needs-a-break/tyler-needs-a-break-ep2-ct-skating",
+                  "thumbnail": "https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg"
+                },
+                {
+                  "title": "The Philly Connection",
+                  "description": "Tyler Mirando on the deep ties between Connecticut and the Philadelphia skating scene.",
+                  "path": "/podcasts/tyler-needs-a-break/tyler-needs-a-break-ep2-philly-connection",
+                  "thumbnail": "https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg"
+                }
+              ]
+            },
+            {
+              "type": "content",
+              "title": "Poets & Friends #8 \u2014 Now Streaming",
+              "description": "Watch the full show and individual performances from Poets & Friends #8: Stupid Cupid, originally recorded live on February 26, 2026 at Koffee?, New Haven CT.",
+              "date": "2026-03-10",
+              "link": "/videos?play=poets-and-friends-8-full",
+              "thumbnail": "/static/thumbnails/poets-and-friends-8_b1908116a7c8.jpg"
+            },
+            {
+              "type": "content",
+              "title": "Poets & Friends #8: Stupid Cupid",
+              "description": "Poets & Friends #8 took place Thursday, February 26, 2026 at Koffee?, New Haven CT. Hosted by Micky Vampiro. Featuring Micky Vampiro, Paul Wildly, Aidan Bauer, Layne Boles, Alex Gonzalez, Miranda Copps, Katie Myerscough, Pat Clendenen, Ellen Martin, Samuel Chen, and Sasha.",
+              "date": "2026-02-26",
+              "link": "/events/v/2026-02-26T18:30:00",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/XTg8Cf9NAHSPE8VwslhdJ?fit=clip&w=800&auto=format"
+            }
+          ]
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": []
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": [
+            {
+              "type": "feature",
+              "title": "Desktop App \u2014 Now Available on Linux",
+              "description": "Ahoy is now available as a native desktop app on Linux. Install with one command on Arch/Garuda, or download the universal AppImage for any Linux distro \u2014 no installation required.",
+              "date": "2026-03-10",
+              "thumbnail": "https://storage.googleapis.com/ahoy-dynamic-content/news/NEW_AHOY.jpg",
+              "features": [
+                "Arch/Garuda: `yay ahoy`",
+                "Any Linux: Universal AppImage (no install needed)",
+                "ARM64 supported (Raspberry Pi, Apple Silicon)"
+              ],
+              "link": "/downloads"
+            }
+          ]
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": []
+        }
+      },
+      "may": {
+        "videos": {
+          "title": "Video Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Tallboyz 'Obsolete' Full Film Released",
+              "description": "Check out the brand new full-length skating film from Tallboyz, featuring Dave Gunn and Andrew Leverton",
+              "date": "2026-05-26",
+              "link": "/videos/tallboyz/tallboyz-obsolete",
+              "thumbnail": "https://storage.googleapis.com/ahoy-videos/skating/tallboyz/Full%20Videos/Obsolete/Ahoy%20Indie%20Media%20-%20Tallboyz%20-%20Obsolete_Ahoy%20Indie%20Media%20-%20Tallboyz%20-%20Obsolete%20-%20Ahoy%20Indie%20Media%20-%20Tallboyz%20-%20Obsolete5.jpg",
+              "premiered": "Jul 20, 2024",
+              "filmed_and_edited_by": "Andrew Leverton and Dave Gunn",
+              "featured_skaters": [
+                "Dave Gunn",
+                "Tadd Labozzetta",
+                "Josh Weaver",
+                "Ian Hutchinson",
+                "Nigel Klein",
+                "Julian Hinsch",
+                "Dave Hartnett",
+                "Mark Wojda",
+                "Don Sanders",
+                "Nick \"Chongo\" Sellen",
+                "Jay Kouch",
+                "Tyler Knight",
+                "Brad",
+                "Alec Gerhart",
+                "Matt Ragone",
+                "Brendan Brown",
+                "Eric Larson",
+                "Rob Dargiewicz",
+                "Chapi",
+                "Nick Tomanelli",
+                "Olivier De Tomas",
+                "Marcello Savona",
+                "Leon Toppin",
+                "Chuck Winfield",
+                "Aaron Kalat",
+                "Connor Murphy",
+                "Jeremy Raff",
+                "Bella Sadik",
+                "Jay O'Neill",
+                "Ed Braxton"
+              ],
+              "is_new": true
+            },
+            {
+              "type": "content",
+              "title": "Poets & Friends #10 — Full Show Recap",
+              "description": "The full video recording and audio from Poets & Friends #10 are now available on Ahoy. Recorded live on April 30, 2026 at Koffee?, New Haven CT. Watch the full show or listen to the audio below.",
+              "date": "2026-05-21",
+              "link": "/videos?play=poets-and-friends-10",
+              "listen_link": "/podcasts/poets-and-friends/poets-and-friends-10-full",
+              "thumbnail": "https://storage.googleapis.com/ahoy-videos/live/poets/poets-10/Poets%20%2310.jpg",
+              "is_new": true
+            }
+          ]
+        },
+        "music": {
+          "title": "Music Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Sinecera & The Knife Kickers - Full Album",
+              "description": "Full album from Sinecera and The Knife Kickers now live in the music catalog. 8 tracks of alternative rock.",
+              "date": "2026-05-07",
+              "link": "/music",
+              "thumbnail": "https://storage.googleapis.com/ahoy-song-collection/sinecera/album%20%3D%20%20___told%20me%20to%20slow%20down%2C%20I%20can%20hardly%20know%20now%2C%20if%20I%27m%20dosing%20the%20coda%20with%20work%20of%20the%20heart%20or%20lines%20from%20a%20tale.../sinecera-album-%20___told%20me%20to%20slow%20down%2C%20I%20can%20hardly%20know%20now%2C%20if%20I%27m%20dosing%20the%20coda%20with%20work%20of%20the%20heart%20or%20lines%20from%20a%20tale....jpg",
+              "is_new": true
+            },
+            {
+              "type": "content",
+              "title": "Sinecera - I wanna tell you",
+              "description": "New alternative rock from Sinecera is now live in the music catalog.",
+              "date": "2026-05-04",
+              "link": "/music",
+              "thumbnail": "https://storage.googleapis.com/ahoy-song-collection/sinecera/Sincera.jpg",
+              "is_new": true
+            }
+          ]
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": [
+            {
+              "type": "feature",
+              "title": "We are out on Google Play Store",
+              "description": "Big milestone - on the google play store - you can now access ahoy as an app on an android phone or tablet and/or chromebook - check it out here - live to the world - https://play.google.com/store/apps/details?id=ooo.ahoy.app",
+              "date": "2026-05-04",
+              "link": "https://play.google.com/store/apps/details?id=ooo.ahoy.app",
+              "thumbnail": "https://www.citypng.com/public/uploads/preview/hd-get-it-on-google-play-button-transparent-png-70408169470949159xr9ct69w.png",
+              "is_new": true
+            }
+          ]
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Poets & Friends #11",
+              "description": "Our monthly gathering continues! Join us for Poets & Friends #11 on Thursday, May 28th at 6:30 PM at Koffee?, New Haven. 3–5 minutes to share your favorite work or an original piece. E-mail alex@ahoy.ooo to sign up for a slot!",
+              "date": "2026-05-20",
+              "link": "/events/v/2026-05-28T18:30:00",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/63jXIXgcLBX0GcqxcI6Rt?fit=clip&w=800&auto=format",
+              "is_new": true
+            }
+          ]
+        }
+      },
+      "jun": {
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": []
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "New Poets Added to the Collection",
+              "description": "We're excited to welcome Kyle Middleton and Claire Cooper to the Ahoy poet roster. Both poets are now available in our growing poetry collection with their latest works.",
+              "date": "2026-06-04",
+              "link": "/poets",
+              "thumbnail": "https://scontent.fijd1-1.fna.fbcdn.net/v/t39.30808-6/471833687_10236105224588802_1759823471792789682_n.jpg?stp=dst-jpegr_tt6&_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=iImrGuV9duwQ7kNvwGcnW_L&_nc_oc=AdqUjCzhFpb9dhchMcyEN1Wz44HdiShLAL21-VgnJeSLYmRzYqbj12zVx3Y8Y2LI-CM&_nc_zt=23&se=-1&_nc_ht=scontent.fijd1-1.fna&_nc_gid=S-VWI8g5DUvCEfKmwrJt9w&_nc_ss=7b2a8&oh=00_Af_3Jq3U1venQocNVIngyf2ro5UqZFGIs-F7z9JqIs7URA&oe=6A24B187",
+              "is_new": true
+            }
+          ]
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": [
+            {
+              "type": "feature",
+              "title": "Poems Feature Now Live",
+              "description": "Experimental beta feature: original poems from the Poets & Friends community are now available on Ahoy, giving our poets a dedicated place to publish and read their work.",
+              "date": "2026-06-02",
+              "features": [
+                "Original poems from Poets & Friends contributors",
+                "Typeset reading view for a clean reading experience",
+                "Links from poems to poet artist profiles",
+                "Experimental beta rollout"
+              ],
+              "link": "https://app.ahoy.ooo/poems",
+              "thumbnail": "https://media.licdn.com/dms/image/v2/D5603AQGUre_-4bLkUQ/profile-displayphoto-shrink_200_200/B56ZOyEUvsGsAc-/0/1733859303028?e=2147483647&v=beta&t=5Hm84xpEDFb0wO-RZsRg1lNRtAgLAgdgSpZG7PdIw0I",
+              "featured_thumbnail": "https://media.licdn.com/dms/image/v2/D5603AQGUre_-4bLkUQ/profile-displayphoto-shrink_200_200/B56ZOyEUvsGsAc-/0/1733859303028?e=2147483647&v=beta&t=5Hm84xpEDFb0wO-RZsRg1lNRtAgLAgdgSpZG7PdIw0I"
+            }
+          ]
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": []
+        }
+      },
+      "aug": {
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": []
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": []
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": [
+            {
+              "type": "technical",
+              "title": "Platform updates seriously underway",
+              "description": "Platform updates are seriously underway. We are actively developing a new \"mp3\" player, and this app is becoming AHOY Discover: a place to find independent music, podcasts, events, film, artists, and studio work. Discover is the first surface in a larger AHOY system alongside Library, Cards, and Player. We didn’t do more this month because we were out filming.",
+              "date": "2026-08-30",
+              "link": "/"
+            }
+          ]
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": []
+        }
+      },
+      "jul": {
+        "music": {
+          "title": "Music Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Featured Artist: Cambell Rice",
+              "description": "This week's featured song is \"Sunflower\" by Cambell Rice — a bedroom-recorded indie track off his three-song run on Ahoy, alongside \"From Here\" and \"Trying to play guitar in a huge room.\" Lo-fi, unpolished, and worth the listen.",
+              "date": "2026-07-09",
+              "link": "/artists/cambell-rice",
+              "thumbnail": "https://m.media-amazon.com/images/I/61APLxryThL._UXNaN_FMjpg_QL85_.jpg",
+              "is_new": true
+            }
+          ]
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "UFR White — Featuring Dave Gunn",
+              "description": "New skating content from Tallboyz featuring Dave Gunn.",
+              "date": "2026-07-08",
+              "link": "/videos/tallboyz/tallboyz-ufrwhite",
+              "thumbnail": "https://storage.googleapis.com/ahoy-videos/skating/tallboyz/May%202026%20Dump/Dave_UFRWhite_thumb.jpg",
+              "is_new": true
+            },
+            {
+              "type": "content",
+              "title": "Poets & Friends #12 — Behind the Scenes",
+              "description": "Behind-the-scenes photos from Poets & Friends #12 held on June 28, 2026 at Koffee?, New Haven CT. Photography by Spider in Stereo.",
+              "date": "2026-07-02",
+              "link": "/studio/poets-and-friends-12-bts",
+              "thumbnail": "https://storage.googleapis.com/ahoy-dynamic-content/studio/poets_12_BTS/WhatsApp%20Image%202026-07-01%20at%2021.37.57%20(1).jpeg"
+            }
+          ]
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": []
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": []
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": []
+        }
+      },
+      "apr": {
+        "videos": {
+          "title": "Video Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Flux TB Cash Contest",
+              "description": "Cash Contest hosted by the Tallboyz at FLUX during their first annual skate film festival at Flux. Shot and edited by Alex Gonzalez.",
+              "date": "2026-04-06",
+              "link": "/videos/flux-tb-cash-contest",
+              "thumbnail": "https://storage.googleapis.com/ahoy-videos/skating/flux/Ahoy-FLUX_CashContest.jpg",
+              "is_new": true,
+              "skip_feature": true
+            },
+            {
+              "type": "content",
+              "title": "New Series: G-Dub Disc Golf",
+              "description": "Check out the brand new G-Dub Disc Golf series! Join Greg Weese for disc golf reviews, equipment breakdowns, road trip adventures, and his PDGA journey.",
+              "date": "2026-04-01",
+              "link": "/videos/g-dub-disc-golf-which-putter-best",
+              "thumbnail": "/static/thumbnails/g-dub-disc-golf-which-putter-best_324904ae.jpg"
+            }
+          ]
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "AHOY @ THE NIGHT MARKET",
+              "description": "Happy to announce that Ahoy Indie Media has an official booth at the New Haven Night Market! Come join us for the release of our local homemade streaming platform — Ahoy — and meet the artists, poets and filmmakers involved! Stop by for exclusive merch, free giveaways and good vibes! \n\nFriday, May 15, 5:30pm – 10:30pm. Details coming soon!",
+              "date": "2026-04-12",
+              "link": "/events/v/2026-05-15T17:30:00",
+              "link_external": "https://partiful.com/e/ZdGtqcQtwwPGcJlJqJXk",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/yUIvRp87Y9u5eKuqGd1p2?fit=clip&w=920&auto=format",
+              "is_new": true
+            },
+            {
+              "type": "content",
+              "title": "Poets & Friends #10",
+              "description": "Join us for another Poets & Friends event on Thursday, April 30th at 6:30 PM at Koffee?, New Haven CT. 3–5 minutes to share your favorite work or an original piece. Want to read? E-mail alex@ahoy.ooo.",
+              "date": "2026-04-02",
+              "link": "/events/v/2026-04-30T18:30:00",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/tzHJtpeaCLKQW6ctU06G0?fit=clip&w=920&auto=format"
+            }
+          ]
+        }
+
+      }
+    }
+  },
+  "_legacy": [
+    {
+      "id": "update-1",
+      "title": "Poet and Friends Show #7",
+      "description": "Join us for another Poet and Friends show on January 29th, 2026 at 7pm at Koffee. Don't miss this special event!",
+      "date": "2026-01-29",
+      "type": "content"
+    },
+    {
+      "id": "update-2",
+      "title": "New Radio Station Launch",
+      "description": "We've launched a new radio station. Same music plays for everyone, everywhere.",
+      "date": "2026-01-15",
+      "type": "feature"
+    },
+    {
+      "id": "update-3",
+      "title": "AHOY TV Channels Expanded",
+      "description": "Four new ahoy tv channels are now available, including short films, music videos, and live shows.",
+      "date": "2026-01-10",
+      "type": "feature"
+    },
+    {
+      "id": "update-4",
+      "title": "Mobile App Improvements",
+      "description": "Enhanced mobile experience with better navigation and faster loading times.",
+      "date": "2026-01-05",
+      "type": "improvement"
+    },
+    {
+      "id": "update-5",
+      "title": "New Artist Spotlight",
+      "description": "Check out our featured artist of the month and discover amazing new music.",
+      "date": "2026-01-01",
+      "type": "improvement"
+    }
+  ]
+}

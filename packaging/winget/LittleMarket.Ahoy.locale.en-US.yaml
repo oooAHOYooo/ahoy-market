@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: LittleMarket.Ahoy
+PackageVersion: 0.2.2
+PackageLocale: en-US
+Publisher: Little Market LLC
+PublisherUrl: https://ahoy.ooo
+PublisherSupportUrl: https://ahoy.ooo/contact
+PrivacyUrl: https://ahoy.ooo/privacy
+Author: Alex
+PackageName: Ahoy
+PackageUrl: https://ahoy.ooo
+License: ISC
+Copyright: Copyright © Little Market LLC
+ShortDescription: Discover and play independent music and shows
+Description: Ahoy is a desktop app for discovering and playing independent music, podcasts, and shows. Support indie artists directly.
+Tags:
+  - music
+  - indie
+  - media
+  - podcast
+  - audio
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

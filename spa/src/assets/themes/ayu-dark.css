@@ -1,0 +1,248 @@
+/**
+ * Ayu Dark Inspired Theme
+ *
+ * High-contrast dark palette with amber primary, deep navy surfaces,
+ * and clean low-noise glass styling.
+ */
+
+body.theme-ayu-dark {
+  --primary-color: #ffb454;
+  --secondary-color: #59c2ff;
+  --accent-color: #aad94c;
+
+  --background-dark: #0f1419;
+  --background-medium: #131922;
+  --background-light: #1a2029;
+
+  --text-primary: #e6e1cf;
+  --text-secondary: rgba(230, 225, 207, 0.78);
+  --text-muted: rgba(198, 190, 164, 0.62);
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --success-color: #aad94c;
+  --warning-color: #ffb454;
+  --error-color: #f26d78;
+
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at top center, rgba(89, 194, 255, 0.12), transparent 38%),
+    radial-gradient(circle at bottom right, rgba(255, 180, 84, 0.10), transparent 32%),
+    linear-gradient(135deg, #0b1014 0%, #10161d 46%, #0f1419 100%);
+  background-attachment: fixed;
+  color: var(--text-primary) !important;
+}
+
+body.theme-ayu-dark,
+body.theme-ayu-dark p,
+body.theme-ayu-dark span,
+body.theme-ayu-dark label {
+  color: var(--text-primary);
+}
+
+body.theme-ayu-dark .neu-card,
+body.theme-ayu-dark .settings-page,
+body.theme-ayu-dark .app-sidebar,
+body.theme-ayu-dark .app-navbar,
+body.theme-ayu-dark .mobile-menu-drawer,
+body.theme-ayu-dark .mini-player,
+body.theme-ayu-dark .compact-footer,
+body.theme-ayu-dark .glass-panel,
+body.theme-ayu-dark .glass-deck {
+  background: rgba(19, 25, 34, 0.88);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+body.theme-ayu-dark .neu-btn-primary,
+body.theme-ayu-dark .btn-primary {
+  background: linear-gradient(135deg, #ffb454, #ff8f3e);
+  color: #16120f;
+  border: 1px solid rgba(255, 180, 84, 0.28);
+  box-shadow: 0 10px 24px rgba(255, 180, 84, 0.18);
+}
+
+body.theme-ayu-dark .neu-btn-primary:hover,
+body.theme-ayu-dark .btn-primary:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 12px 28px rgba(255, 180, 84, 0.24);
+}
+
+body.theme-ayu-dark .neu-btn-secondary,
+body.theme-ayu-dark .btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+body.theme-ayu-dark .neu-btn-secondary:hover,
+body.theme-ayu-dark .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff !important;
+}
+
+body.theme-ayu-dark .btn-danger {
+  background: #f26d78;
+  color: #16120f;
+  border: none;
+}
+
+body.theme-ayu-dark .nav-link.active,
+body.theme-ayu-dark .router-link-active {
+  color: var(--primary-color);
+}
+
+body.theme-ayu-dark .app-sidebar-item.active {
+  background: rgba(255, 180, 84, 0.08);
+  border-left: 3px solid var(--primary-color);
+}
+
+body.theme-ayu-dark a {
+  color: var(--secondary-color);
+}
+
+body.theme-ayu-dark a:hover {
+  color: var(--primary-color);
+}
+
+body.theme-ayu-dark .text-muted,
+body.theme-ayu-dark .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+body.theme-ayu-dark input,
+body.theme-ayu-dark textarea,
+body.theme-ayu-dark select {
+  background: rgba(16, 22, 29, 0.9);
+  color: var(--text-primary);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+}
+
+body.theme-ayu-dark input:focus,
+body.theme-ayu-dark textarea:focus,
+body.theme-ayu-dark select:focus {
+  border-color: rgba(255, 180, 84, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 180, 84, 0.12);
+  outline: none;
+}
+
+body.theme-ayu-dark .mini-player-controls button:hover,
+body.theme-ayu-dark .icon-button:hover {
+  color: var(--primary-color);
+}
+
+body.theme-ayu-dark .playlist-card:hover,
+body.theme-ayu-dark .artist-card:hover,
+body.theme-ayu-dark .show-card:hover {
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
+}
+
+body.theme-ayu-dark h1,
+body.theme-ayu-dark h2,
+body.theme-ayu-dark h3,
+body.theme-ayu-dark h4,
+body.theme-ayu-dark h5,
+body.theme-ayu-dark h6,
+body.theme-ayu-dark .content-header,
+body.theme-ayu-dark .content-header-title {
+  color: var(--text-primary) !important;
+}
+
+body.theme-ayu-dark .content-header-subtitle,
+body.theme-ayu-dark .content-header-kicker,
+body.theme-ayu-dark .setting-toggle-title,
+body.theme-ayu-dark .setting-toggle-desc,
+body.theme-ayu-dark .settings-label,
+body.theme-ayu-dark .settings-value {
+  color: var(--text-secondary) !important;
+}
+
+body.theme-ayu-dark input::placeholder,
+body.theme-ayu-dark textarea::placeholder {
+  color: rgba(198, 190, 164, 0.7) !important;
+  opacity: 1 !important;
+}
+
+body.theme-ayu-dark .filter-option,
+body.theme-ayu-dark .submenu-filter,
+body.theme-ayu-dark .settings-select option {
+  color: var(--text-primary) !important;
+}
+
+body.theme-ayu-dark .bottom-deck,
+body.theme-ayu-dark .deck-frame,
+body.theme-ayu-dark .mobile-dock,
+body.theme-ayu-dark .mobile-bottom-bar {
+  background:
+    linear-gradient(180deg, rgba(18, 24, 31, 0.98), rgba(11, 15, 20, 0.98)) !important;
+  border-top: 1px solid rgba(255, 180, 84, 0.16);
+  box-shadow:
+    0 -12px 30px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 180, 84, 0.08);
+}
+
+body.theme-ayu-dark .mobile-bottom-bar-switcher-btn,
+body.theme-ayu-dark .mobile-bottom-bar-tab,
+body.theme-ayu-dark .mobile-player-deck-track,
+body.theme-ayu-dark .mobile-player-deck-empty,
+body.theme-ayu-dark .mobile-player-deck-btn,
+body.theme-ayu-dark .utility-action,
+body.theme-ayu-dark .utility-status-pill {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+body.theme-ayu-dark .mobile-bottom-bar-switcher-btn.active,
+body.theme-ayu-dark .mobile-bottom-bar-tab.active,
+body.theme-ayu-dark .mobile-player-deck-btn--play,
+body.theme-ayu-dark .utility-action.active {
+  background:
+    linear-gradient(180deg, rgba(255, 180, 84, 0.96), rgba(255, 143, 62, 0.9));
+  color: #16120f;
+  border-color: rgba(255, 180, 84, 0.26);
+}
+
+body.theme-ayu-dark .mobile-bottom-bar-tab-dot,
+body.theme-ayu-dark .utility-status-badge {
+  background: var(--primary-color);
+  color: #16120f;
+}
+
+body.theme-ayu-dark .mobile-player-deck-art,
+body.theme-ayu-dark .mobile-player-deck-empty-icon,
+body.theme-ayu-dark .mobile-player-deck-open {
+  background:
+    linear-gradient(180deg, rgba(31, 38, 47, 0.96), rgba(22, 28, 35, 0.94));
+  color: var(--primary-color);
+}
+
+body.theme-ayu-dark .mobile-player-deck-title,
+body.theme-ayu-dark .mobile-player-deck-empty-copy strong,
+body.theme-ayu-dark .utility-status-copy strong {
+  color: var(--text-primary);
+}
+
+body.theme-ayu-dark .mobile-player-deck-artist,
+body.theme-ayu-dark .mobile-player-deck-empty-copy small,
+body.theme-ayu-dark .mobile-player-deck-pill,
+body.theme-ayu-dark .utility-status-copy small,
+body.theme-ayu-dark .utility-status-action {
+  color: var(--text-secondary);
+}
+
+body.theme-ayu-dark .mobile-player-deck-link {
+  color: color-mix(in srgb, var(--secondary-color) 70%, var(--primary-color) 30%);
+}
+
+@media (max-width: 1024px) {
+  body.theme-ayu-dark .content-header,
+  body.theme-ayu-dark .submenu-filter,
+  body.theme-ayu-dark .neu-card.filter-card,
+  body.theme-ayu-dark .filter-row {
+    background: transparent !important;
+  }
+}

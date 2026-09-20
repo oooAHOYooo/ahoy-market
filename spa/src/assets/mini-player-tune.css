@@ -1,0 +1,749 @@
+/**
+ * ULTRA-DENSE UI TUNE SHEET (Mini Player)
+ * ─────────────────────────────────────────────────────────────────────────
+ * Goal: Minimize "dead air" and maximize content real estate.
+ * Edit spacing, padding, and colors here. Overrides apply to the
+ * now-playing bar (desktop + mobile) and mobile dock secondary row.
+ *
+ * HTML/copy: spa/src/components/MiniPlayer.vue  |  Dock: spa/src/components/NavBar.vue
+ */
+
+/* ── 1. DENSITY TOGGLES (Adjust these for immediate impact) ────────────── */
+:root {
+  --ui-density-gap: 4px;
+  /* Vertical space between rows */
+  --ui-touch-padding: 6px;
+  /* Inner padding for buttons */
+  --ui-glass-opacity: 0.85;
+  /* Transparency of the dock */
+
+  /* Liquid glass: bar tint (low = more see-through; dark = a hint darker) */
+  --np-bar-tint: 0.08;
+  --np-bar-darken: 0.14;
+  /* Bottom dock: same liquid glass */
+  --dock-bar-blur: 28px;
+  --dock-bar-tint: 0.08;
+  --dock-bar-darken: 0.14;
+
+  /* ── 2. MOBILE DOCK (Primary & Secondary Rows) ────────────────────────── */
+  --mobile-dock-secondary-padding: 4px 8px;
+  --mobile-dock-secondary-gap: 2px;
+  --mobile-dock-secondary-min-height: 56px;
+  /* Distance from viewport bottom to the now-playing bar’s bottom edge (dock height). Tweak to move bar: increase = bar up, decrease = bar down; set to match dock height for flush. */
+  --np-mobile-dock-height: 152px;
+  --np-collapsed-strip-height: 36px;
+
+  /* ── 3. NOW PLAYING WRAPPER (The Player Bar) ─────────────────────────── */
+  /* Change these to adjust bar height; mobile needs room for 2 rows (info + transport). */
+  --np-height: 73px;
+  /* Desktop bar height (timeline removed) */
+  --np-mobile-height: var(--np-mobile-dock-height);
+  /* Mobile: matches the bottom navigation deck height exactly for seamless swap */
+  --np-bar-radius: 0;
+
+  /* Container Tightening */
+  --np-container-padding: 8px 12px;
+  --np-container-gap-col: 12px;
+
+  /* Album Art & Info */
+  --np-album-size: 42px;
+  /* Scaled down for density */
+  --np-album-radius: 10px;
+  --np-title-size: 13px;
+  --np-artist-size: 11px;
+  --np-info-gap: 1px;
+  /* Tighten text stack */
+  --np-left-gap: 8px;
+
+  /* Transport & Buttons */
+  --np-transport-gap: 4px;
+  /* Tighter button grouping */
+  --np-btn-size: 30px;
+  --np-play-btn-size: 36px;
+  --np-actions-gap: 6px;
+  --np-action-btn-size: 30px;
+  --np-action-btn-radius: 8px;
+  --np-volume-wrap-gap: 8px;
+  --np-volume-width: 84px;
+
+  /* ── 4. COLORS & EFFECTS (liquid glass: translucent, a hint darker, blends with background) ──── */
+  --np-bar-bg: rgba(0, 0, 0, var(--np-bar-darken));
+  --np-bar-blur: 28px;
+  --np-bar-border: none;
+  --np-bar-border-gloss: none;
+  --np-bar-chromatic: none;
+  --np-playing-glow: none;
+
+  /* Text */
+  --np-title-color: var(--text-primary, #ffffff);
+  --np-artist-color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+  --np-empty-title-color: rgba(255, 255, 255, 0.6);
+  --np-empty-artist-color: rgba(255, 255, 255, 0.4);
+  --np-empty-link-color: rgba(255, 255, 255, 0.5);
+  --np-empty-link-hover: rgba(255, 255, 255, 0.85);
+  --np-empty-art-bg: linear-gradient(135deg, rgba(67, 56, 202, 0.22) 0%, rgba(79, 70, 229, 0.16) 100%);
+
+  /* Buttons: flat (transparent, no neumorphic shadows) */
+  --np-btn-bg: rgba(255, 255, 255, 0.04);
+  --np-btn-color: rgba(255, 255, 255, 0.9);
+  --np-btn-hover-bg: rgba(255, 255, 255, 0.08);
+  --np-btn-active-bg: rgba(79, 70, 229, 0.35);
+  --np-btn-active-color: #4f46e5;
+  --np-btn-shadow: none;
+  --np-btn-shadow-active: none;
+  --np-play-btn-bg: linear-gradient(135deg, #5b21b6, #4f46e5);
+  --np-play-btn-hover-bg: linear-gradient(135deg, #6d28d9, #6366f1);
+  --np-play-btn-shadow: none;
+  --np-play-btn-shadow-active: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+  --np-action-btn-border: 1px solid rgba(255, 255, 255, 0.08);
+  --np-action-btn-bg: rgba(255, 255, 255, 0.04);
+  --np-action-btn-color: rgba(255, 255, 255, 0.55);
+  --np-action-btn-hover-bg: rgba(255, 255, 255, 0.06);
+  --np-action-btn-hover-border: rgba(255, 255, 255, 0.15);
+  --np-action-btn-hover-color: rgba(255, 255, 255, 0.9);
+  --np-action-btn-shadow: none;
+  --np-action-btn-shadow-active: none;
+  --np-album-shadow: none;
+  --np-empty-art-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2);
+
+  /* Bottom dock tab colors (match now-player: subtle inactive, brand active) */
+  --dock-tab-inactive: rgba(255, 255, 255, 0.52);
+  --dock-tab-active: rgba(129, 140, 248, 0.95);
+  --dock-tab-active-bg: rgba(79, 70, 229, 0.14);
+}
+
+/* ── Ghost / collapsed state (for future "zero row" or scroll-to-hide) ──── */
+/* --np-ghost-height: 0; */
+/* --np-collapsed-opacity: 0; */
+
+/* ── COMPACT LOGIC APPLIED ─────────────────────────────────────────────── */
+
+.now-playing-wrapper {
+  min-height: var(--np-height);
+  height: auto;
+  transition: min-height 0.42s cubic-bezier(0.19, 1, 0.22, 1), transform 0.42s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+body.has-player {
+  padding-bottom: var(--np-height);
+}
+
+.now-playing-glass {
+  height: 100%;
+  min-height: 100%;
+  border-radius: var(--np-bar-radius);
+  border: none;
+  box-shadow: none;
+  background: var(--np-bar-bg);
+  backdrop-filter: blur(var(--np-bar-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--np-bar-blur)) saturate(1.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.now-playing-glass.now-playing-is-playing {
+  border: none;
+  box-shadow: none;
+}
+
+.now-playing-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--np-container-padding);
+  gap: var(--np-container-gap-col);
+}
+
+.now-playing-left,
+.now-playing-transport,
+.now-playing-actions-wrap {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.now-playing-left {
+  flex: 1;
+  justify-content: flex-start;
+  gap: var(--np-left-gap);
+}
+
+.now-playing-transport {
+  justify-content: center;
+  gap: var(--np-transport-gap);
+  flex: auto;
+}
+
+.now-playing-actions-wrap {
+  flex: 1;
+  justify-content: flex-end;
+  gap: var(--np-volume-wrap-gap);
+}
+
+@media (min-width: 769px) {
+  .now-playing-container {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: var(--np-container-gap-col);
+    padding-left: 0;
+    padding-right: 0;
+    max-width: none;
+    margin: 0;
+  }
+
+  .now-playing-left {
+    flex: initial;
+    justify-content: flex-start;
+    grid-column: 1;
+  }
+
+  .now-playing-transport {
+    flex: initial;
+    justify-content: center;
+    grid-column: 2;
+  }
+
+  .now-playing-actions-wrap {
+    flex: initial;
+    justify-content: flex-end;
+    grid-column: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .now-playing-container {
+    grid-template-columns: 340px 1fr 340px;
+  }
+}
+
+.now-playing-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--np-info-gap);
+  min-width: 0;
+}
+
+.now-playing-title {
+  font-size: var(--np-title-size);
+  color: var(--np-title-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.now-playing-artist {
+  font-size: var(--np-artist-size);
+  color: var(--np-artist-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.now-playing-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.now-playing-live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  background: rgba(255, 60, 60, 0.15);
+  border: 0.8px solid rgba(255, 60, 60, 0.4);
+  color: #ff5c5c;
+  font-size: 8px;
+  font-weight: 800;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(255, 60, 60, 0.4);
+}
+
+.live-dot {
+  width: 5px;
+  height: 5px;
+  background: #ff5c5c;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255, 60, 60, 0.8);
+  animation: live-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes live-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 4px rgba(255, 60, 60, 0.6); }
+  50% { transform: scale(1.3); box-shadow: 0 0 10px rgba(255, 60, 60, 0.9); }
+  100% { transform: scale(1); box-shadow: 0 0 4px rgba(255, 60, 60, 0.6); }
+}
+
+.now-playing-empty-title {
+  color: var(--np-empty-title-color) !important;
+}
+
+.now-playing-empty-artist {
+  color: var(--np-empty-artist-color) !important;
+}
+
+.now-playing-empty-link {
+  color: var(--np-empty-link-color);
+}
+
+.now-playing-empty-link:hover {
+  color: var(--np-empty-link-hover);
+}
+
+
+
+.now-playing-actions {
+  gap: var(--np-actions-gap);
+}
+
+.now-playing-volume {
+  width: var(--np-volume-width);
+}
+
+.now-playing-album-art {
+  width: var(--np-album-size);
+  height: var(--np-album-size);
+  border-radius: var(--np-album-radius);
+  box-shadow: var(--np-album-shadow);
+}
+
+.now-playing-empty-art {
+  border-radius: var(--np-album-radius);
+  background: var(--np-empty-art-bg);
+  box-shadow: var(--np-empty-art-shadow);
+}
+
+.now-playing-btn {
+  width: var(--np-btn-size);
+  height: var(--np-btn-size);
+  background: var(--np-btn-bg);
+  color: var(--np-btn-color);
+  box-shadow: var(--np-btn-shadow);
+}
+
+.now-playing-btn:hover {
+  background: var(--np-btn-hover-bg);
+}
+
+.now-playing-btn:active {
+  box-shadow: var(--np-btn-shadow-active);
+}
+
+.now-playing-btn.active {
+  background: var(--np-btn-active-bg);
+  color: var(--np-btn-active-color);
+  box-shadow: var(--np-btn-shadow-active);
+}
+
+.now-playing-play-btn {
+  width: var(--np-play-btn-size);
+  height: var(--np-play-btn-size);
+  border-radius: 50%;
+  background: var(--np-play-btn-bg);
+  box-shadow: var(--np-play-btn-shadow);
+}
+
+.now-playing-play-btn:hover {
+  background: var(--np-play-btn-hover-bg);
+}
+
+.now-playing-play-btn:active {
+  box-shadow: var(--np-play-btn-shadow-active);
+}
+
+.now-playing-action-btn {
+  width: var(--np-action-btn-size);
+  height: var(--np-action-btn-size);
+  border-radius: var(--np-action-btn-radius);
+  border: var(--np-action-btn-border);
+  background: var(--np-action-btn-bg);
+  color: var(--np-action-btn-color);
+  box-shadow: var(--np-action-btn-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.now-playing-action-btn:hover {
+  background: var(--np-action-btn-hover-bg);
+  border-color: var(--np-action-btn-hover-border);
+  color: var(--np-action-btn-hover-color);
+}
+
+.now-playing-action-btn:active {
+  box-shadow: var(--np-action-btn-shadow-active);
+}
+
+/* ── MOBILE OVERRIDES (The "Shave") ────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .now-playing-wrapper {
+    min-height: var(--np-mobile-height) !important;
+    height: auto !important;
+    max-height: none !important;
+    /* Flush with edges */
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  body.has-player {
+    padding-bottom: calc(var(--np-mobile-dock-height) + env(safe-area-inset-bottom)) !important;
+  }
+
+  .now-playing-title,
+  .now-playing-artist {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  .now-playing-container {
+    padding: var(--np-container-padding) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .now-playing-album-art,
+  .now-playing-empty-art {
+    width: var(--np-album-size) !important;
+    height: var(--np-album-size) !important;
+  }
+
+  .now-playing-transport {
+    gap: var(--np-transport-gap) !important;
+  }
+
+  .now-playing-actions {
+    gap: var(--np-actions-gap) !important;
+  }
+
+  .now-playing-btn {
+    width: var(--np-btn-size) !important;
+    height: var(--np-btn-size) !important;
+  }
+
+  .now-playing-play-btn {
+    width: var(--np-play-btn-size) !important;
+    height: var(--np-play-btn-size) !important;
+  }
+
+  .now-playing-volume {
+    width: 64px !important;
+    min-width: 48px !important;
+  }
+
+  /* Bottom dock: solid panel for readability on mobile */
+  .mobile-dock {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-height: var(--np-mobile-dock-height) !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    background: #07090d !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+    justify-content: center !important;
+    align-content: center !important;
+    gap: 0 !important;
+  }
+
+  .deck-frame .mobile-dock {
+    background: #07090d !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-dock::before {
+    display: none !important;
+  }
+
+  /* Dock tabs: override combined.css padding (was 0.375rem 0.625rem = 6px/10px and 8px 6px 6px on small screens) */
+  .mobile-dock .mobile-tab {
+    color: var(--dock-tab-inactive) !important;
+    transition: color 0.2s ease, transform 0.12s ease !important;
+    padding: 5px 4px 6px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    white-space: nowrap !important;
+    min-height: 54px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1.02 !important;
+    overflow: visible !important;
+  }
+
+  /* No glow on tap (override combined.css radial ::after); playful press instead */
+  .mobile-dock .mobile-tab:active::after {
+    opacity: 0 !important;
+  }
+
+  .mobile-dock .mobile-tab:active {
+    transform: scale(0.94) !important;
+  }
+
+  .mobile-dock .mobile-tab i,
+  .mobile-dock .mobile-tab span {
+    color: var(--dock-tab-inactive) !important;
+  }
+
+  .mobile-dock .mobile-tab.active {
+    color: var(--dock-tab-active) !important;
+  }
+
+  .mobile-dock .mobile-tab.active::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: radial-gradient(circle at center, rgba(109, 220, 255, 0.18) 0%, transparent 70%) !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: -1;
+  }
+
+  .mobile-dock .mobile-tab.active i,
+  .mobile-dock .mobile-tab.active span {
+    color: var(--dock-tab-active) !important;
+    font-weight: 600;
+  }
+
+  /* Secondary row: no top margin, minimal padding, tight gap */
+  .mobile-dock-row-secondary {
+    margin-top: 0 !important;
+    min-height: var(--mobile-dock-secondary-min-height) !important;
+    padding: 8px 4px 6px !important;
+    background: transparent !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.03) !important;
+  }
+
+  /* Hide queue button and panel on mobile */
+  .now-playing-queue-wrap {
+    display: none !important;
+  }
+
+  /* Hide all "Add to queue" buttons on mobile */
+  .queue-btn,
+  .add-to-playlist-btn {
+    display: none !important;
+  }
+
+  /* Hide queue / Up Next sections on mobile */
+  .np-queue,
+  .dashboard-right .queue-list,
+  .dashboard-right .sidebar-empty,
+  .dashboard-right .sidebar-see-all {
+    display: none !important;
+  }
+}
+
+/* ── Mobile dock row spacing — override combined.css, survive git pulls ── */
+@media (max-width: 1024px) {
+  /* Both rows: tight gap and bottom-biased padding so icons sit low */
+  .mobile-dock-row-secondary,
+  .mobile-dock-row-primary {
+    gap: 2px !important;
+    min-height: 56px !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+  }
+
+  .mobile-dock-row-secondary {
+    padding: 8px 4px 6px !important;
+  }
+
+  .mobile-dock-row-primary {
+    padding: 6px 4px 8px !important;
+  }
+
+  .mobile-dock-row-tertiary {
+    min-height: 56px !important;
+    padding: 6px 4px 8px !important;
+  }
+
+  /* Override the ≤420px combined.css rule that adds awkward compressed tab padding */
+  .mobile-dock .mobile-tab {
+    padding: 5px 4px 6px !important;
+  }
+
+  .mobile-dock .mobile-tab i {
+    display: block !important;
+    line-height: 1 !important;
+    margin-bottom: 2px !important;
+    overflow: visible !important;
+  }
+
+  .mobile-dock .mobile-tab span {
+    line-height: 0.98 !important;
+  }
+}
+
+/* ── SNES-inspired fun (controller / console feel) ────────────────────────
+ * Chunky shapes, purple/gray palette, tactile “button” feel.
+ * Toggle: remove or comment this block to revert to default.
+ */
+:root {
+  --snes-purple: rgba(107, 91, 149, 0.15);
+  --snes-purple-bright: rgba(139, 123, 168, 0.25);
+  --snes-purple-dark: rgba(90, 74, 122, 0.2);
+  --snes-gray: rgba(74, 69, 80, 0.15);
+  --snes-gray-dark: rgba(58, 53, 64, 0.2);
+  --snes-radius: 16px;
+  --snes-radius-sm: 12px;
+}
+
+/* Now-playing bar: flush with dock on mobile (no bottom radius) */
+.now-playing-glass {
+  border-radius: 0 !important; /* Square corners for flush look on desktop */
+}
+
+@media (max-width: 1024px) {
+  .now-playing-glass {
+    border-radius: 0 !important; /* Square corners for flush look */
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+.now-playing-glass.now-playing-is-playing {
+  border-top: 0.8px solid var(--snes-purple-bright) !important;
+  box-shadow: 0 -2px 16px rgba(107, 91, 149, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Play button = chunky “A button” (convex, satisfying press) */
+.now-playing-play-btn {
+  border-radius: 50% !important;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: linear-gradient(135deg, rgba(107, 91, 149, 0.4), rgba(79, 70, 229, 0.4)) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.now-playing-play-btn:hover {
+  box-shadow:
+    0 4px 0 var(--snes-purple-dark),
+    0 5px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.now-playing-play-btn:active {
+  box-shadow:
+    0 0 0 var(--snes-purple-dark),
+    0 1px 4px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+  transform: translateY(2px);
+}
+
+/* When playing: soft “power on” glow on the A button */
+.now-playing-glass.now-playing-is-playing .now-playing-play-btn:not(.loading) {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(139, 123, 168, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Prev/next = smaller “shoulder” style buttons */
+.now-playing-transport .now-playing-btn:not(.now-playing-play-btn) {
+  border-radius: var(--snes-radius-sm) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Album art: subtle “cartridge slot” ridge when playing */
+.now-playing-wrapper.has-player .now-playing-album-art {
+  box-shadow: 0 0 0 2px var(--snes-gray), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.now-playing-wrapper.has-player .now-playing-album-img.spinning {
+  box-shadow: 0 0 0 2px var(--snes-purple-bright), 0 0 20px rgba(107, 91, 149, 0.4) !important;
+}
+
+/* Mobile dock: controller bar (rounded top, purple band, button-like tabs) */
+@media (max-width: 1024px) {
+  .app .mobile-dock,
+  .mobile-dock {
+    border-radius: 0 !important; /* Flush with edges and player */
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 -4px 20px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .app .mobile-dock .mobile-tab,
+  .mobile-dock .mobile-tab {
+    border-radius: var(--snes-radius-sm) !important;
+  }
+
+  .app .mobile-dock .mobile-tab.active::before,
+  .mobile-dock .mobile-tab.active::before {
+    border-radius: 10px !important;
+    background: linear-gradient(180deg, rgba(139, 123, 168, 0.26) 0%, rgba(90, 74, 122, 0.34) 100%) !important;
+    border: 1px solid rgba(139, 123, 168, 0.34) !important;
+    box-shadow:
+      0 0 8px rgba(139, 123, 168, 0.26),
+      0 1px 0 rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .app .mobile-dock .mobile-tab.active i,
+  .app .mobile-dock .mobile-tab.active span,
+  .mobile-dock .mobile-tab.active i,
+  .mobile-dock .mobile-tab.active span {
+    color: #fff !important;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.35);
+  }
+}
+/* ── HIGH-ENERGY INTERACTIVES ────────────────────────────────────────── */
+
+/* Eject Glow: Reactive neon pulse when playing */
+.now-playing-eject-btn.active-glow {
+  color: var(--accent-primary, #6ddcff) !important;
+  text-shadow: 0 0 12px var(--accent-primary, #6ddcff);
+  animation: eject-prism 3s infinite linear !important;
+  border-color: var(--accent-primary, #6ddcff) !important;
+  box-shadow: 0 0 15px rgba(109, 220, 255, 0.25) !important;
+}
+
+@keyframes eject-prism {
+  0% { filter: hue-rotate(0deg) drop-shadow(0 0 2px var(--accent-primary, #6ddcff)); }
+  50% { filter: hue-rotate(180deg) drop-shadow(0 0 8px #ff2df0); }
+  100% { filter: hue-rotate(360deg) drop-shadow(0 0 2px var(--accent-primary, #6ddcff)); }
+}
+
+
+
+/* Holographic spinning art */
+.now-playing-album-img.spinning {
+  animation: spin 3s linear infinite, holo-flare 6s infinite ease-in-out !important;
+}
+
+@keyframes holo-flare {
+  0%, 100% { filter: brightness(1) contrast(1) saturate(1); }
+  50% { filter: brightness(1.2) contrast(1.1) saturate(1.4) hue-rotate(10deg); }
+}
+
+/* Tactile Button Feedback */
+.now-playing-btn:not(:disabled):hover {
+  transform: translateY(-2px) scale(1.1) !important;
+}
+
+.now-playing-btn:not(:disabled):active {
+  transform: translateY(1px) scale(0.95) !important;
+}

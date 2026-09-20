@@ -1,0 +1,907 @@
+{% extends "base.html" %}
+
+{% block title %}Music Library - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="music-container music-browse" x-data="musicLibrary()" x-init="loadMusic()">
+    {% from "macros/subpage_header.html" import subpage_hero %}
+    {{ subpage_hero(title="Music Library", subtitle="Explore",
+    icon_class="fas fa-music") }}
+
+    <section class="music-browse-controls" aria-label="Browse music">
+        <div class="music-browse-heading">
+            <div>
+                <h2>Browse music</h2>
+                <p>Search tracks or browse the community library by artist.</p>
+            </div>
+        </div>
+        <div class="music-filter-bar">
+            <label class="music-search-field">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <span class="sr-only">Search music</span>
+                <input type="search" x-model="searchQuery" @input="filterMusic()"
+                    placeholder="Search tracks, artists, albums…" aria-label="Search music">
+                <button type="button" @click="clearSearch()" x-show="searchQuery" aria-label="Clear search">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </label>
+            <select x-model="selectedArtist" @change="filterMusic()" aria-label="Filter by artist">
+                <option value>All Artists</option>
+                <template x-for="artist in artists" :key="artist">
+                    <option :value="artist" x-text="artist"></option>
+                </template>
+            </select>
+            <select x-model="sortBy" @change="sortMusic()" aria-label="Sort music">
+                <option value="title">Title</option>
+                <option value="artist">Artist</option>
+                <option value="plays">Plays</option>
+                <option value="added_date">Date Added</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="music-for-you" aria-labelledby="for-you-title" x-show="!isLoading">
+        <div class="music-for-you-header">
+            <div>
+                <span class="music-eyebrow">Made for right now</span>
+                <h2 id="for-you-title" x-text="recommendationTitle"></h2>
+                <p x-text="recommendationSubtitle"></p>
+            </div>
+            <div class="music-set-actions" x-show="recommendations.length">
+                <button type="button" class="music-primary-button" @click="playRecommendations(false)">
+                    <i class="fas fa-play" aria-hidden="true"></i> Play all
+                </button>
+                <button type="button" class="music-secondary-button" @click="playRecommendations(true)">
+                    <i class="fas fa-random" aria-hidden="true"></i> Shuffle
+                </button>
+            </div>
+        </div>
+        <div class="music-recommendation-rail" x-show="recommendations.length" role="list" aria-label="Recommended tracks">
+            <template x-for="(track, index) in recommendations" :key="track.id">
+                <article class="music-recommendation-card" role="listitem">
+                    <button type="button" class="music-rec-art" @click="playRecommendation(track)"
+                        :aria-label="(currentTrack?.id === track.id && isPlaying ? 'Pause ' : 'Play ') + track.title">
+                        <img x-show="track.cover_art" :src="getTrackCover(track)" :alt="''" loading="lazy"
+                            @error="handleImageError($event, track)">
+                        <span x-show="!track.cover_art" class="music-art-fallback" :style="fallbackArtwork(track)" aria-hidden="true">
+                            <i class="fas fa-music"></i>
+                        </span>
+                        <span class="music-rec-play" aria-hidden="true">
+                            <i :class="currentTrack?.id === track.id && isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                        </span>
+                    </button>
+                    <div class="music-rec-copy">
+                        <span class="music-rec-reason" x-text="recommendationReason(track, index)"></span>
+                        <h3 x-text="track.title"></h3>
+                        <div><span x-text="track.artist || 'Ahoy artist'"></span><time x-text="formatTime(track.duration_seconds || 0)"></time></div>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+
+    <section class="music-library" aria-labelledby="library-title">
+        <div class="music-library-header">
+            <div><span class="music-eyebrow">The full collection</span><h2 id="library-title">All tracks</h2></div>
+            <span x-text="filteredTracks.length + (filteredTracks.length === 1 ? ' track' : ' tracks')"></span>
+        </div>
+        <div class="music-track-labels" aria-hidden="true"><span>Track</span><span>Time</span><span>Actions</span></div>
+        <div class="music-track-list" role="list">
+            <template x-for="(track, index) in filteredTracks" :key="track.id">
+                <article class="music-track-row" role="listitem" tabindex="0"
+                    @click="playTrack(track)" @keydown.enter.prevent="playTrack(track)" @keydown.space.prevent="playTrack(track)"
+                    :class="{'is-current': currentTrack?.id === track.id, 'is-playing': currentTrack?.id === track.id && isPlaying}"
+                    :aria-label="track.title + ' by ' + (track.artist || 'Unknown artist') + (currentTrack?.id === track.id ? ', currently selected' : '')">
+                    <div class="music-row-leading">
+                        <div class="music-row-art">
+                            <img x-show="track.cover_art" :src="getTrackCover(track)" :alt="''" loading="lazy" @error="handleImageError($event, track)">
+                            <span x-show="!track.cover_art" class="music-art-fallback" :style="fallbackArtwork(track)" aria-hidden="true"><i class="fas fa-music"></i></span>
+                            <span class="music-row-index" x-text="index + 1"></span>
+                            <button type="button" class="music-row-play" @click.stop="playTrack(track)"
+                                :aria-label="(currentTrack?.id === track.id && isPlaying ? 'Pause ' : 'Play ') + track.title">
+                                <span class="music-equalizer" x-show="currentTrack?.id === track.id && isPlaying" aria-hidden="true"><i></i><i></i><i></i></span>
+                                <i x-show="!(currentTrack?.id === track.id && isPlaying)" :class="currentTrack?.id === track.id ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="music-row-copy"><h3 x-text="track.title"></h3><p><span x-text="track.artist || 'Unknown artist'"></span><span x-show="track.album || track.genre"> · <span x-text="track.album || track.genre"></span></span></p></div>
+                    </div>
+                    <time class="music-row-duration" x-text="formatTime(track.duration_seconds || 0)"></time>
+                    <div class="music-row-actions">
+                                <div class="queue-container"
+                                    x-data="globalQueueHandler()" x-init="init()">
+                                    <button class="action-btn queue-btn"
+                                        @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
+                                        :class="{ 'in-queue': isInQueue('track', track.id) }"
+                                        :aria-label="isInQueue('track', track.id) ? 'In queue' : 'Add to queue'">
+                                        <i :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
+                                    :aria-pressed="isBookmarked('track', track.id)"
+                                    :class="{ 'bookmarked': isBookmarked('track', track.id) }"
+                                    :aria-label="(isBookmarked('track', track.id) ? 'Remove ' : 'Save ') + track.title">
+                                    <i :class="isBookmarked('track', track.id) ? 'fas fa-bookmark' : 'far fa-bookmark'" aria-hidden="true"></i>
+                                </button>
+                                <button class="action-btn" @click.stop="openBoost(track)" :aria-label="'More options for ' + track.title" title="More options">
+                                    <i class="fas fa-ellipsis-h" aria-hidden="true"></i>
+                                </button>
+                    </div>
+                    <span class="sr-only" x-show="currentTrack?.id === track.id" x-text="isPlaying ? 'Playing' : 'Paused'"></span>
+                </article>
+            </template>
+        </div>
+    </section>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading music library...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="!isLoading && filteredTracks.length === 0" class="empty-state music-empty-state">
+        <i class="fas fa-music"></i>
+        <h3>No music found</h3>
+        <p>Try adjusting your filters or search terms</p>
+    </div>
+
+    <!-- Add to Board Modal -->
+    <div x-show="showAddToBoardModal" class="modal-overlay"
+        @click="showAddToBoardModal = false">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Add to Board</h3>
+                <button @click="showAddToBoardModal = false" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="playlist-list">
+                    <template x-for="playlist in playlists" :key="playlist.id">
+                        <div class="playlist-option"
+                            @click="addToBoard(playlist)">
+                            <div class="playlist-color"
+                                :style="`background-color: ${playlist.color}`"></div>
+                            <div class="playlist-info">
+                                <h4 x-text="playlist.name"></h4>
+                                <p x-text="playlist.total_items + ' items'"></p>
+                            </div>
+                            <button class="add-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </template>
+
+                    <div class="create-playlist-option"
+                        @click="showCreateBoardModal = true">
+                        <div class="playlist-color"
+                            style="background: linear-gradient(45deg, #6366f1, #8b5cf6);"></div>
+                        <div class="playlist-info">
+                            <h4>Create New Board</h4>
+                            <p>Start a new collection</p>
+                        </div>
+                        <button class="add-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Board Modal -->
+    <div x-show="showCreateBoardModal" class="modal-overlay"
+        @click="showCreateBoardModal = false">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Create New Board</h3>
+                <button @click="showCreateBoardModal = false" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Board Name</label>
+                    <input type="text" x-model="newBoard.name"
+                        placeholder="Enter playlist name">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea x-model="newBoard.description"
+                        placeholder="Enter playlist description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <div class="color-picker">
+                        <button @click="newBoard.color = '#6366f1'"
+                            :class="{'active': newBoard.color === '#6366f1'}"
+                            class="color-option"
+                            style="background: #6366f1;"></button>
+                        <button @click="newBoard.color = '#ef4444'"
+                            :class="{'active': newBoard.color === '#ef4444'}"
+                            class="color-option"
+                            style="background: #ef4444;"></button>
+                        <button @click="newBoard.color = '#10b981'"
+                            :class="{'active': newBoard.color === '#10b981'}"
+                            class="color-option"
+                            style="background: #10b981;"></button>
+                        <button @click="newBoard.color = '#f59e0b'"
+                            :class="{'active': newBoard.color === '#f59e0b'}"
+                            class="color-option"
+                            style="background: #f59e0b;"></button>
+                        <button @click="newBoard.color = '#8b5cf6'"
+                            :class="{'active': newBoard.color === '#8b5cf6'}"
+                            class="color-option"
+                            style="background: #8b5cf6;"></button>
+                        <button @click="newBoard.color = '#ec4899'"
+                            :class="{'active': newBoard.color === '#ec4899'}"
+                            class="color-option"
+                            style="background: #ec4899;"></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" x-model="newBoard.is_public">
+                        Make this playlist public
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="showCreateBoardModal = false"
+                    class="btn btn-outline">Cancel</button>
+                <button @click="createBoard()" class="btn btn-primary">Create
+                    Board</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function musicLibrary() {
+    return {
+        // State
+        tracks: [],
+        filteredTracks: [],
+        artists: [],
+        artistCoverMap: {},
+        viewMode: 'list',
+        searchQuery: '',
+        selectedArtist: '',
+        sortBy: 'plays',
+        isLoading: true,
+        currentTrack: null,
+        isPlaying: false,
+        showAddToBoardModal: false,
+        showCreateBoardModal: false,
+        selectedTrack: null,
+        playlists: [],
+        newBoard: {
+            name: '',
+            description: '',
+            color: '#6366f1',
+            is_public: false
+        },
+
+        get recommendations() {
+            const unplayed = this.tracks.filter(track => !(track.play_count > 0));
+            const source = unplayed.length ? unplayed : [...this.tracks].sort((a, b) =>
+                new Date(b.added_date || 0) - new Date(a.added_date || 0)
+            );
+            return source.slice(0, 8);
+        },
+
+        get recommendationTitle() {
+            if (!this.recommendations.length) return 'Start exploring Ahoy';
+            return this.tracks.some(track => !(track.play_count > 0)) ? 'For You' : 'You’re caught up';
+        },
+
+        get recommendationSubtitle() {
+            if (!this.recommendations.length) return 'Community favorites will appear here as the library grows.';
+            return this.tracks.some(track => !(track.play_count > 0))
+                ? 'A fresh set of tracks from the Ahoy community.'
+                : 'Check out the newest tracks from Ahoy artists.';
+        },
+        
+        // Initialize
+        async loadMusic() {
+            // Listen to player events and sync current state
+            if (window.mediaPlayer) {
+                this.currentTrack = window.mediaPlayer.currentTrack || null;
+                this.isPlaying = !!window.mediaPlayer.isPlaying;
+                window.mediaPlayer.on('play', () => {
+                    this.isPlaying = true;
+                });
+                window.mediaPlayer.on('pause', () => {
+                    this.isPlaying = false;
+                });
+                window.mediaPlayer.on('trackchange', (track) => {
+                    this.currentTrack = track;
+                    this.isPlaying = true;
+                });
+            }
+            
+            // Also listen to custom events
+            document.addEventListener('play-track', (e) => {
+                const track = (e.detail && (e.detail.track || e.detail)) || null;
+                if (track) this.currentTrack = track;
+            });
+            
+            document.addEventListener('ahoy:player:play', () => {
+                this.isPlaying = true;
+            });
+            
+            document.addEventListener('ahoy:player:pause', () => {
+                this.isPlaying = false;
+            });
+            
+            try {
+                this.isLoading = true;
+                const response = await fetch('/api/music?t=' + Date.now());
+                const data = await response.json();
+                this.tracks = data.tracks || [];
+                this.filteredTracks = [...this.tracks];
+                this.extractArtists();
+                this.buildArtistCoverMap();
+                this.sortMusic();
+            } catch (error) {
+                console.error('Error loading music:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        extractArtists() {
+            const artistSet = new Set();
+
+            this.tracks.forEach(track => {
+                if (track.artist) artistSet.add(track.artist);
+            });
+
+            this.artists = Array.from(artistSet).sort();
+        },
+
+        // Build a map of artist -> array of valid cover URLs for fallback
+        buildArtistCoverMap() {
+            this.artistCoverMap = {};
+            this.tracks.forEach(track => {
+                if (track.artist && track.cover_art) {
+                    if (!this.artistCoverMap[track.artist]) {
+                        this.artistCoverMap[track.artist] = [];
+                    }
+                    // Avoid duplicates
+                    if (!this.artistCoverMap[track.artist].includes(track.cover_art)) {
+                        this.artistCoverMap[track.artist].push(track.cover_art);
+                    }
+                }
+            });
+        },
+
+        // Handle image load errors - try another cover from same artist
+        handleImageError(event, track) {
+            const img = event.target;
+            const failedSrc = img.src;
+
+            // Mark this URL as failed
+            if (!this._failedImages) this._failedImages = new Set();
+            this._failedImages.add(failedSrc);
+
+            // Try to find another cover from the same artist
+            const artistCovers = this.artistCoverMap[track.artist] || [];
+            const validCover = artistCovers.find(url => !this._failedImages.has(url));
+
+            if (validCover) {
+                img.src = validCover;
+                // Also update the track object so bookmarks get the right image
+                track.cover_art = validCover;
+            } else {
+                // All artist covers failed, use default
+                img.src = '/static/img/default-cover.jpg';
+            }
+        },
+
+        // Filtering and sorting
+        filterMusic() {
+            let filtered = [...this.tracks];
+            
+            // Search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(track => 
+                    track.title.toLowerCase().includes(query) ||
+                    track.artist.toLowerCase().includes(query) ||
+                    track.album?.toLowerCase().includes(query)
+                );
+            }
+            
+            // Artist filter
+            if (this.selectedArtist) {
+                filtered = filtered.filter(track => track.artist === this.selectedArtist);
+            }
+            
+            this.filteredTracks = filtered;
+            this.sortMusic();
+        },
+        
+        sortMusic() {
+            this.filteredTracks.sort((a, b) => {
+                switch (this.sortBy) {
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'artist':
+                        return a.artist.localeCompare(b.artist);
+                    case 'added_date':
+                        return new Date(b.added_date || 0) - new Date(a.added_date || 0);
+                    case 'plays':
+                        return (b.play_count || 0) - (a.play_count || 0);
+                    default:
+                        return 0;
+                }
+            });
+        },
+        
+        sortByPlays() {
+            if (this.sortBy === 'plays') {
+                // Toggle ascending/descending if already sorted by plays
+                this.filteredTracks.reverse();
+            } else {
+                this.sortBy = 'plays';
+                this.sortMusic();
+            }
+        },
+        
+        // Track actions
+        playTrack(track) {
+            // Prevent multiple rapid calls
+            if (this._playTrackDebounce) {
+                clearTimeout(this._playTrackDebounce);
+            }
+
+            this._playTrackDebounce = setTimeout(async () => {
+                // If same track is playing, toggle pause
+                if (this.currentTrack?.id === track.id && this.isPlaying) {
+                    this.togglePlayPause();
+                    return;
+                }
+
+                this.currentTrack = track;
+
+                // Set the full filtered library as the playlist (sorted A-Z by title)
+                // so next/prev buttons navigate through all visible tracks
+                const sorted = [...this.filteredTracks].sort((a, b) =>
+                    (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
+                );
+                if (window.__ahoyEnsurePlayer) {
+                    await window.__ahoyEnsurePlayer();
+                }
+                if (window.mediaPlayer && typeof window.mediaPlayer.setPlaylist === 'function') {
+                    window.mediaPlayer.setPlaylist(sorted);
+                    const idx = sorted.findIndex(t => t.id === track.id);
+                    window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+                }
+
+                // Dispatch custom event to trigger global player
+                document.dispatchEvent(new CustomEvent('play-track', {
+                    detail: {
+                        track: track,
+                        type: 'track'
+                    }
+                }));
+            }, 100);
+        },
+        
+        togglePlayPause() {
+            const mp = window.mediaPlayer;
+            if (!mp) return;
+            if (mp.isPlaying) {
+                mp.pause();
+            } else if (mp.currentTrack) {
+                mp.resume();
+            }
+        },
+
+        playRandomTrack() {
+            if (this.filteredTracks.length > 0) {
+                const randomIndex = Math.floor(Math.random() * this.filteredTracks.length);
+                this.playTrack(this.filteredTracks[randomIndex]);
+            }
+        },
+
+        recommendationReason(track, index) {
+            if (!(track.play_count > 0)) return 'Not played yet';
+            if (track.added_date) return index < 2 ? 'New this week' : 'Recently added';
+            return 'Community pick';
+        },
+
+        fallbackArtwork(track) {
+            const seed = `${track.artist || ''}${track.title || ''}`;
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+            const hue = Math.abs(hash) % 360;
+            return `--art-a: hsl(${hue} 55% 28%); --art-b: hsl(${(hue + 54) % 360} 62% 15%)`;
+        },
+
+        async playCollection(items) {
+            if (!items.length) return;
+            if (window.__ahoyEnsurePlayer) await window.__ahoyEnsurePlayer();
+            if (window.mediaPlayer && typeof window.mediaPlayer.setPlaylist === 'function') {
+                // The queue owns collection advance; keep the player's looping
+                // playlist empty so the set ends cleanly instead of repeating.
+                window.mediaPlayer.setPlaylist([]);
+            }
+            if (window.playerQueue && typeof window.playerQueue.replace === 'function') {
+                window.playerQueue.replace(items.slice(1));
+            }
+            this.currentTrack = items[0];
+            document.dispatchEvent(new CustomEvent('play-track', {
+                detail: { track: items[0], type: 'track' }
+            }));
+        },
+
+        playRecommendations(shuffle = false) {
+            const items = [...this.recommendations];
+            if (shuffle) {
+                for (let i = items.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [items[i], items[j]] = [items[j], items[i]];
+                }
+            }
+            this.playCollection(items);
+        },
+
+        playRecommendation(track) {
+            if (this.currentTrack?.id === track.id && this.isPlaying) {
+                this.togglePlayPause();
+                return;
+            }
+            const items = [track, ...this.recommendations.filter(item => item.id !== track.id)];
+            this.playCollection(items);
+        },
+
+
+        async saveTrack(track) {
+            try {
+                console.log('Bookmarking track:', track);
+                const isCurrentlySaved = this.isSaved(track);
+                console.log('Currently saved:', isCurrentlySaved);
+                
+                // Use the unified bookmarks system
+                if (window.AhoyBookmarks) {
+                    const item = {
+                        type: 'track',
+                        id: track.id,
+                        title: track.title,
+                        artwork: track.cover_art
+                    };
+                    window.AhoyBookmarks.toggle(item);
+                    track.saved = !isCurrentlySaved;
+                    this.showNotification(!isCurrentlySaved ? 'Bookmarked track!' : 'Removed from bookmarks', 'success');
+                } else {
+                    // Fallback to API
+                    const response = await fetch('/api/bookmarks', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            media_id: String(track.id),
+                            media_type: 'music'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        track.saved = result.persisted !== false;
+                        this.showNotification('Bookmarked track!', 'success');
+                    } else {
+                        console.error('Bookmark failed');
+                        this.showNotification('Failed to bookmark track', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error bookmarking track:', error);
+                this.showNotification('Failed to bookmark track: ' + error.message, 'error');
+            }
+        },
+        
+        addToPlaylist(track) {
+            // Show add to playlist modal
+            this.selectedTrack = track;
+            this.showAddToPlaylistModal = true;
+        },
+        
+        showAddToPlaylist(track) {
+            this.selectedTrack = track;
+            this.loadPlaylists();
+            this.showAddToPlaylistModal = true;
+        },
+        
+        async loadPlaylists() {
+            try {
+                const response = await fetch('/api/playlists');
+                const data = await response.json();
+                this.playlists = data.playlists || [];
+            } catch (error) {
+                console.error('Error loading playlists:', error);
+            }
+        },
+        
+        async addToPlaylist(playlist) {
+            if (!this.selectedTrack) return;
+            
+            try {
+                const response = await fetch(`/api/playlists/${playlist.id}/add`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'track',
+                        id: this.selectedTrack.id,
+                        data: this.selectedTrack
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.showAddToBoardModal = false;
+                    this.selectedTrack = null;
+                    
+                    if (result.guest) {
+                        this.showNotification('Added to playlist! (Guest mode - create account to keep permanently)', 'info');
+                        this.showUpgradePrompt();
+                    } else {
+                        this.showNotification('Added to playlist!', 'success');
+                    }
+                } else {
+                    this.showNotification(result.error || 'Failed to add to playlist', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to playlist:', error);
+                this.showNotification('Failed to add to playlist', 'error');
+            }
+        },
+        
+        async createBoard() {
+            try {
+                const response = await fetch('/api/playlists', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.newBoard)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.playlists.push(data.playlist);
+                    this.showCreateBoardModal = false;
+                    this.newBoard = { name: '', description: '', color: '#6366f1', is_public: false };
+                    this.showNotification('Board created!', 'success');
+                }
+            } catch (error) {
+                console.error('Error creating playlist:', error);
+                this.showNotification('Failed to create playlist', 'error');
+            }
+        },
+        
+        showNotification(message, type = 'info') {
+            // Simple notification system
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                font-weight: 500;
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        },
+        
+        showUpgradePrompt() {
+            // Do not show upgrade popup on mobile - can block scroll / cause issues
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
+            const prompt = document.createElement('div');
+            prompt.className = 'upgrade-prompt';
+            prompt.innerHTML = `
+                <div class="upgrade-content">
+                    <div class="upgrade-icon">🎵</div>
+                    <h3>Keep Your Music Forever!</h3>
+                    <p>You're saving content as a guest. Create a free account to keep your playlists and saves permanently.</p>
+                    <div class="upgrade-actions">
+                        <button onclick="window.location.href='/register'" class="btn btn-primary">Create Account</button>
+                        <button onclick="this.closest('.upgrade-prompt').remove()" class="btn btn-outline">Maybe Later</button>
+                    </div>
+                </div>
+            `;
+            prompt.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--background-light);
+                border-radius: 12px;
+                padding: 24px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                max-width: 400px;
+                text-align: center;
+            `;
+            document.body.appendChild(prompt);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (prompt.parentNode) {
+                    prompt.remove();
+                }
+            }, 10000);
+        },
+        
+        async migrateGuestData() {
+            try {
+                // Get guest data
+                const guestResponse = await fetch('/api/guest-data');
+                const guestData = await guestResponse.json();
+                
+                if (guestData.error) {
+                    this.showNotification('No guest data to migrate', 'info');
+                    return;
+                }
+                
+                // Migrate to user account
+                const migrateResponse = await fetch('/api/migrate-guest-data', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(guestData)
+                });
+                
+                const result = await migrateResponse.json();
+                
+                if (migrateResponse.ok) {
+                    this.showNotification(result.message, 'success');
+                    // Reload playlists
+                    this.loadBoards();
+                } else {
+                    this.showNotification('Failed to migrate data', 'error');
+                }
+            } catch (error) {
+                console.error('Error migrating guest data:', error);
+                this.showNotification('Failed to migrate data', 'error');
+            }
+        },
+        
+        showTrackMenu(track) {
+            // Show track context menu
+            console.log('Showing track menu:', track);
+        },
+        
+        isSaved(track) {
+            // Check server state first
+            if (track.saved !== undefined) {
+                return track.saved;
+            }
+            
+            // Check local storage
+            const key = `track:${track.id}`;
+            const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
+            return localBookmarks.includes(key);
+        },
+        
+        // Bookmark methods
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+                // Force Alpine.js to re-evaluate bookmark states
+                this.$nextTick(() => {
+                    // Trigger reactivity by updating a dummy property
+                    this.lastBookmarkAction = Date.now();
+                });
+            }
+        },
+        
+        isBookmarked(type, id) {
+            // Access lastBookmarkAction to trigger reactivity
+            this.lastBookmarkAction;
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
+        },
+        
+        lastBookmarkAction: 0,
+        
+        bookmarkCount() {
+            // Access lastBookmarkAction to trigger reactivity
+            this.lastBookmarkAction;
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.all().length;
+            }
+            return 0;
+        },
+        
+        // Utility functions
+        getTrackCover(track) {
+            const url = track && (track.cover_art || track.artwork);
+            if (typeof url === 'string' && url.trim()) return url;
+            return '/static/img/default-cover.jpg';
+        },
+
+        openBoost(track) {
+            if (!track || !track.artist) return;
+            document.dispatchEvent(new CustomEvent('ahoy:boost:open', {
+                detail: {
+                    recipientType: 'artist',
+                    recipientId: track.artist_slug || track.artist,
+                    recipientName: track.artist
+                }
+            }));
+        },
+
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    };
+}
+
+// Recent Queue Section Handler
+function recentQueueSection() {
+    return {
+        recentQueueItems: [],
+        
+        init() {
+            this.loadRecentQueue();
+            // Listen for queue changes
+            document.addEventListener('queue:changed', () => {
+                this.loadRecentQueue();
+            });
+        },
+        
+        loadRecentQueue() {
+            if (window.playerQueue) {
+                const queue = window.playerQueue.getQueue();
+                // Show most recent items (last 5)
+                this.recentQueueItems = queue.slice(-5).reverse();
+            }
+        },
+        
+        playFromQueue(index) {
+            // Calculate actual queue index (displayed items are last 5 reversed)
+            if (window.playerQueue) {
+                const queue = window.playerQueue.getQueue();
+                const actualIndex = queue.length - 1 - index;
+                const item = queue[actualIndex];
+                if (item) {
+                    // Remove from queue before playing (same as now-playing panel behavior)
+                    window.playerQueue.remove(actualIndex);
+                    document.dispatchEvent(new CustomEvent('play-track', { detail: item }));
+                    this.loadRecentQueue();
+                }
+            }
+        },
+
+        removeFromQueue(index) {
+            if (window.playerQueue) {
+                const queue = window.playerQueue.getQueue();
+                const actualIndex = queue.length - 1 - index;
+                window.playerQueue.remove(actualIndex);
+                this.loadRecentQueue();
+            }
+        }
+    };
+}
+
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+</style>
+{% endblock %}

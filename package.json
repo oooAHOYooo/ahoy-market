@@ -1,0 +1,247 @@
+{
+  "name": "ahoy-indie-media",
+  "version": "1.1.5",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "description": "A comprehensive Flask-based media platform for discovering and organizing independent music, shows, and content.",
+  "main": "electron/main.js",
+  "bin": {
+    "ahoy-cli": "./ahoy-cli"
+  },
+  "scripts": {
+    "start": "bash scripts/start_ahoy.sh",
+    "start:dev": "python dev.py",
+    "dev": "python dev.py",
+    "electron:dev": "npm run prebuild && electron .",
+    "prebuild": "node scripts/write-build-info.js",
+    "electron:build:mac": "bash scripts/build_desktop_backend.sh && npm run prebuild && electron-builder --mac",
+    "electron:build:mac:dmg": "bash scripts/build_desktop_backend.sh && npm run prebuild && electron-builder --mac --publish never",
+    "electron:build:mas": "bash scripts/build_desktop_backend.sh && npm run prebuild && electron-builder --mac mas --publish never",
+    "electron:build:mas-dev": "bash scripts/build_desktop_backend.sh && npm run prebuild && electron-builder --mac mas-dev --publish never",
+    "electron:build:linux": "bash scripts/build_desktop_backend.sh && npm run prebuild && electron-builder --linux",
+    "electron:build:all": "bash scripts/build_desktop_backend.sh && npm run prebuild && electron-builder --mac --win --linux",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "music",
+    "media",
+    "indie",
+    "desktop"
+  ],
+  "author": {
+    "name": "Little Market LLC",
+    "email": "alex@littlemarket.org"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/screen-orientation": "^5.0.7"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^5.7.0",
+    "@capacitor/cli": "^5.7.0",
+    "@capacitor/core": "^5.7.0",
+    "@capacitor/ios": "^5.7.8",
+    "@capacitor/preferences": "^5.0.6",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "typescript": "^5.9.3"
+  },
+  "build": {
+    "appId": "com.ahoyindiemedia.desktop",
+    "productName": "Ahoy Indie Media",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "packaging"
+    },
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "packaging/icons/ahoy.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "packaging/entitlements.mac.plist",
+      "entitlementsInherit": "packaging/entitlements.mac.plist"
+    },
+    "mas": {
+      "category": "public.app-category.music",
+      "target": [
+        "mas"
+      ],
+      "type": "distribution",
+      "icon": "packaging/icons/ahoy.icns",
+      "entitlements": "packaging/entitlements.mas.plist",
+      "entitlementsInherit": "packaging/entitlements.mas.inherit.plist",
+      "entitlementsLoginHelper": "packaging/entitlements.mas.inherit.plist"
+    },
+    "masDev": {
+      "category": "public.app-category.music",
+      "target": [
+        "mas-dev"
+      ],
+      "type": "development",
+      "icon": "packaging/icons/ahoy.icns",
+      "entitlements": "packaging/entitlements.mas.plist",
+      "entitlementsInherit": "packaging/entitlements.mas.inherit.plist",
+      "entitlementsLoginHelper": "packaging/entitlements.mas.inherit.plist"
+    },
+    "dmg": {
+      "title": "${productName} ${version}",
+      "icon": "packaging/icons/ahoy.icns",
+      "background": null,
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "packaging/icons/ahoy.ico"
+    },
+    "nsis": {
+      "artifactName": "${name}-${version}-${arch}-setup.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "snap",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "packaging/icons/ahoy-512.png",
+      "category": "AudioVideo"
+    },
+    "deb": {
+      "artifactName": "${name}-${version}-${arch}.${ext}",
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxss1",
+        "libxtst6"
+      ],
+      "afterInstall": "packaging/linux/postinst.sh"
+    },
+    "appImage": {
+      "artifactName": "${name}-${version}-${arch}.${ext}"
+    },
+    "snap": {
+      "artifactName": "${name}-${version}-${arch}.snap",
+      "summary": "Discover and play independent music and shows",
+      "description": "Ahoy is a desktop app for discovering and playing independent music, podcasts, and shows from Ahoy Indie Media.",
+      "grade": "stable",
+      "confinement": "strict",
+      "plugs": [
+        "default",
+        "audio-playback",
+        "network",
+        "network-bind",
+        "browser-support",
+        "opengl"
+      ]
+    },
+    "files": [
+      "electron/**/*",
+      "desktop_main.py",
+      "app.py",
+      "models.py",
+      "db.py",
+      "config.py",
+      "storage.py",
+      "extensions.py",
+      "search_indexer.py",
+      "templates/**/*",
+      "static/**/*",
+      "data/**/*",
+      "ahoy/**/*",
+      "blueprints/**/*",
+      "services/**/*",
+      "utils/**/*",
+      "commands/**/*",
+      "alembic/**/*",
+      "alembic.ini",
+      "requirements.txt",
+      "!electron/preload.js.map"
+    ],
+    "extraResources": [
+      {
+        "from": "dist/ahoy-backend",
+        "to": "ahoy-backend"
+      },
+      {
+        "from": ".",
+        "filter": [
+          "*.py",
+          "templates/**",
+          "static/**",
+          "data/**",
+          "ahoy/**",
+          "blueprints/**",
+          "services/**",
+          "utils/**",
+          "commands/**",
+          "alembic/**",
+          "spa-dist/**"
+        ]
+      }
+    ]
+  }
+}

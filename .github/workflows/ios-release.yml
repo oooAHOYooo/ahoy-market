@@ -1,0 +1,47 @@
+name: iOS Release → TestFlight
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'packaging/**'
+      - 'hardware/**'
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Fastlane lane to run"
+        default: "beta"
+        required: true
+
+jobs:
+  testflight:
+    name: Build & Upload to TestFlight
+    runs-on: self-hosted
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build SPA
+        run: cd spa && npm ci && npm run build
+
+      - name: Sync Capacitor → iOS
+        run: npx cap sync ios
+
+      - name: Install fastlane gems
+        run: cd ios && bundle install
+
+      - name: Run fastlane beta
+        run: cd ios && bundle exec fastlane ${{ github.event.inputs.lane || 'beta' }}
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "60"

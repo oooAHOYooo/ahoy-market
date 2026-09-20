@@ -1,0 +1,1459 @@
+{% extends "base.html" %}
+
+{% block title %}My Account - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="acct">
+  {% from "macros/subpage_header.html" import subpage_hero %}
+  {{ subpage_hero(title="Profile", subtitle="Your account and saves.", logo_src=url_for('static', filename='img/ahoy_logo.png')) }}
+
+  {% if current_user.is_authenticated %}
+    <div class="acct-head">
+      <div class="acct-meta">
+        <h1 class="acct-name">{{ current_user.username or 'Account' }}</h1>
+        <div class="acct-sub">
+          {% if current_user.email %}<span class="acct-email">{{ current_user.email }}</span>{% endif %}
+        </div>
+        <div class="acct-actions">
+          <a class="acct-action-btn" href="/my-saves">
+            <i class="fas fa-bookmark"></i>
+            <span>Bookmarks</span>
+          </a>
+          <button type="button" class="acct-action-btn acct-signout-btn"
+            onclick="if(confirm('Sign out?')){fetch('/api/auth/logout',{method:'POST',credentials:'include'}).then(()=>window.location.reload())}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="acct-grid">
+      <div class="card glass acct-profile-card" x-data="profileEditor()" x-init="init()">
+        <div class="card-header">Profile Bio</div>
+        <div class="card-body">
+          <label class="acct-bio-label" for="acct-bio">Bio</label>
+          <textarea id="acct-bio" class="acct-bio-input" x-model.trim="bio" maxlength="160" rows="4"
+            placeholder="Write a short bio for your profile."></textarea>
+          <div class="acct-bio-meta">
+            <span x-text="`${bio.length}/160`"></span>
+            <span x-show="status" x-text="status"></span>
+          </div>
+          <div class="acct-profile-actions">
+            <button type="button" class="acct-action-btn acct-primary-btn" @click="saveBio()" :disabled="saving">
+              <i class="fas fa-save"></i>
+              <span x-text="saving ? 'Saving…' : 'Save Bio'"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card glass" x-data="acctStats()" x-init="load()">
+        <div class="card-header">Your Stats</div>
+        <div class="card-body">
+          <div class="acct-stats">
+            <a href="/my-saves" class="acct-stat acct-stat-link">
+              <div class="n" x-text="bookmarks"></div>
+              <div class="l">Bookmarks</div>
+            </a>
+            <a href="/my-saves" class="acct-stat acct-stat-link">
+              <div class="n" x-text="recentPlays"></div>
+              <div class="l">Recently Played</div>
+            </a>
+            <div class="acct-stat">
+              <div class="n">{{ stats.merch_orders or 0 }}</div>
+              <div class="l">Merch Orders</div>
+            </div>
+          </div>
+          <!-- Type breakdown -->
+          <div class="acct-stats-breakdown" x-show="bookmarks > 0">
+            <div class="acct-breakdown-row">
+              <span class="acct-breakdown-label"><i class="fas fa-music"></i> Tracks</span>
+              <span class="acct-breakdown-val" x-text="trackCount"></span>
+            </div>
+            <div class="acct-breakdown-row">
+              <span class="acct-breakdown-label"><i class="fas fa-video"></i> Shows</span>
+              <span class="acct-breakdown-val" x-text="showCount"></span>
+            </div>
+            <div class="acct-breakdown-row">
+              <span class="acct-breakdown-label"><i class="fas fa-user"></i> Artists</span>
+              <span class="acct-breakdown-val" x-text="artistCount"></span>
+            </div>
+          </div>
+          <a href="/my-saves" class="acct-view-all">View All Saves <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <section class="wallet-card" aria-labelledby="wallet-title" x-data="walletWidget({{ wallet_balance|default(0) }})" x-cloak>
+        <div class="wallet-card-header">
+          <h2 id="wallet-title" class="wallet-title">Wallet</h2>
+          <p class="wallet-helper">Use wallet for boosts + merch</p>
+        </div>
+        
+        <div class="wallet-card-body">
+          <!-- Success/Error Banner -->
+          <div class="wallet-banner wallet-banner-success" x-show="state === 'success'" x-cloak x-transition>
+            <i class="fas fa-check-circle"></i>
+            <span>Balance updated successfully</span>
+          </div>
+          <div class="wallet-banner wallet-banner-error" x-show="state === 'error'" x-cloak x-transition>
+            <i class="fas fa-exclamation-circle"></i>
+            <span x-text="errorMessage || 'Something went wrong'"></span>
+          </div>
+
+          <!-- Balance Block -->
+          <div class="wallet-balance-block">
+            <label class="wallet-balance-label">Available balance</label>
+            <div class="wallet-balance-amount" 
+                 :class="{ 'wallet-balance-empty': balance === 0 }"
+                 x-text="formatBalance(balance)"
+                 x-show="!loading"
+                 x-transition:enter="wallet-fade-in"
+                 x-transition:enter.duration="300ms">
+            </div>
+            <div class="wallet-balance-loading" x-show="loading" x-cloak>
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="wallet-empty" x-show="balance === 0 && !loading" x-cloak x-transition>
+            <p class="wallet-empty-text">Pre-fund your wallet for instant checkout</p>
+            <p class="text-xs text-white/50 mb-3">Optional: Add funds now to skip card entry on future purchases</p>
+            <button 
+              class="wallet-btn wallet-btn-primary wallet-btn-empty"
+              @click="fundWallet(5)"
+              :disabled="loading"
+              aria-label="Add $5 to wallet">
+              <i class="fas fa-plus"></i>
+              <span>Add $5 (Optional)</span>
+            </button>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="wallet-actions" x-show="balance > 0 || loading" x-cloak>
+            <!-- Quick Pick Amounts -->
+            <div class="wallet-quick-picks">
+              <button 
+                class="wallet-quick-pick"
+                @click="fundWallet(5)"
+                :disabled="loading"
+                aria-label="Add $5 to wallet">
+                +$5
+              </button>
+              <button 
+                class="wallet-quick-pick"
+                @click="fundWallet(10)"
+                :disabled="loading"
+                aria-label="Add $10 to wallet">
+                +$10
+              </button>
+              <button 
+                class="wallet-quick-pick"
+                @click="fundWallet(25)"
+                :disabled="loading"
+                aria-label="Add $25 to wallet">
+                +$25
+              </button>
+            </div>
+
+            <!-- Primary CTA -->
+            <button 
+              class="wallet-btn wallet-btn-primary"
+              @click="fundWallet()"
+              :disabled="loading"
+              aria-label="Fund wallet">
+              <i class="fas fa-plus" x-show="!loading"></i>
+              <i class="fas fa-spinner fa-spin" x-show="loading" x-cloak></i>
+              <span x-text="loading ? 'Processing...' : 'Add funds'"></span>
+            </button>
+          </div>
+
+          <!-- Secondary Action -->
+          <div class="wallet-secondary">
+            <a 
+              href="/payments/wallet/transactions" 
+              class="wallet-btn wallet-btn-ghost"
+              aria-label="View wallet transaction history">
+              <i class="fas fa-history"></i>
+              <span>View transactions</span>
+            </a>
+          </div>
+
+          <!-- Trust Microcopy -->
+          <p class="wallet-trust-text">
+            <i class="fas fa-info-circle"></i>
+            Wallet is optional • Use it for instant checkout, or pay with card directly • 100% to creators (before fees)
+          </p>
+        </div>
+      </section>
+
+      <div class="card glass">
+        <div class="card-header">Recent Merch Orders</div>
+        <div class="card-body">
+          {% if recent_orders and recent_orders|length %}
+            <div class="acct-orders">
+              {% for o in recent_orders %}
+                <div class="acct-order">
+                  <div>
+                    <div class="row1">
+                      <strong>#{{ o.id }}</strong>
+                      <span class="pill st-{{ (o.status or 'pending')|e }}">{{ (o.status or 'pending') }}</span>
+                    </div>
+                    <div class="muted text-sm">
+                      {{ o.item_id }}{% if o.qty %} • Qty {{ o.qty }}{% endif %}
+                      {% if o.created_at %} • {{ o.created_at }}{% endif %}
+                    </div>
+                  </div>
+                  <div class="right">
+                    <div class="total">{{ '$%.2f'|format((o.total or 0)|float) }}</div>
+                    <div class="muted text-xs">{{ o.stripe_id or '' }}</div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="muted text-xs" style="margin-top:10px;">
+              Status comes from payment + fulfillment tracking (pending → paid → fulfilled).
+            </div>
+          {% else %}
+            <div class="muted">No merch orders yet.</div>
+            <div style="margin-top:10px;">
+              <a class="acct-action-btn acct-primary-btn" href="/merch">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Shop Merch</span>
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="acct-guest glass" x-data="profileAuth()" x-init="init()">
+      <h2>Account</h2>
+      <p class="muted">Claim a username and unlock bookmarks and merch goodies.</p>
+      
+      <!-- Guest Bookmarks Info -->
+      <div class="acct-guest-bookmarks" x-data="{ bookmarkCount: 0 }" x-init="
+        if (window.AhoyBookmarks) {
+          bookmarkCount = window.AhoyBookmarks.count();
+        } else {
+          try {
+            const raw = localStorage.getItem('ahoy.bookmarks.v1');
+            if (raw) {
+              const data = JSON.parse(raw);
+              bookmarkCount = Object.keys(data.items || {}).length;
+            }
+          } catch(e) {}
+        }
+      ">
+        <div x-show="bookmarkCount > 0" class="guest-bookmarks-notice">
+          <i class="fas fa-bookmark"></i>
+          <div>
+            <strong>You have <span x-text="bookmarkCount"></span> bookmark<span x-text="bookmarkCount === 1 ? '' : 's'"></span> saved locally</strong>
+            <p>Log in to save them permanently and access from any device.</p>
+          </div>
+          <a href="/my-saves" class="btn btn-secondary" style="margin-left: auto;">
+            <i class="fas fa-bookmark"></i>
+            View Bookmarks
+          </a>
+        </div>
+      </div>
+
+      <div class="acct-auth-tabs" role="tablist" aria-label="Account access">
+        <button type="button" class="acct-auth-tab" :class="{active: mode==='login'}"
+          @click="mode='login'">I'm back ✨</button>
+        <button type="button" class="acct-auth-tab" :class="{active: mode==='register'}"
+          @click="mode='register'">Claim a username 🚀</button>
+      </div>
+
+      <div class="acct-auth-error" x-show="error" x-text="error" role="status"></div>
+
+      <!-- Login -->
+      <form x-show="mode==='login'" x-cloak @submit.prevent="login()" class="acct-auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="acct-auth-label">
+          Email or username
+          <input class="acct-auth-input" type="text" inputmode="email" autocomplete="username"
+            x-model.trim="loginIdentifier" placeholder="you@example.com or yourname" required>
+        </label>
+        <label class="acct-auth-label">
+          Password
+          <div class="acct-auth-password">
+            <input class="acct-auth-input" :type="showLoginPw ? 'text' : 'password'"
+              autocomplete="current-password" x-model="loginPassword" required>
+            <button type="button" class="acct-auth-eye" @click="showLoginPw=!showLoginPw"
+              :aria-label="showLoginPw ? 'Hide password' : 'Show password'">
+              <i :class="showLoginPw ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+        </label>
+        <button class="btn btn-primary" type="submit" :disabled="loading">
+          <span x-show="!loading">Let's go 🎧</span>
+          <span x-show="loading">Signing in…</span>
+        </button>
+        <div class="acct-auth-foot">
+          New here?
+          <a href="#" @click.prevent="mode='register'; error=''">Claim your username</a>
+        </div>
+      </form>
+
+      <!-- Register -->
+      <form x-show="mode==='register'" x-cloak @submit.prevent="register()" class="acct-auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="acct-auth-label">
+          Email
+          <input class="acct-auth-input" type="email" autocomplete="email"
+            x-model.trim="regEmail" @input="autofillUsername()" placeholder="you@example.com" required>
+        </label>
+
+        <label class="acct-auth-label">
+          Username
+          <div class="acct-auth-username">
+            <span class="acct-auth-at">@</span>
+            <input class="acct-auth-input" type="text" autocomplete="username"
+              x-model.trim="regUsername" @input="onUsernameInput()" @blur="checkUsername()"
+              placeholder="yourname" required>
+            <button type="button" class="acct-auth-chip" @click="randomizeUsername()"
+              aria-label="Try another username">Shuffle</button>
+          </div>
+          <div class="acct-auth-help" x-show="usernameStatus" x-text="usernameStatus"></div>
+        </label>
+
+        <div class="acct-auth-suggestions" x-show="suggestions.length">
+          <template x-for="s in suggestions" :key="s">
+            <button type="button" class="acct-auth-suggestion" @click="pickSuggestion(s)" x-text="'@' + s"></button>
+          </template>
+        </div>
+
+        <label class="acct-auth-label">
+          Password
+          <div class="acct-auth-password">
+            <input class="acct-auth-input" :type="showRegPw ? 'text' : 'password'"
+              autocomplete="new-password" x-model="regPassword" minlength="8" required>
+            <button type="button" class="acct-auth-eye" @click="showRegPw=!showRegPw"
+              :aria-label="showRegPw ? 'Hide password' : 'Show password'">
+              <i :class="showRegPw ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <div class="acct-auth-help">At least 8 characters.</div>
+        </label>
+
+        <button class="btn btn-primary" type="submit" :disabled="loading || !canRegister">
+          <span x-show="!loading">Claim it 🎉</span>
+          <span x-show="loading">Creating…</span>
+        </button>
+        <div class="acct-auth-foot">
+          Already claimed one?
+          <a href="#" @click.prevent="mode='login'; error=''">Sign in</a>
+        </div>
+        <div class="acct-auth-legal muted text-xs">
+          By continuing you agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy</a>.
+        </div>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .acct { max-width: 1100px; margin: 0 auto; padding: 18px 18px 40px; }
+  .acct-head { display:flex; gap: 14px; align-items:center; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+  .acct-name { margin: 0; font-size: 20px; color: rgba(255,255,255,0.95); font-weight: 600; }
+  .acct-sub { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .acct-email { color: rgba(255,255,255,0.75); font-size: 14px; }
+  .acct-actions { margin-top: 10px; display:flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Account action buttons - fixed visibility */
+  .acct-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .acct-action-btn:hover {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .acct-action-btn i {
+    font-size: 14px;
+  }
+
+  .acct-primary-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    border-color: rgba(236, 72, 153, 0.5);
+    color: #ffffff;
+  }
+
+  .acct-primary-btn:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #f472b6 100%);
+    border-color: rgba(236, 72, 153, 0.7);
+  }
+
+  .acct-signout-btn {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: rgba(239, 68, 68, 0.95);
+  }
+
+  .acct-signout-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #ef4444;
+  }
+
+  .acct-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  @media (max-width: 900px) { .acct-grid { grid-template-columns: 1fr; } }
+  .acct-profile-card { margin-top: 0; }
+  .acct-bio-label { display:block; margin-bottom: 8px; font-weight: 700; color: rgba(255,255,255,0.9); }
+  .acct-bio-input {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    outline: none;
+  }
+  .acct-bio-input:focus {
+    border-color: rgba(147,51,234,0.55);
+    box-shadow: 0 0 0 3px rgba(147,51,234,0.18);
+  }
+  .acct-bio-meta { display:flex; justify-content: space-between; gap: 10px; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.62); }
+  .acct-profile-actions { margin-top: 12px; display:flex; justify-content:flex-end; }
+
+  .acct-stats { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 560px) { .acct-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .acct-stat { border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 10px 10px; }
+  .acct-stat .n { font-weight: 900; font-size: 20px; color: rgba(255,255,255,0.95); }
+  .acct-stat .l { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-top: 2px; color: rgba(255,255,255,0.8); }
+  .acct-stat-link { text-decoration: none; color: inherit; cursor: pointer; transition: all 0.2s ease; display: block; }
+  .acct-stat-link:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,0,96,0.3); }
+
+  .acct-stats-breakdown { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 6px; }
+  .acct-breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  .acct-breakdown-label { font-size: 12px; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 6px; }
+  .acct-breakdown-label i { width: 14px; text-align: center; color: rgba(255,255,255,0.4); }
+  .acct-breakdown-val { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); }
+
+  .acct-view-all { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: #ff0060; text-decoration: none; font-weight: 600; letter-spacing: 0.03em; transition: gap 0.2s ease; }
+  .acct-view-all:hover { gap: 10px; }
+
+  .acct-orders { display:flex; flex-direction: column; gap: 10px; }
+  .acct-order { display:flex; justify-content:space-between; gap: 12px; padding: 10px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+  .acct-order .row1 { display:flex; align-items:center; gap: 8px; }
+  .acct-order .right { text-align:right; }
+  .acct-order .total { font-weight: 900; color: rgba(255,255,255,0.95); }
+
+  .pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); text-transform: uppercase; letter-spacing:.10em; font-size:10px; }
+  .pill.st-paid { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.10); }
+  .pill.st-pending { border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.10); }
+  .pill.st-fulfilled { border-color: rgba(59,130,246,0.28); background: rgba(59,130,246,0.10); }
+
+  .acct-guest { padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+  .acct-guest h1 { margin: 0; }
+  .acct-guest p { margin: 8px 0 0; }
+
+  .acct-auth-tabs { display:flex; gap:8px; margin-top: 12px; }
+  .acct-auth-tab { flex:1; height:42px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); color:#e5e7eb; font-weight: 700; }
+  .acct-auth-tab.active { border-color: rgba(147,51,234,0.55); background: rgba(147,51,234,0.18); }
+  .acct-auth-form { margin-top: 12px; display:flex; flex-direction:column; gap: 10px; }
+  .acct-auth-label { display:flex; flex-direction:column; gap: 6px; font-weight: 700; color: rgba(255,255,255,0.92); }
+  .acct-auth-input { width:100%; padding: 12px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(0,0,0,0.35); color:#fff; outline:none; }
+  .acct-auth-input:focus { border-color: rgba(147,51,234,0.55); box-shadow: 0 0 0 3px rgba(147,51,234,0.18); }
+  .acct-auth-password { position: relative; }
+  .acct-auth-eye { position:absolute; right:8px; top:50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04); color:#e5e7eb; }
+  .acct-auth-username { position: relative; display:flex; align-items:center; gap: 8px; }
+  .acct-auth-at { position:absolute; left: 12px; color: rgba(255,255,255,0.55); font-weight: 900; }
+  .acct-auth-username .acct-auth-input { padding-left: 26px; }
+  .acct-auth-chip { flex:0 0 auto; height: 42px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); color:#e5e7eb; font-weight: 800; }
+  .acct-auth-help { font-weight: 600; color: rgba(255,255,255,0.65); font-size: 12px; }
+  .acct-auth-error { margin-top: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.10); color: rgba(255,255,255,0.92); }
+  .acct-auth-suggestions { display:flex; gap:8px; flex-wrap: wrap; margin-top: -4px; }
+  .acct-auth-suggestion { border-radius: 999px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.03); color:#e5e7eb; font-weight: 800; }
+  .acct-auth-foot { margin-top: 2px; font-size: 13px; color: rgba(255,255,255,0.70); }
+  .acct-auth-foot a { color: rgba(167,139,250,0.95); font-weight: 900; }
+  .acct-auth-legal a { color: rgba(255,255,255,0.85); text-decoration: underline; }
+
+  /* Guest Bookmarks Notice */
+  .acct-guest-bookmarks {
+    margin-top: 1rem;
+  }
+
+  .guest-bookmarks-notice {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(147, 51, 234, 0.1);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 12px;
+    flex-wrap: wrap;
+  }
+
+  .guest-bookmarks-notice i {
+    font-size: 1.5rem;
+    color: var(--accent-color, #9333ea);
+    flex-shrink: 0;
+  }
+
+  .guest-bookmarks-notice > div {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .guest-bookmarks-notice strong {
+    display: block;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.25rem;
+  }
+
+  .guest-bookmarks-notice p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  /* Ensure the primary CTA is always readable even if theme vars set --primary-color too light */
+  .acct-guest .btn.btn-primary {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    color: #ffffff;
+    border: 1px solid rgba(236,72,153,0.45);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+  }
+  .acct-guest .btn.btn-primary:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  .acct-guest .btn.btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(236,72,153,0.22), 0 10px 24px rgba(0,0,0,0.35);
+  }
+
+  /* ========================================
+     Wallet Widget - Dark Liquid Glass
+     ======================================== */
+  
+  .wallet-card {
+    background: linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.5) 0%, 
+      rgba(15, 15, 20, 0.6) 50%,
+      rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--border-radius-xl, 20px);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 1px 0 rgba(255, 255, 255, 0.1) inset;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .wallet-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(147, 51, 234, 0.4) 50%, 
+      transparent 100%);
+    pointer-events: none;
+  }
+
+  .wallet-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  }
+
+  .wallet-card-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .wallet-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.98);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .wallet-helper {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .wallet-card-body {
+    padding: 24px;
+  }
+
+  /* Banner States */
+  .wallet-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--border-radius-md, 12px);
+    margin-bottom: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: wallet-slide-down 0.3s ease-out;
+  }
+
+  @keyframes wallet-slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .wallet-banner-success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: rgba(16, 185, 129, 0.95);
+  }
+
+  .wallet-banner-error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: rgba(239, 68, 68, 0.95);
+  }
+
+  .wallet-banner-info {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: rgba(59, 130, 246, 0.95);
+  }
+
+  .wallet-banner i {
+    font-size: 1rem;
+  }
+
+  /* Balance Block */
+  .wallet-balance-block {
+    margin-bottom: 24px;
+  }
+
+  .wallet-balance-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .wallet-balance-amount {
+    font-size: 2.75rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.98);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .wallet-balance-empty {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .wallet-balance-loading {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .wallet-balance-loading i {
+    font-size: 1.5rem;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes wallet-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Empty State */
+  .wallet-empty {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+  }
+
+  .wallet-empty-text {
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  /* Quick Pick Buttons */
+  .wallet-quick-picks {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .wallet-quick-pick {
+    flex: 1;
+    min-width: 70px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--border-radius-md, 12px);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wallet-quick-pick:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .wallet-quick-pick:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .wallet-quick-pick:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
+    border-color: rgba(147, 51, 234, 0.5);
+  }
+
+  .wallet-quick-pick:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wallet-quick-pick {
+      transition: none;
+    }
+    .wallet-quick-pick:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+
+  /* Primary Button */
+  .wallet-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: var(--border-radius-md, 12px);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wallet-btn-primary {
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%);
+    color: #ffffff;
+    box-shadow: 
+      0 4px 14px rgba(147, 51, 234, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .wallet-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
+    box-shadow: 
+      0 6px 20px rgba(147, 51, 234, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    transform: translateY(-1px);
+  }
+
+  .wallet-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 
+      0 2px 8px rgba(147, 51, 234, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+
+  .wallet-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 
+      0 0 0 3px rgba(147, 51, 234, 0.4),
+      0 4px 14px rgba(147, 51, 234, 0.4);
+  }
+
+  .wallet-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .wallet-btn-empty {
+    max-width: 240px;
+    margin: 0 auto;
+  }
+
+  /* Ghost Button (History) */
+  .wallet-btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    width: auto;
+    padding: 10px 20px;
+  }
+
+  .wallet-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .wallet-btn-ghost:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Actions Container */
+  .wallet-actions {
+    margin-bottom: 16px;
+  }
+
+  .wallet-secondary {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* Trust Text */
+  .wallet-trust-text {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .wallet-trust-text i {
+    font-size: 0.6875rem;
+    opacity: 0.7;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .wallet-card-header {
+      padding: 16px 20px 10px;
+    }
+
+    .wallet-card-body {
+      padding: 20px;
+    }
+
+    .wallet-balance-amount {
+      font-size: 2.25rem;
+    }
+
+    .wallet-quick-picks {
+      gap: 6px;
+    }
+
+    .wallet-quick-pick {
+      min-width: 60px;
+      padding: 9px 12px;
+      font-size: 0.8125rem;
+    }
+
+    .wallet-btn {
+      padding: 12px 20px;
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wallet-card,
+    .wallet-btn,
+    .wallet-quick-pick {
+      transition: none;
+    }
+    
+    .wallet-card:hover {
+      transform: none;
+    }
+    
+    .wallet-btn-primary:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+function profileEditor() {
+  return {
+    bio: '',
+    saving: false,
+    status: '',
+    async init() {
+      try {
+        const response = await fetch('/api/user/profile', { credentials: 'include' });
+        if (!response.ok) return;
+        const data = await response.json();
+        this.bio = (data.preferences && data.preferences.bio) || '';
+      } catch (_) {}
+    },
+    async saveBio() {
+      this.saving = true;
+      this.status = '';
+      try {
+        const response = await fetch('/api/user/profile', {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]') || {}).content || ''
+          },
+          body: JSON.stringify({ bio: this.bio })
+        });
+        this.status = response.ok ? 'Bio saved.' : 'Save failed.';
+      } catch (_) {
+        this.status = 'Save failed.';
+      } finally {
+        this.saving = false;
+        if (this.status === 'Bio saved.') {
+          setTimeout(() => { this.status = ''; }, 2500);
+        }
+      }
+    }
+  };
+}
+
+// Account Stats - uses client-side bookmarks as source of truth (matches my-saves)
+function acctStats() {
+  return {
+    bookmarks: {{ stats.bookmarks or 0 }},
+    recentPlays: 0,
+    trackCount: 0,
+    showCount: 0,
+    artistCount: 0,
+    load() {
+      this.refresh();
+      try {
+        const raw = localStorage.getItem('ahoy.recentlyPlayed.v1');
+        this.recentPlays = raw ? JSON.parse(raw).length : 0;
+      } catch (_) {}
+      // Keep in sync if bookmarks change
+      document.addEventListener('bookmarks:changed', () => this.refresh());
+      document.addEventListener('recentlyPlayed:updated', () => {
+        try {
+          const raw = localStorage.getItem('ahoy.recentlyPlayed.v1');
+          this.recentPlays = raw ? JSON.parse(raw).length : 0;
+        } catch (_) {}
+      });
+    },
+    refresh() {
+      // Use client-side AhoyBookmarks as master (same source as /my-saves)
+      if (!window.AhoyBookmarks) return;
+      const all = window.AhoyBookmarks.all();
+      this.bookmarks = all.length;
+      this.trackCount = all.filter(b => b.type === 'track').length;
+      this.showCount = all.filter(b => b.type === 'show').length;
+      this.artistCount = all.filter(b => b.type === 'artist').length;
+    }
+  };
+}
+
+// Wallet Widget Alpine.js Component
+function walletWidget(initialBalance) {
+  return {
+    balance: initialBalance || 0,
+    loading: false,
+    state: null, // 'success', 'error', or null
+    errorMessage: null,
+
+    init() {
+      // Refresh balance on mount
+      this.refreshBalance();
+      
+      // If coming from wallet success page, refresh more aggressively
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('wallet_funded') === 'true') {
+        // Refresh immediately and then again after a short delay
+        setTimeout(() => this.refreshBalance(), 500);
+        setTimeout(() => this.refreshBalance(), 2000);
+        // Clean up URL parameter
+        urlParams.delete('wallet_funded');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+      
+      // Check for reduced motion preference
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.style.setProperty('--wallet-animation-duration', '0ms');
+      }
+    },
+
+    formatBalance(amount) {
+      return '$' + (amount || 0).toFixed(2);
+    },
+
+    async refreshBalance() {
+      try {
+        const response = await fetch('/payments/wallet', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.balance !== undefined) {
+            const newBalance = parseFloat(data.balance);
+            // Animate balance update if it changed
+            if (Math.abs(newBalance - this.balance) > 0.01) {
+              this.animateBalanceUpdate(this.balance, newBalance);
+            } else {
+              this.balance = newBalance;
+            }
+          }
+        }
+      } catch (e) {
+        // Silently fail - wallet might not be available
+        console.debug('Wallet balance refresh failed:', e);
+      }
+    },
+
+    animateBalanceUpdate(oldBalance, newBalance) {
+      const prefersReducedMotion = window.matchMedia && 
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      if (prefersReducedMotion) {
+        this.balance = newBalance;
+        return;
+      }
+
+      // Smooth number animation
+      const duration = 400;
+      const startTime = performance.now();
+      const difference = newBalance - oldBalance;
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function (ease-out)
+        const eased = 1 - Math.pow(1 - progress, 3);
+        this.balance = oldBalance + (difference * eased);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          this.balance = newBalance;
+        }
+      };
+
+      requestAnimationFrame(animate);
+    },
+
+    async fundWallet(quickAmount = null) {
+      if (this.loading) return;
+
+      let amount = quickAmount;
+      
+      // If no quick amount, prompt user
+      if (!amount) {
+        const input = prompt('Enter amount to fund (minimum $1.00):', '10.00');
+        if (!input) return;
+        amount = parseFloat(input);
+      }
+
+      // Validate amount
+      if (isNaN(amount) || amount < 1.00) {
+        this.showError('Please enter a valid amount (minimum $1.00)');
+        return;
+      }
+
+      if (amount > 1000.00) {
+        this.showError('Maximum funding amount is $1,000.00 per transaction');
+        return;
+      }
+
+      // Set loading state
+      this.loading = true;
+      this.state = null;
+      this.errorMessage = null;
+
+      try {
+        const response = await fetch('/payments/wallet/fund', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ amount: amount })
+        });
+
+        // Handle non-JSON responses
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
+          // If response isn't JSON, it's likely an error
+          this.showError('Server error: Invalid response. Please try again.');
+          this.loading = false;
+          return;
+        }
+
+        if (response.ok && data.checkout_url) {
+          // Show redirecting state with clear message
+          this.state = 'success';
+          this.errorMessage = null;
+          
+          // Update button text to show redirecting
+          const btnSpans = document.querySelectorAll('.wallet-btn-primary span');
+          btnSpans.forEach(span => {
+            if (span) span.textContent = 'Redirecting to Stripe...';
+          });
+          
+          // Show redirecting banner
+          const redirectBanner = document.createElement('div');
+          redirectBanner.className = 'wallet-banner wallet-banner-info';
+          redirectBanner.innerHTML = '<i class="fas fa-arrow-right"></i> <span>Redirecting to Stripe secure checkout...</span>';
+          const cardBody = document.querySelector('.wallet-card-body');
+          if (cardBody) {
+            cardBody.insertBefore(redirectBanner, cardBody.firstChild);
+          }
+          
+          // Immediately redirect to Stripe Checkout
+          // User will enter card details on Stripe's secure, PCI-compliant page
+          console.log('Redirecting to Stripe Checkout:', data.checkout_url);
+          // Use location.assign to avoid Illegal invocation errors
+          window.location.assign(data.checkout_url);
+          
+          // Fallback: if redirect doesn't happen in 2 seconds, show link
+          setTimeout(() => {
+            if (document.body.contains(redirectBanner)) {
+              const link = document.createElement('a');
+              link.href = data.checkout_url;
+              link.textContent = 'Click here if you are not redirected';
+              link.className = 'wallet-btn wallet-btn-primary';
+              link.style.marginTop = '10px';
+              link.style.display = 'block';
+              redirectBanner.appendChild(document.createElement('br'));
+              redirectBanner.appendChild(link);
+            }
+          }, 2000);
+        } else {
+          // Handle different error status codes
+          let errorMsg = data.error || 'Failed to create funding session';
+          if (response.status === 401) {
+            // Not logged in - redirect to login with return URL
+            errorMsg = 'Please log in to fund your wallet. Redirecting to login...';
+            this.showError(errorMsg);
+            setTimeout(() => {
+              const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+              window.location.href = `/auth?return=${returnUrl}`;
+            }, 2000);
+            return;
+          } else if (response.status === 400) {
+            errorMsg = data.error || 'Invalid request. Please check the amount and try again.';
+          } else if (response.status === 500) {
+            errorMsg = 'Server error. Please try again later.';
+          }
+          this.showError(errorMsg);
+          this.loading = false;
+        }
+      } catch (err) {
+        console.error('Wallet funding error:', err);
+        this.showError('Network error: ' + err.message);
+        this.loading = false;
+      }
+    },
+
+    showError(message) {
+      this.state = 'error';
+      this.errorMessage = message;
+      
+      // Auto-hide error after 5 seconds
+      setTimeout(() => {
+        if (this.state === 'error') {
+          this.state = null;
+          this.errorMessage = null;
+        }
+      }, 5000);
+    }
+  };
+}
+
+// Legacy function for backwards compatibility (if needed elsewhere)
+function fundWallet(amount) {
+  // Direct fetch approach - simpler and more reliable
+  let amountNum;
+  if (amount) {
+    amountNum = parseFloat(amount);
+  } else {
+    const input = prompt('Enter amount to fund (minimum $1.00):', '10.00');
+    if (!input) return;
+    amountNum = parseFloat(input);
+  }
+  
+  if (!amountNum || isNaN(amountNum) || amountNum < 1.00) {
+    alert('Please enter a valid amount (minimum $1.00)');
+    return;
+  }
+  
+  if (amountNum > 1000.00) {
+    alert('Maximum funding amount is $1,000.00 per transaction');
+    return;
+  }
+  
+  fetch('/payments/wallet/fund', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ amount: amountNum })
+  })
+  .then(r => {
+    if (!r.ok) {
+      return r.json().then(data => {
+        throw new Error(data.error || `Server error: ${r.status}`);
+      });
+    }
+    return r.json();
+  })
+  .then(data => {
+    if (data.checkout_url) {
+      // Use location.assign to avoid Illegal invocation errors
+      window.location.assign(data.checkout_url);
+    } else {
+      alert(data.error || 'Failed to create funding session');
+    }
+  })
+  .catch(err => {
+    alert('Error: ' + err.message);
+  });
+}
+</script>
+
+<script>
+function profileAuth() {
+  const normalizeUsername = (raw) => {
+    const allowed = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+    let s = String(raw || '').trim().toLowerCase();
+    s = s.replace(/[ .-]+/g, '_');
+    s = Array.from(s).filter(ch => allowed.includes(ch)).join('');
+    s = s.replace(/__+/g, '_').replace(/^_+|_+$/g, '');
+    return s.slice(0, 24);
+  };
+  const deriveFromEmail = (email) => normalizeUsername(String(email || '').split('@')[0] || '');
+  const mkSuggestions = (base) => {
+    const b = normalizeUsername(base) || 'user';
+    const s1 = b;
+    const s2 = (b.slice(0, Math.max(0, 24 - 2)) + '01').slice(0, 24);
+    const s3 = (b.slice(0, Math.max(0, 24 - 5)) + '_music').slice(0, 24);
+    return Array.from(new Set([s1, s2, s3])).filter(Boolean);
+  };
+
+  return {
+    mode: 'login',
+    loading: false,
+    error: '',
+
+    // login
+    loginIdentifier: '',
+    loginPassword: '',
+    showLoginPw: false,
+
+    // register
+    regEmail: '',
+    regUsername: '',
+    regPassword: '',
+    showRegPw: false,
+    usernameStatus: '',
+    suggestions: [],
+    usernameAvailable: null,
+
+    get canRegister() {
+      return !!(this.regEmail && this.regUsername && this.regPassword && this.regPassword.length >= 8 && this.usernameAvailable !== false);
+    },
+
+    init() {
+      try {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem) {
+          const last = localStorage.getItem('ahoyLastIdentifier');
+          if (last) this.loginIdentifier = last;
+        }
+      } catch (_) {}
+      this.suggestions = mkSuggestions('');
+    },
+
+    autofillUsername() {
+      if (this.regUsername) return;
+      const base = deriveFromEmail(this.regEmail);
+      this.regUsername = base || '';
+      this.onUsernameInput();
+    },
+
+    onUsernameInput() {
+      const u = normalizeUsername(this.regUsername);
+      if (u !== this.regUsername) this.regUsername = u;
+      this.usernameAvailable = null;
+      this.usernameStatus = u ? 'Checking availability…' : '';
+      this.suggestions = mkSuggestions(u || deriveFromEmail(this.regEmail));
+    },
+
+    pickSuggestion(s) {
+      this.regUsername = normalizeUsername(s);
+      this.onUsernameInput();
+      this.checkUsername();
+    },
+
+    randomizeUsername() {
+      const base = deriveFromEmail(this.regEmail) || 'user';
+      const n = String(Math.floor(Math.random() * 90) + 10);
+      this.pickSuggestion((base.slice(0, Math.max(0, 24 - n.length)) + n).slice(0, 24));
+    },
+
+    async checkUsername() {
+      const u = normalizeUsername(this.regUsername);
+      if (!u) return;
+      this.usernameStatus = 'Checking availability…';
+      try {
+        const r = await fetch(`/api/auth/username-available?username=${encodeURIComponent(u)}`, { 
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!r.ok) {
+          // If server error, don't block registration
+          this.usernameAvailable = null;
+          this.usernameStatus = '';
+          return;
+        }
+        const data = await r.json();
+        this.usernameAvailable = !!data.available;
+        this.suggestions = Array.isArray(data.suggestions) ? data.suggestions : this.suggestions;
+        this.usernameStatus = data.available ? `@${u} is available` : `@${u} is taken — try one of these`;
+      } catch (_) {
+        this.usernameAvailable = null;
+        this.usernameStatus = '';
+      }
+    },
+
+    async login() {
+      this.error = '';
+      this.loading = true;
+      try {
+        const csrf = document.querySelector("form.acct-auth-form input[name='csrf_token']")?.value || '';
+        const r = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRFToken': csrf } : {}) },
+          credentials: 'include',
+          body: JSON.stringify({ identifier: this.loginIdentifier, password: this.loginPassword })
+        });
+        let data = {};
+        try {
+          data = await r.json();
+        } catch (_) {
+          // Response is not JSON, use status text
+        }
+        if (!r.ok) {
+          this.error = data.message || data.detail || data.error || 'Sign in failed';
+          return;
+        }
+        try { 
+          if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+            localStorage.setItem('ahoyLastIdentifier', this.loginIdentifier);
+          }
+        } catch (_) {}
+        window.location.reload();
+      } catch (_) {
+        this.error = 'Sign in failed. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async register() {
+      this.error = '';
+      this.loading = true;
+      try {
+        const csrf = document.querySelector("form.acct-auth-form input[name='csrf_token']")?.value || '';
+        const r = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRFToken': csrf } : {}) },
+          credentials: 'include',
+          body: JSON.stringify({ email: this.regEmail, username: this.regUsername, password: this.regPassword })
+        });
+        let data = {};
+        try {
+          data = await r.json();
+        } catch (_) {
+          // Response is not JSON, use status text
+        }
+        if (!r.ok) {
+          this.error = data.message || data.detail || data.error || 'Create account failed';
+          if (Array.isArray(data.suggestions)) this.suggestions = data.suggestions;
+          if (data.error === 'invalid_username') this.usernameAvailable = false;
+          return;
+        }
+        try { 
+          if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+            localStorage.setItem('ahoyLastIdentifier', this.regUsername);
+          }
+        } catch (_) {}
+        window.location.reload();
+      } catch (_) {
+        this.error = 'Create account failed. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    }
+  };
+}
+</script>
+{% endblock %}

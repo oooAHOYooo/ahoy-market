@@ -1,0 +1,42 @@
+# NOTE: This file is for reference only.
+# electron-builder auto-generates the real snapcraft.yaml during `npm run electron:build:linux`.
+# Snap config lives in package.json under "build" > "snap".
+#
+# To publish to Snapcraft store:
+#   1. Create account at snapcraft.io (use alex@littlemarket.org)
+#   2. snap install snapcraft --classic
+#   3. snapcraft login
+#   4. snapcraft upload dist-electron/ahoy-0.2.x-amd64.snap --release=stable
+#
+# After publishing, anyone installs with:
+#   snap install ahoy
+#
+# Snap store page: https://snapcraft.io/ahoy
+
+name: ahoy
+base: core22
+version: '0.2.1'
+summary: Discover and play independent music and shows
+description: |
+  Ahoy is a desktop app for discovering and playing independent music,
+  podcasts, and shows from Ahoy Indie Media.
+
+  Features:
+  - Stream independent music
+  - Listen to podcasts and shows
+  - Bookmark and playlist support
+  - Mini player with media controls
+
+grade: stable
+confinement: strict
+
+apps:
+  ahoy:
+    command: ahoy-indie-media --no-sandbox
+    plugs:
+      - default
+      - audio-playback
+      - network
+      - network-bind
+      - browser-support
+      - opengl

@@ -1,0 +1,26 @@
+# Store Assets — .gitignore
+
+# Allow PNG screenshots (tracked)
+!*.png
+
+# But ignore temporary/working files
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+
+# Don't commit JPEG or other formats (use PNG only)
+*.jpg
+*.jpeg
+*.webp
+*.gif
+
+# Ignore screenshots from other tools
+temp_screenshots/
+working_screenshots/
+*.xcresult/
+
+# Ignore video/animated files
+*.mp4
+*.mov

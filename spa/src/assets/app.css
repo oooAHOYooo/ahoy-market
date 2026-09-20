@@ -1,0 +1,1910 @@
+/*
+ * Ahoy SPA — imports the existing site CSS for 1:1 visual parity.
+ * design-tokens.css → CSS variables (colors, blur, radius, transitions)
+ * main.css → all component styles (~25K lines)
+ * combined.css → mobile overrides and additional styles
+ *
+ * SPA-specific additions below (nav bar, mini player, offline banner).
+ */
+@import './design-tokens.css';
+@import './main.css';
+@import './combined.css';
+@import './mini-player-tune.css';
+@import './desktop-header.css';
+
+/* ── SPA Shell Overrides ───────────────────────────────────────────── */
+
+/* Desktop: match base.html app-shell + left sidebar + top navbar */
+.app {
+  --ds-topbar-height: 44px;
+}
+
+.app .main-content {
+  padding-top: var(--ds-topbar-height);
+  min-height: 100vh;
+}
+
+.app .main-content.no-navbar {
+  padding-top: 0;
+}
+
+.app .main-content.no-navbar .app-shell {
+  padding-left: 0 !important;
+}
+
+.app .app-shell {
+  min-height: calc(100vh - var(--ds-topbar-height));
+}
+
+.app .app-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app .content-area.app-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Hint to GPU that this area scrolls, preventing 'checkerboarding' */
+  will-change: scroll-position;
+}
+
+.app .content-area.poem-surface {
+  background: #0a0b0d;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.app .content-area.poem-surface .poem-detail-page {
+  min-height: 100%;
+}
+
+/* Trick 3: Use 'contain: content' on list items so the browser knows they are 
+   independent units. If one item changes, it won't trigger a reflow of others. */
+.music-mobile-row, .show-card, .artist-card, .episode-row, .search-item, .podcast-show-card, .merch-card {
+  contain: content;
+}
+
+/* Desktop: hide native scrollbar — replaced by CustomScrollbar.vue overlay */
+@media (min-width: 1025px) {
+  body:not(.force-mobile-shell) .app .content-area.app-content {
+    scrollbar-width: none;           /* Firefox */
+    -ms-overflow-style: none;        /* IE 11 */
+  }
+  body:not(.force-mobile-shell) .app .content-area.app-content::-webkit-scrollbar {
+    display: none;                   /* Chrome / Safari / Edge */
+  }
+}
+
+/* Videos page: let content grow so all grid items are visible when scrolling */
+.app .content-area .videos-page,
+.app .content-area .videos-page .shows-container {
+  flex: none;
+  min-height: min-content;
+}
+
+.app .content-area .videos-page .shows-grid-section {
+  flex: none;
+  min-height: min-content;
+  /* was 0 — caused only first row (2 videos) to show */
+}
+
+.app .app-sidebar {
+  top: 0;
+  height: 100vh;
+}
+
+/* Desktop: sidebar fixed and always locked in place */
+@media (min-width: 1025px) {
+  body:not(.force-mobile-shell) .app .app-sidebar {
+    position: fixed !important;
+    left: 0;
+    width: 173px;
+    z-index: 10;
+  }
+
+  /* Compensate for fixed sidebar so app-main isn't hidden behind it */
+  body:not(.force-mobile-shell) .app .app-shell {
+    padding-left: 173px;
+  }
+}
+
+/* Compact footer: un-fix when inside the scrollable content area */
+.app .content-area .compact-footer {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+}
+
+/* Desktop: hide mobile-only volume button (shown in same slot as + on mobile) */
+.app .now-playing-volume-mobile-btn {
+  display: none !important;
+}
+
+/* Mobile/tablet: account for status bar + mobile-top-nav + navbar + safe area (match Flask combined.css) */
+@media (max-width: 1024px) {
+  .app {
+    --ds-topbar-height: calc(32px + 48px + 44px + env(safe-area-inset-top));
+  }
+
+  /* Suppress legacy route/loading strips that can leak into native mobile chrome. */
+  body > #progress-bar,
+  body > .progress-bar,
+  body > .progress-fill,
+  body > .progress-bar-wrapper,
+  #app > .progress-bar,
+  #app > .progress-fill {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .app .app-header::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  .app .main-content {
+    padding-top: var(--ds-topbar-height);
+  }
+
+  /* Hide sidebar on the mobile/tablet shell */
+  .app .app-sidebar {
+    display: none !important;
+  }
+
+  .app .main-content {
+    margin-left: 0;
+  }
+}
+
+body.force-mobile-shell .app {
+  --ds-topbar-height: calc(32px + 48px + 44px + env(safe-area-inset-top));
+}
+
+body.force-mobile-shell > #progress-bar,
+body.force-mobile-shell > .progress-bar,
+body.force-mobile-shell > .progress-fill,
+body.force-mobile-shell > .progress-bar-wrapper,
+body.force-mobile-shell #app > .progress-bar,
+body.force-mobile-shell #app > .progress-fill {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body.force-mobile-shell .app .app-header::before {
+  content: none !important;
+  display: none !important;
+}
+
+body.force-mobile-shell .app .main-content {
+  padding-top: var(--ds-topbar-height);
+  margin-left: 0;
+}
+
+body.force-mobile-shell .app .app-sidebar {
+  display: none !important;
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  body.force-mobile-shell .app {
+    --ds-topbar-height: calc(28px + 36px + 36px + env(safe-area-inset-top));
+    --np-mobile-dock-height: 152px;
+    --np-collapsed-strip-height: 34px;
+  }
+
+  body.force-mobile-shell .app .main-content {
+    padding-top: var(--ds-topbar-height);
+  }
+
+  body.force-mobile-shell .app .mobile-top-nav {
+    padding: 4px 10px;
+  }
+
+  body.force-mobile-shell .app .mobile-notification-btn,
+  body.force-mobile-shell .app .notification-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  body.force-mobile-shell .app .mobile-dock {
+    padding-top: 8px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+
+  body.force-mobile-shell .app .mobile-dock-row-secondary {
+    padding-top: 8px !important;
+    padding-bottom: 4px !important;
+  }
+
+  body.force-mobile-shell .app .mobile-dock-row-primary {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  body.force-mobile-shell .app .mobile-dock .mobile-tab {
+    min-height: 40px;
+    padding: 6px 4px 4px;
+    max-width: 78px;
+  }
+
+  body.force-mobile-shell .app .mobile-dock .mobile-tab span {
+    display: none !important;
+  }
+
+  body.force-mobile-shell .app .mobile-dock .mobile-tab i {
+    font-size: 18px;
+  }
+
+  body.force-mobile-shell .app .deck-frame {
+    height: var(--np-mobile-dock-height, 152px);
+  }
+
+  body.force-mobile-shell .app .deck-header {
+    top: -36px;
+  }
+
+  body.force-mobile-shell .app .deck-toggle {
+    width: 56px;
+    height: 28px;
+  }
+
+  body.force-mobile-shell .app .deck-toggle-icon {
+    font-size: 11px;
+  }
+
+  body.force-mobile-shell .app .spa-main.has-player {
+    padding-bottom: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (max-width: 1024px), (pointer: coarse) {
+
+  /* Flush: mini player sits directly in the deck slot (bottom handled by parent or deck mode) */
+  .app .now-playing-wrapper {
+    bottom: env(safe-area-inset-bottom, 0px) !important;
+    height: auto !important;
+    min-height: var(--np-mobile-dock-height, 152px) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    z-index: 10020 !important;
+  }
+
+  /* Collapsed: thin strip directly above the dock (no overlap) */
+  .app .now-playing-wrapper.collapsed {
+    bottom: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom)) !important;
+    min-height: 0 !important;
+    height: var(--np-collapsed-strip-height, 40px) !important;
+    overflow: hidden !important;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app .now-playing-wrapper {
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app .now-playing-wrapper.collapsed .now-playing-container {
+    display: none !important;
+  }
+
+  /* Strip: no borders, translucent — just the button */
+  .app .now-playing-wrapper.collapsed .now-playing-glass {
+    min-height: var(--np-collapsed-strip-height, 40px) !important;
+    height: var(--np-collapsed-strip-height, 40px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-right: 12px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .app .now-playing-wrapper.collapsed .minimize-btn {
+    position: static !important;
+    margin: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 9px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .app .now-playing-wrapper.collapsed .minimize-btn:hover,
+  .app .now-playing-wrapper.collapsed .minimize-btn:active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+  .app .now-playing-sticky,
+  .app .now-playing-glass.now-playing-sticky,
+  .mini-player-deck-slot .now-playing-sticky,
+  .mini-player-deck-slot .now-playing-glass.now-playing-sticky,
+  .bottom-deck .now-playing-sticky,
+  .bottom-deck .now-playing-glass.now-playing-sticky {
+    position: relative !important; /* combined.css sets position:fixed;bottom:0 which escapes wrapper & blocks dock taps */
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    inset: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+
+  .app .now-playing-container {
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 12px 14px !important;
+    padding: 12px 14px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    align-items: center !important;
+  }
+
+  /* Row 1: album art + title/artist only (full width) */
+  .app .now-playing-left {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* Row 2 left: transport (−5, prev, play, next, +5) */
+  .app .now-playing-transport {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: start !important;
+    gap: 6px !important;
+  }
+
+  /* Row 2 right: action buttons (no volume) */
+  .app .now-playing-actions-wrap {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+    min-width: 0 !important;
+  }
+
+  /* Hide volume on mobile */
+  .app .now-playing-volume-wrap {
+    display: none !important;
+  }
+
+  /* On mobile: hide Add to playlist (+), show volume button in its place */
+  .app .now-playing-add-to-playlist-btn {
+    display: none !important;
+  }
+
+  .app .now-playing-volume-mobile-btn {
+    display: inline-flex !important;
+  }
+
+  .app .now-playing-actions {
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+
+  /* Reserve content space for only ONE bar, since they swap in the deck container */
+  .app .spa-main.has-player {
+    padding-bottom: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+
+  /* Flush list utility: removes side padding from the shell on mobile */
+  .content-area.flush-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* iOS install nudge banner */
+.ios-install-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99998;
+  background: #111;
+  color: #fff;
+  border-bottom: 1px solid #00d7ff44;
+  padding: 8px 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.ios-install-banner .ios-install-icon { color: #00d7ff; flex-shrink: 0; }
+.ios-install-banner .ios-install-text { flex: 1; min-width: 0; }
+.ios-install-banner em { font-style: normal; color: #00d7ff; }
+.ios-install-banner .dismiss {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Offline banner */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: #ff6b35;
+  color: #fff;
+  text-align: center;
+  padding: 6px 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.offline-banner .dismiss {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Main content area — leave room for mobile bottom nav */
+.spa-main {
+  padding-bottom: 80px;
+}
+
+.spa-main.has-player {
+  padding-bottom: 148px;
+}
+
+/* ── Mobile Bottom Tab Bar (matches .mobile-top-nav from base.html) ── */
+.spa-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(var(--blur-strong, 24px));
+  -webkit-backdrop-filter: blur(var(--blur-strong, 24px));
+  border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 6px 0 2px;
+  padding-bottom: calc(2px + env(safe-area-inset-bottom));
+}
+
+.spa-mobile-nav .mobile-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+  text-decoration: none;
+  font-size: 9px;
+  padding: 4px 6px 2px;
+  min-width: 52px;
+  transition: color 0.2s;
+}
+
+.spa-mobile-nav .mobile-tab i {
+  font-size: 18px;
+  margin-bottom: 1px;
+}
+
+.spa-mobile-nav .mobile-tab.active {
+  color: var(--text-primary, rgba(255, 255, 255, 0.92));
+}
+
+/* ── Mini Player ─────────────────────────────────────────────────── */
+.spa-mini-player {
+  position: fixed;
+  bottom: 74px;
+  bottom: calc(74px + env(safe-area-inset-bottom));
+  left: 8px;
+  right: 8px;
+  z-index: 999;
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(var(--blur-strong, 24px));
+  -webkit-backdrop-filter: blur(var(--blur-strong, 24px));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 16px);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.spa-mini-player .cover {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.spa-mini-player .track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spa-mini-player .track-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spa-mini-player .track-artist {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spa-mini-player .controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.spa-mini-player .controls button {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.spa-mini-player .controls button:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.spa-mini-player .progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.spa-mini-player .progress-fill {
+  height: 100%;
+  background: var(--accent-primary, #6ddcff);
+  border-radius: 2px;
+  transition: width 0.3s linear;
+}
+
+/* ── Mini Player Extras ──────────────────────────────────────────── */
+.spa-mini-player .track-time {
+  font-size: 10px;
+  opacity: 0.5;
+  margin-left: 6px;
+}
+
+.spa-mini-player .progress-bar {
+  cursor: pointer;
+}
+
+/* Desktop: global now-playing bar (fixed at bottom; .mini-player-desktop is in App.vue) */
+@media (min-width: 1025px) {
+  /* Override .desktop-only which only activates on desktop pointer contexts. */
+  body:not(.force-mobile-shell) .mini-player-desktop {
+    display: block !important;
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10020;
+  }
+
+  body:not(.force-mobile-shell) .mini-player-desktop .now-playing-wrapper {
+    height: auto;
+    min-height: 110px;
+    background: rgba(10, 10, 12, 0.85);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Track overlay play button */
+.track-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: inherit;
+}
+
+.track-card:hover .track-overlay,
+.track-card.playing .track-overlay {
+  opacity: 1;
+}
+
+.track-overlay .play-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+
+.track-cover {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Episode row playing state */
+.episode-row.playing {
+  background: rgba(109, 220, 255, 0.08);
+  border-radius: 8px;
+}
+
+.episode-row .episode-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary, rgba(255, 255, 255, 0.92));
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.episode-row .episode-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Scroll row horizontal */
+.scroll-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding: 0 16px 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-row .track-card,
+.scroll-row .show-card,
+.scroll-row .artist-card {
+  flex-shrink: 0;
+  width: 116px;
+}
+
+/* Section header (Home page) */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 8px;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, rgba(255, 255, 255, 0.92));
+}
+
+.section-header .see-all {
+  color: var(--accent-primary, #6ddcff);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+/* ── Page Transitions ────────────────────────────────────────────── */
+.fade-enter-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-down-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-leave-active {
+  transition: all 0.2s ease;
+}
+
+.slide-down-enter-from {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.slide-down-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* ── Global Action Buttons (Liquid Glass & Squared) ──────────────── */
+.action-btn {
+  appearance: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+}
+
+.btn-follow {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-follow.active {
+  background: #00FF00;
+  color: #000;
+  border-color: #00FF00;
+}
+
+.btn-boost {
+  background: linear-gradient(135deg, #FF00FF 0%, #7000FF 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 0, 255, 0.3);
+}
+
+.btn-share {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Loading Skeleton ────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Grid items: typography & line spacing (Flask source of truth) ── */
+.track-card .track-info,
+.show-card .show-info,
+.artist-card .artist-info {
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+}
+
+.track-card .track-info h3,
+.track-card .track-info h4,
+.show-card .show-info h3,
+.show-card .show-info h4,
+.artist-card .artist-info h3,
+.artist-card .artist-info h4 {
+  margin: 0 0 var(--spacing-1, 0.25rem) 0;
+  font-size: var(--font-size-base, 0.9rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.track-card .track-info p,
+.show-card .show-info p,
+.artist-card .artist-info p {
+  margin: 0;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  line-height: 1.35;
+}
+
+.artist-card .artist-info .artist-name,
+.artist-card .artist-info h4 {
+  font-size: var(--font-size-base, 0.9rem);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* ── Merch (match Flask templates/merch.html extra_css) ── */
+.merch-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.merch-hero {
+  border-radius: 18px;
+  padding: 18px 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 14px;
+}
+
+.merch-hero h1 {
+  margin: 0 0 6px 0;
+  font-size: 28px;
+}
+
+.merch-hero p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.merch-build {
+  margin-top: 10px;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.merch-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 2px 14px;
+}
+
+.merch-search {
+  flex: 1 1 260px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.merch-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.merch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.merch-pill select {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  outline: 0;
+}
+
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 980px) {
+  .merch-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .merch-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.merch-card {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  position: relative;
+}
+
+.merch-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.merch-card.sale-pending {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.merch-card.sale-pending:hover {
+  transform: none;
+}
+
+.sale-pending-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: rgba(255, 193, 7, 0.95);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+.sale-pending-badge i {
+  font-size: 12px;
+}
+
+.merch-media {
+  aspect-ratio: 4/3;
+  background: rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.merch-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+.image-toggle-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.image-toggle-hint i {
+  font-size: 10px;
+  animation: spin-slow 3s linear infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.merch-body {
+  padding: 12px;
+}
+
+.merch-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.merch-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+}
+
+.merch-price {
+  text-align: right;
+}
+
+.merch-price .usd {
+  font-weight: 900;
+}
+
+.merch-price .sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.merch-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.merch-chip {
+  font-size: 11px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  padding: 5px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.merch-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.merch-actions .qty {
+  width: 78px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.merch-cta {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.merch-cta:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.merch-cta:disabled,
+.merch-cta.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.merch-empty {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* --- AGGRESSIVE MOBILE FLUSH OVERRIDES --- */
+@media (max-width: 1024px), (pointer: coarse) {
+
+  /* Flush Music List */
+  .content-area.flush-content,
+  .music-container.flush-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Flush Mini Player and Dock wrappers */
+  .now-playing-wrapper,
+  .now-playing-glass,
+  .now-playing-container,
+  .dock-wrapper {
+    width: 100% !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+  }
+
+  .now-playing-glass {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────── */
+/* Mobile Bottom Deck Toggle — Fast crossfade swap */
+/* ─────────────────────────────────────────────────────────────────── */
+
+@keyframes deck-toggle-press {
+  0%   { transform: scale(1); opacity: 1; }
+  50%  { transform: scale(0.96); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes deck-icon-fade {
+  0%   { opacity: 1; transform: translateY(0); }
+  50%  { opacity: 0.45; transform: translateY(1px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.bottom-deck {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 11200; /* Keep above route content and fullscreen-adjacent layers */
+  overflow: visible; /* changed from hidden to allow floating button */
+  padding-bottom: 0;
+}
+
+/* Mobile footer behavior:
+   - Hide full app footer entirely
+   - Keep compact footer visible just above the bottom deck */
+@media (max-width: 1024px), (pointer: coarse) {
+  .app-footer {
+    display: none !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  .compact-footer {
+    display: none !important;
+  }
+}
+
+/* Vue Transition: keep the nav layer nearly still; quick dissolve only */
+.deck-nav-enter-active {
+  transition: opacity 0.12s ease-out, transform 0.14s ease-out;
+}
+.deck-nav-leave-active {
+  transition: opacity 0.09s linear, transform 0.1s linear;
+}
+.deck-nav-enter-from {
+  transform: translateY(4px);
+  opacity: 0;
+}
+.deck-nav-leave-to {
+  transform: translateY(2px);
+  opacity: 0;
+}
+
+/* Unified glass panel — owns all visual material for the bottom deck */
+.deck-frame {
+  --deck-player-top-inset: 0px;
+  width: 100%;
+  height: var(--np-mobile-dock-height, 152px);
+  overflow: visible;
+  position: relative;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--primary-color, #00a2ff) 12%, #07090d),
+      #07090d);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: none;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--primary-color, #00a2ff) 16%, rgba(255, 255, 255, 0.12)),
+    0 -4px 24px rgba(0, 0, 0, 0.25);
+}
+
+.deck-header {
+  position: absolute;
+  top: -34px;
+  right: 0;
+  width: 92px;
+  height: 62px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--primary-color, #00a2ff) 10%, rgba(14, 18, 27, 0.98)),
+    rgba(7, 9, 13, 0.96));
+  border: 1px solid color-mix(in srgb, var(--primary-color, #00a2ff) 12%, rgba(255, 255, 255, 0.06));
+  border-bottom: none;
+  border-radius: 18px 18px 12px 12px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 1px 0 0 rgba(255, 255, 255, 0.03),
+    0 8px 18px rgba(0, 0, 0, 0.18);
+  pointer-events: auto;
+  z-index: 4;
+}
+
+.deck-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 14px;
+  border-radius: 0 0 18px 18px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--primary-color, #00a2ff) 12%, rgba(20, 26, 38, 0.38)),
+      rgba(7, 9, 13, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset -1px 0 0 rgba(255, 255, 255, 0.03),
+    inset 1px 0 0 rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+}
+
+.deck-header::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 17px;
+  width: 36px;
+  height: 8px;
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--primary-color, #00a2ff) 10%, rgba(24, 31, 46, 0.52)),
+    rgba(7, 9, 13, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+/* Slot base */
+.deck-slot {
+  width: 100%;
+  height: 100%;
+  will-change: opacity, transform;
+  transition: opacity 0.12s ease-out, transform 0.14s ease-out, visibility 0s linear 0.14s;
+}
+
+.deck-frame .deck-slot {
+  position: absolute;
+  inset: 0;
+}
+
+/* Slot 2 — containment: prevents .now-playing-wrapper from escaping to viewport */
+.deck-slot-2 .now-playing-wrapper {
+  position: relative !important;
+  bottom: auto !important;
+  z-index: auto !important;
+  width: 100%;
+  height: 100%;
+}
+.deck-slot-2 .now-playing-glass.now-playing-sticky {
+  position: relative !important;
+  bottom: auto !important;
+  top: var(--deck-player-top-inset) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Hidden/active states */
+.deck-frame .deck-slot.deck-slot--hidden {
+  position: absolute;
+  inset: 0;
+  transform: translateY(4px);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.deck-frame .deck-slot.deck-slot--active {
+  position: absolute;
+  inset: 0;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* Deck toggle tab — attached to the deck edge instead of floating over content */
+.deck-toggle {
+  position: relative;
+  z-index: 3;
+  width: 64px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255,255,255,0.10), transparent 58%),
+    rgba(18, 24, 36, 0.16);
+  backdrop-filter: blur(6px) saturate(1.02);
+  -webkit-backdrop-filter: blur(6px) saturate(1.02);
+  color: rgba(255,255,255,0.54);
+  font-size: 9px;
+  cursor: pointer;
+  display: block;
+  transition: color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease, transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  overflow: hidden;
+  padding: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.35);
+  opacity: 0.95;
+  margin-bottom: 0;
+}
+
+.deck-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+.deck-toggle.is-player-mode {
+  border-color: color-mix(in srgb, var(--primary-color, #00a2ff) 12%, rgba(255,255,255,0.1));
+  color: color-mix(in srgb, var(--primary-color, #00a2ff) 64%, rgba(255,255,255,0.72));
+}
+.deck-toggle.is-utility-mode {
+  border-color: color-mix(in srgb, var(--primary-color, #00a2ff) 18%, rgba(255,255,255,0.12));
+  color: color-mix(in srgb, var(--primary-color, #00a2ff) 52%, rgba(255,255,255,0.68));
+}
+.deck-toggle.has-active-media {
+  border-color: rgba(120, 240, 255, 0.18);
+  color: rgba(120, 240, 255, 0.7);
+  background: rgba(18, 28, 40, 0.22);
+}
+.deck-toggle.switching {
+  animation: deck-toggle-press 0.12s ease-out forwards;
+}
+
+.deck-toggle:hover,
+.deck-toggle:focus-visible {
+  background: rgba(24, 31, 46, 0.34);
+  color: rgba(255,255,255,0.74);
+  opacity: 1;
+}
+
+.deck-toggle-icon {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  margin-top: -2px; /* optical center balancing the dots below */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 13px;
+  opacity: 0.96;
+}
+.deck-toggle.switching .deck-toggle-icon {
+  animation: deck-icon-fade 0.12s ease-out forwards;
+}
+
+.deck-toggle-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  display: flex;
+  gap: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.deck-toggle-dots span {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.24);
+  transition: width 0.16s ease, background 0.16s ease, opacity 0.16s ease;
+}
+
+.deck-toggle-dots span.active {
+  width: 8px;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+/* Narrow mobile overrides (≤375px) */
+@media (max-width: 375px) {
+  /* Ensure status bar is one line */
+  .status-time, .status-breadcrumb {
+    font-size: 10px !important;
+  }
+  
+  /* Hide lettering below icons in navigation */
+  .mobile-tab span, .nav-tab-label {
+    display: none !important;
+  }
+  
+  /* Centering adjustment for icon-only mode */
+  .mobile-tab {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    gap: 0 !important;
+  }
+
+  .mobile-tab i {
+    font-size: 24px !important;
+    margin: 0 !important;
+  }
+}
+
+/* ===== Mobile micro-interaction polish ===== */
+/* Mini-player: press feedback on transport + action buttons */
+.now-playing-btn:active {
+  transform: scale(0.88) !important;
+  opacity: 0.75;
+  transition: transform 0.08s ease, opacity 0.08s ease !important;
+}
+
+/* Loading state: animate play button while loading */
+.now-playing-play-btn.loading {
+  animation: btn-loading-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes btn-loading-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+}
+
+/* Queue empty state */
+.queue-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  gap: 10px;
+}
+.queue-empty i {
+  font-size: 2rem;
+}
+.queue-empty p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Queue panel slide-up transition */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(12px);
+  opacity: 0;
+}
+/* ── Compact Mode ────────────────────────────────────────────────── */
+.compact-mode {
+  --sp-1: 2px;
+  --sp-2: 4px;
+  --sp-3: 8px;
+  --sp-4: 12px;
+  --sp-5: 16px;
+  --sp-6: 20px;
+  --ds-topbar-height: 38px;
+}
+
+.compact-mode .settings-section {
+  padding: 16px;
+  gap: 12px;
+}
+
+.compact-mode .neu-card {
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.compact-mode .settings-header {
+  margin-bottom: 24px;
+}
+
+.compact-mode .explore-hero-inner {
+  padding: 2rem 1.5rem;
+  min-height: 280px;
+}
+
+.compact-mode .whats-new-item {
+  padding: 8px 12px;
+}
+
+.compact-mode .sidebar-header {
+  padding: 12px 16px;
+}
+
+.compact-mode .section-header {
+  padding: 8px 16px 4px;
+}
+
+.compact-mode .scroll-row {
+  padding-bottom: 8px;
+}
+
+.compact-mode .track-card .track-info,
+.compact-mode .show-card .show-info,
+.compact-mode .artist-card .artist-info {
+  padding: 0.5rem 0.75rem;
+}
+
+/* ── Skeleton Loading ───────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 37%,
+    rgba(255, 255, 255, 0.03) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.skeleton-text {
+  height: 1em;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-rect {
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+}
+
+/* ── Landscape Mode Enhancements (Immersive Video) ─────────────────── */
+/* Only triggers when the device is rotated and width is relatively small (mobile/tablets) */
+@media (max-width: 932px) and (orientation: landscape) {
+  /* Hide standard UI shells to make video truly immersive */
+  body.video-fullscreen-active .app-header,
+  body.video-fullscreen-active .bottom-deck,
+  body.video-fullscreen-active .spa-mobile-nav,
+  body.video-fullscreen-active .app-sidebar,
+  body.video-fullscreen-active .app-footer,
+  body.video-fullscreen-active .compact-footer {
+    display: none !important;
+  }
+
+  /* Allow content to fill the screen */
+  body.video-fullscreen-active .main-content {
+    padding-top: 0 !important;
+    margin-left: 0 !important;
+    height: 100vh !important;
+  }
+
+  body.video-fullscreen-active .app-shell,
+  body.video-fullscreen-active .app-main,
+  body.video-fullscreen-active .content-area {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Immersive AHOY TV Player */
+  body.video-fullscreen-active .ltv-player-section {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 20000 !important;
+    background: #000;
+  }
+
+  body.video-fullscreen-active .ltv-player-wrap,
+  body.video-fullscreen-active .ltv-video-stage,
+  body.video-fullscreen-active .ltv-video-frame,
+  body.video-fullscreen-active video.ltv-video {
+    height: 100% !important;
+    width: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    aspect-ratio: auto !important;
+    object-fit: contain !important; /* contain so we see full frame, or cover for full bleed */
+  }
+
+  /* Hide the info bar and title/desc in landscape to focus on video */
+  body.video-fullscreen-active .ltv-info-bar {
+    display: none !important;
+  }
+
+  /* Immersive Global TV Player (for non-AHOY TV video views) */
+  body.video-fullscreen-active .global-tv-player.pinned,
+  body.video-fullscreen-active .global-tv-player.mini {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: none !important;
+    z-index: 20000 !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  body.video-fullscreen-active .global-tv-player video {
+    object-fit: contain !important;
+  }
+}
+
+/* ── Global Focus & Accessibility ───────────────────────────────────── */
+
+/* Better focus states for all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--accent-primary, #6ddcff);
+  outline-offset: 2px;
+}
+
+/* Loading spinner consistency */
+.spinner,
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--accent-primary, #6ddcff);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Universal Mobile Performance Refactors ─────────────────────── */
+@media (max-width: 1024px) {
+  /* Trick 3 Extended: Universal active feedback for all list items */
+  .music-mobile-row:active,
+  .show-card:active,
+  .artist-card:active,
+  .episode-row:active,
+  .search-item:active,
+  .podcast-show-card:active,
+  .merch-card:active,
+  .mini-track:active,
+  .podcast-mobile-show-card:active,
+  .community-playlist-card:active {
+    transform: scale(0.982) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Trick 4 Extended: Smooth cross-fade for all lazy images */
+  .music-mobile-art-img,
+  .show-thumbnail img,
+  .artist-image,
+  .episode-art,
+  .search-item-art,
+  .podcast-show-art,
+  .merch-media img,
+  .podcast-mobile-show-art,
+  .dash-thumb img {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+  }
+
+  .music-mobile-art-img[src],
+  .show-thumbnail img[src],
+  .artist-image[src],
+  .episode-art[src],
+  .search-item-art[src],
+  .podcast-show-art[src],
+  .merch-media img[src],
+  .podcast-mobile-show-art[src],
+  .dash-thumb img[src],
+  .image-placeholder {
+    opacity: 1 !important;
+  }
+}
+
+/* Shell breakpoint guard: mobile/tablet through 1024px, desktop starts at 1025px. */
+@media (max-width: 1024px) {
+  .app .desktop-only,
+  .app .mini-player-desktop,
+  .app .app-sidebar,
+  .app .navbar.desktop-nav,
+  .app .custom-scrollbar {
+    display: none !important;
+  }
+
+  .app .mobile-only,
+  .app .bottom-deck.mobile-only,
+  .app .bottom-deck {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .app .mobile-dock,
+  .app .mobile-dock.mobile-only {
+    display: flex !important;
+  }
+
+  .app .dock-wrapper {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .app .app-shell {
+    padding-left: 0 !important;
+  }
+
+  .app .main-content {
+    margin-left: 0 !important;
+  }
+}
+
+body.force-mobile-shell .app .desktop-only,
+body.force-mobile-shell .app .mini-player-desktop,
+body.force-mobile-shell .app .app-sidebar,
+body.force-mobile-shell .app .navbar.desktop-nav,
+body.force-mobile-shell .app .custom-scrollbar {
+  display: none !important;
+}
+
+body.force-mobile-shell .app .mobile-only,
+body.force-mobile-shell .app .bottom-deck.mobile-only,
+body.force-mobile-shell .app .bottom-deck {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.force-mobile-shell .app .mobile-dock,
+body.force-mobile-shell .app .mobile-dock.mobile-only {
+  display: flex !important;
+  background: #07090d;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
+}
+
+body.force-mobile-shell .app .dock-wrapper {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.force-mobile-shell .app .app-shell {
+  padding-left: 0 !important;
+}
+
+body.force-mobile-shell .app .main-content {
+  margin-left: 0 !important;
+}
+
+body.force-mobile-shell .app .mobile-dock-row {
+  background: transparent;
+}
+
+body.force-mobile-shell .app .mobile-dock-row-secondary {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (min-width: 1025px) {
+  body:not(.force-mobile-shell) .app .mobile-only,
+  body:not(.force-mobile-shell) .app .bottom-deck.mobile-only,
+  body:not(.force-mobile-shell) .app .bottom-deck {
+    display: none !important;
+  }
+
+  body:not(.force-mobile-shell) .app .desktop-only {
+    display: block !important;
+  }
+
+  body:not(.force-mobile-shell) .app .app-sidebar {
+    display: flex !important;
+  }
+
+  body:not(.force-mobile-shell) .app .desktop-only.inline {
+    display: inline-block !important;
+  }
+
+  body:not(.force-mobile-shell) .app .desktop-only.flex {
+    display: flex !important;
+  }
+
+  body:not(.force-mobile-shell) .app .desktop-only.grid {
+    display: grid !important;
+  }
+}

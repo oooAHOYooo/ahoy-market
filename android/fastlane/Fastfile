@@ -1,0 +1,66 @@
+default_platform(:android)
+
+platform :android do
+  desc "Generate screenshots for Google Play Store"
+  lane :screenshots do
+    # Build the app for testing
+    build_app(
+      task: "assembleDebug",
+      project_dir: "android/"
+    )
+
+    # Capture screenshots using UI Automator
+    capture_screenshots(
+      app_apk_path: "android/app/build/outputs/apk/debug/app-debug.apk",
+      tests_apk_path: "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      clear_previous_screenshots: true,
+      output_directory: "android/fastlane/screenshots",
+      locales: ["en-US"],
+      device_type: "phone",
+      use_tests_in_packages: ["ooo.ahoy.app.screengrab"]
+    )
+  end
+
+  desc "Manual screenshot workflow - use this for now"
+  lane :manual_screenshots do
+    UI.message("📱 Screenshot Guide for Google Play Store (en-US)")
+    UI.message("")
+    UI.message("Recommended screenshots (5 total, 1080x1920 each):")
+    UI.message("")
+    UI.message("1️⃣  HOME SCREEN")
+    UI.message("   - Show the music/content grid")
+    UI.message("   - Highlight the diverse library")
+    UI.message("")
+    UI.message("2️⃣  NOW PLAYING / MUSIC PLAYER")
+    UI.message("   - Play a song")
+    UI.message("   - Show the player with controls")
+    UI.message("   - Highlight: play/pause, queue, volume")
+    UI.message("")
+    UI.message("3️⃣  ARTIST DETAIL PAGE")
+    UI.message("   - Tap an artist card")
+    UI.message("   - Show artist info + their songs")
+    UI.message("   - Highlight: bio, top tracks, play all")
+    UI.message("")
+    UI.message("4️⃣  SEARCH / DISCOVERY")
+    UI.message("   - Open search or browse artists")
+    UI.message("   - Show filtering/browsing capabilities")
+    UI.message("")
+    UI.message("5️⃣  PLAYLISTS / SAVED CONTENT")
+    UI.message("   - Show a playlist or saved tracks")
+    UI.message("   - Highlight bookmarking/save feature")
+    UI.message("")
+    UI.message("💡 Pro Tips:")
+    UI.message("   - Use the Android Emulator (Android Studio)")
+    UI.message("   - Screenshot size: 1080x1920 pixels (portrait)")
+    UI.message("   - Save as PNG files")
+    UI.message("   - Compress with: pngquant image.png --quality=50-80")
+    UI.message("")
+    UI.message("Upload location: Google Play Console → Screenshots")
+  end
+end
+
+# Helper lane to show instructions
+lane :show_screenshot_instructions do
+  # This will be run for iOS too
+  puts "Navigate to each screen and take screenshots of 1080x1920 resolution."
+end

@@ -1,0 +1,32 @@
+<!-- ACCOUNT MENU (Bottom Sheet) -->
+<div class="offcanvas-overlay" x-show="accountOpen" @click.self="accountOpen = false" x-transition.opacity></div>
+<aside class="sheet-panel" :class="accountOpen ? 'open' : ''" x-transition x-data="navbarProxy()">
+    <div class="sheet-header">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="sheet-title">Account</div>
+        <button class="sheet-close" @click="accountOpen = false" aria-label="Close account menu">✕</button>
+    </div>
+
+    <div class="sheet-user">
+        <div class="name" x-text="isLoggedIn ? (userProfile.display_name || 'User') : 'Guest'"></div>
+        <div class="meta" x-show="isLoggedIn">
+            <span x-text="'$' + ((walletBalanceCents || 0)/100).toFixed(2) + ' Wallet'"></span>
+            <span>•</span>
+            <span x-text="(badges?.length || 0) + ' Badges'"></span>
+            <span>•</span>
+            <span x-text="(totalBookmarkCount || 0) + ' Bookmarks'"></span>
+        </div>
+    </div>
+
+    <nav class="sheet-nav">
+        <a href="/account"><i class="fas fa-user-circle"></i><span>My Profile</span></a>
+        <!-- <a href="/portfolio"><i class="fas fa-chart-line"></i><span>My Portfolio</span></a> -->
+        <!-- Dashboard unlinked from navigation for now (route still exists at /dashboard). -->
+        <a href="/my-saves"><i class="fas fa-bookmark"></i><span>Saved</span></a>
+        <a href="/settings"><i class="fas fa-sliders-h"></i><span>Preferences</span></a>
+        <button class="sheet-action danger" x-show="isLoggedIn" @click="logout(); accountOpen = false">
+            <i class="fas fa-sign-out-alt"></i><span>Sign Out</span>
+        </button>
+    </nav>
+</aside>
+

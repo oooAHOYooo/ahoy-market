@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: LittleMarket.Ahoy
+PackageVersion: 0.2.2
+InstallerType: nullsoft
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/oooAHOYooo/ahoy-little-platform/releases/download/v0.2.2/ahoy-indie-media-0.2.2-x64-setup.exe
+    InstallerSha256: PLACEHOLDER_RUN_scripts/winget-sha256.sh
+  - Architecture: arm64
+    InstallerUrl: https://github.com/oooAHOYooo/ahoy-little-platform/releases/download/v0.2.2/ahoy-indie-media-0.2.2-arm64-setup.exe
+    InstallerSha256: PLACEHOLDER_RUN_scripts/winget-sha256.sh
+ManifestType: installer
+ManifestVersion: 1.6.0

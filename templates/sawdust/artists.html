@@ -1,0 +1,703 @@
+{% extends "base.html" %}
+
+{% block title %}Artists - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="artists-page" x-data="artistsPage()" x-init="init()">
+    <div class="artists-container">
+        <!-- Unified Rotating Hero -->
+        <section class="unified-hero tv-hero"
+            x-data="createUnifiedHero({ pageType: 'artists', rotationSpeed: 14000 })"
+            x-init="init()"
+            @touchstart="handleTouchStart" @touchmove="handleTouchMove"
+            @touchend="handleTouchEnd">
+            <div class="unified-hero-feed hero-feed"
+                :style="`transform: translateX(${heroOffset}px)`">
+                <template x-for="(item, index) in heroItems"
+                    :key="item.id || item.name">
+                    <div class="hero-item" x-show="getItemImage(item)"
+                        :class="{'active': currentHeroIndex === index}"
+                        :style="`background-image: url(${getItemImage(item)})`"
+                        @click="playHeroItem(item)">
+                        <div class="hero-overlay">
+                            <div class="hero-content">
+                                <div class="hero-badge ahoy-subheader"
+                                    x-text="getPageBadge()"></div>
+                                <h1 x-text="getItemTitle(item)"></h1>
+                                <p x-text="getItemSubtitle(item)"></p>
+                                <button @click.stop="playHeroItem(item)"
+                                    class="hero-play-btn">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="hero-controls">
+                <button @click="prevHero()" class="hero-nav">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button @click="nextHero()" class="hero-nav">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="hero-indicators">
+                <template x-for="(item, index) in heroItems"
+                    :key="item.id || item.name">
+                    <button @click="setHeroIndex(index)"
+                        :class="{'active': currentHeroIndex === index}"
+                        class="hero-dot"></button>
+                </template>
+            </div>
+        </section>
+
+        <!-- Mobile: Artists layout matches Podcasts (episode rows) -->
+        {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
+        {{ subpage_hero(title="Artists", subtitle="Discover indie musicians, show hosts, athletes, filmmakers, and more.", icon_class="fas fa-users") }}
+
+        <section class="podcasts-section mobile-only">
+            {% call subpage_section_header("All Artists") %}
+            <button type="button" class="episode-btn"
+                @click="viewRandomArtist()" title="Discover Random Artist">
+                <i class="fas fa-random" aria-hidden="true"></i>
+                <span class="sr-only">Discover Random Artist</span>
+            </button>
+            {% endcall %}
+
+            <div class="artists-mobile-controls">
+                <div class="search-bar">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input type="text"
+                        x-model="searchQuery"
+                        @input="filterArtists()"
+                        placeholder="Search artists..."
+                        class="search-input">
+                    <button @click="clearSearch()" class="search-clear"
+                        x-show="searchQuery" aria-label="Clear search">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="filter-tabs-mobile">
+                    <button @click="setType('all')"
+                        :class="{'active': selectedType === 'all'}"
+                        class="filter-tab-mobile">
+                        <span>All</span>
+                    </button>
+                    <button @click="setType('musician')"
+                        :class="{'active': selectedType === 'musician'}"
+                        class="filter-tab-mobile">
+                        <span>Musicians</span>
+                    </button>
+                    <button @click="setType('host')"
+                        :class="{'active': selectedType === 'host'}"
+                        class="filter-tab-mobile">
+                        <span>Hosts</span>
+                    </button>
+                    <button @click="setType('filmmaker')"
+                        :class="{'active': selectedType === 'filmmaker'}"
+                        class="filter-tab-mobile">
+                        <span>Filmmakers</span>
+                    </button>
+                    <button @click="setType('producer')"
+                        :class="{'active': selectedType === 'producer'}"
+                        class="filter-tab-mobile">
+                        <span>Producers</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="episode-list">
+                <template x-for="artist in filteredArtists" :key="artist.id || artist.slug || artist.name">
+                    <article class="episode-row" @click="viewArtist(artist)">
+                        <img class="episode-art"
+                            :src="artist.image || '/static/img/default-avatar.png'"
+                            :alt="artist.name"
+                            loading="lazy"
+                            decoding="async">
+                        <div class="episode-meta">
+                            <div class="episode-title" x-text="artist.name"></div>
+                        </div>
+                        <div class="episode-actions">
+                            <button type="button" class="episode-btn"
+                                @click.stop="viewArtist(artist)" title="Open">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span class="sr-only">Open</span>
+                            </button>
+                            <button type="button" class="episode-btn bm-btn"
+                                @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
+                                :title="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Bookmark'">
+                                <i x-show="isBookmarked('artist', artist.id || artist.slug)"
+                                    class="fas fa-bookmark" aria-hidden="true"></i>
+                                <i x-show="!isBookmarked('artist', artist.id || artist.slug)"
+                                    class="far fa-bookmark" aria-hidden="true"></i>
+                                <span class="sr-only"
+                                    x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Bookmark'"></span>
+                            </button>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </section>
+        <!-- Unified Header Section -->
+        <section class="unified-header artists-subheader">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="title-text">
+                        <h1>Artists</h1>
+                        <p>Discover indie musicians, show hosts, athletes,
+                            filmmakers, and more.</p>
+                    </div>
+                </div>
+
+                <div class="header-search desktop-only">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            x-model="searchQuery"
+                            @input="filterArtists()"
+                            placeholder="Search artists, genres, or descriptions..."
+                            class="search-input">
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="header-search mobile-only">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            x-model="searchQuery"
+                            @input="filterArtists()"
+                            placeholder="Search artists..."
+                            class="search-input">
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-filters">
+                    <div class="filter-tabs desktop-only">
+                        <button @click="setType('all')"
+                            :class="{'active': selectedType === 'all'}"
+                            class="filter-tab">
+                            <span>All Artists</span>
+                        </button>
+                        <button @click="setType('musician')"
+                            :class="{'active': selectedType === 'musician'}"
+                            class="filter-tab">
+                            <span>Musicians</span>
+                        </button>
+                        <button @click="setType('host')"
+                            :class="{'active': selectedType === 'host'}"
+                            class="filter-tab">
+                            <span>Hosts</span>
+                        </button>
+                        <button @click="setType('filmmaker')"
+                            :class="{'active': selectedType === 'filmmaker'}"
+                            class="filter-tab">
+                            <span>Filmmakers</span>
+                        </button>
+                        <button @click="setType('producer')"
+                            :class="{'active': selectedType === 'producer'}"
+                            class="filter-tab">
+                            <span>Producers</span>
+                        </button>
+                    </div>
+                    <!-- Mobile: Horizontal Scrollable Filter Tabs -->
+                    <div class="filter-tabs-mobile mobile-only">
+                        <button @click="setType('all')"
+                            :class="{'active': selectedType === 'all'}"
+                            class="filter-tab-mobile">
+                            <span>All</span>
+                        </button>
+                        <button @click="setType('musician')"
+                            :class="{'active': selectedType === 'musician'}"
+                            class="filter-tab-mobile">
+                            <span>Musicians</span>
+                        </button>
+                        <button @click="setType('host')"
+                            :class="{'active': selectedType === 'host'}"
+                            class="filter-tab-mobile">
+                            <span>Hosts</span>
+                        </button>
+                        <button @click="setType('filmmaker')"
+                            :class="{'active': selectedType === 'filmmaker'}"
+                            class="filter-tab-mobile">
+                            <span>Filmmakers</span>
+                        </button>
+                        <button @click="setType('producer')"
+                            :class="{'active': selectedType === 'producer'}"
+                            class="filter-tab-mobile">
+                            <span>Producers</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="view-options">
+                        <button @click="viewMode = 'grid'"
+                            :class="{'active': viewMode === 'grid'}"
+                            class="view-btn">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button @click="viewMode = 'list'"
+                            :class="{'active': viewMode === 'list'}"
+                            class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <button @click="viewRandomArtist()"
+                        class="btn btn-primary btn-large">
+                        <i class="fas fa-user"></i> Discover Random Artist
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Artists Grid -->
+        <section class="artists-grid-section">
+            <div class="section-header">
+                <h2><i class="fas fa-th"></i> All Artists</h2>
+                <div class="view-controls">
+                    <button @click="viewMode = 'grid'"
+                        :class="{'active': viewMode === 'grid'}"
+                        class="view-btn">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button @click="viewMode = 'list'"
+                        :class="{'active': viewMode === 'list'}"
+                        class="view-btn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid View -->
+            <div x-show="viewMode === 'grid'" class="artists-grid">
+                <template x-for="artist in filteredArtists" :key="artist.id">
+                    <div class="artist-card" @click="viewArtist(artist)">
+                        <div class="artist-cover">
+                            <img
+                                :src="artist.image || '/static/img/default-avatar.png'"
+                                :alt="artist.name"
+                                class="artist-image image-placeholder">
+                            <div class="artist-overlay">
+                                <button @click.stop="viewArtist(artist)"
+                                    class="view-btn">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <div class="artist-actions">
+                                    <button class="action-btn bm-btn"
+                                        @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
+                                        :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
+                                        :class="{ 'bookmarked': isBookmarked('artist', artist.id || artist.slug), 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
+                                        <span aria-hidden="true">
+                                            <i
+                                                x-show="isBookmarked('artist', artist.id || artist.slug)"
+                                                class="fas fa-bookmark"
+                                                style="color: var(--accent-color);"></i>
+                                            <i
+                                                x-show="!isBookmarked('artist', artist.id || artist.slug)"
+                                                class="far fa-bookmark"></i>
+                                        </span>
+                                        <span class="sr-only"
+                                            x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="artist-type-badge ahoy-subheader"
+                                x-text="artist.type?.toUpperCase()"></div>
+                        </div>
+                        <div class="artist-info">
+                            <h4 x-text="artist.name"></h4>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- List View -->
+            <div x-show="viewMode === 'list'" class="artists-list">
+                <div class="list-header">
+                    <span class="col-avatar">Avatar</span>
+                    <span class="col-name">Name</span>
+                    <span class="col-type">Type</span>
+                    <span class="col-genre">Genre</span>
+                    <span class="col-actions">Actions</span>
+                </div>
+                <div class="list-items">
+                    <template x-for="artist in filteredArtists"
+                        :key="artist.id">
+                        <div class="list-item" @click="viewArtist(artist)">
+                            <div class="col-avatar">
+                                <img
+                                    :src="artist.image || '/static/img/default-avatar.png'"
+                                    :alt="artist.name"
+                                    class="artist-thumbnail image-placeholder">
+                                <div class="artist-type-badge ahoy-subheader"
+                                    x-text="artist.type?.toUpperCase()"></div>
+                            </div>
+                            <div class="col-name">
+                                <h4 x-text="artist.name"></h4>
+                            </div>
+                            <span class="col-type" x-text="artist.type"></span>
+                            <span class="col-genre"
+                                x-text="artist.genres?.join(', ') || 'Various'"></span>
+                            <div class="col-actions">
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                                    :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
+                                    :class="{ 'bookmarked': isBookmarked('artist', artist.id || artist.slug), 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
+                                    <span aria-hidden="true">
+                                        <i
+                                            x-show="isBookmarked('artist', artist.id || artist.slug)"
+                                            class="fas fa-bookmark"
+                                            style="color: var(--accent-color);"></i>
+                                        <i
+                                            x-show="!isBookmarked('artist', artist.id || artist.slug)"
+                                            class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only"
+                                        x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section x-show="isLoading" class="loading-section">
+            <div class="spinner"></div>
+            <p>Loading artists...</p>
+        </section>
+
+        <!-- Empty State -->
+        <section x-show="!isLoading && filteredArtists.length === 0"
+            class="empty-section">
+            <div class="empty-content">
+                <i class="fas fa-users"></i>
+                <h3>No artists found</h3>
+                <p>Try adjusting your search or filters</p>
+                <button @click="clearFilters()" class="btn btn-primary">Clear
+                    Filters</button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+function artistsPage() {
+    return {
+        // State
+        artists: [],
+        filteredArtists: [],
+        searchQuery: '',
+        selectedType: 'all',
+        viewMode: 'grid',
+        isLoading: true,
+        
+        // Initialize
+        async init() {
+            await this.loadArtists();
+        },
+        
+        // Data loading
+        async loadArtists() {
+            try {
+                this.isLoading = true;
+                const response = await fetch('/api/artists');
+                const data = await response.json();
+                this.artists = data.artists || [];
+                this.filteredArtists = [...this.artists];
+                this.filterArtists();
+                
+                // Images will load automatically via lazy loading
+            } catch (error) {
+                console.error('Error loading artists:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        // Filtering
+        filterArtists() {
+            let filtered = [...this.artists];
+            
+            // Search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(artist => 
+                    artist.name.toLowerCase().includes(query) ||
+                    artist.description?.toLowerCase().includes(query) ||
+                    artist.genres?.some(genre => genre.toLowerCase().includes(query))
+                );
+            }
+            
+            // Type filter
+            if (this.selectedType !== 'all') {
+                filtered = filtered.filter(artist => artist.type === this.selectedType);
+            }
+            
+            this.filteredArtists = filtered;
+        },
+        
+        setType(type) {
+            this.selectedType = type;
+            this.filterArtists();
+        },
+        
+        clearSearch() {
+            this.searchQuery = '';
+            this.filterArtists();
+        },
+        
+        clearFilters() {
+            this.searchQuery = '';
+            this.selectedType = 'all';
+            this.filterArtists();
+        },
+        
+        // Actions
+        viewArtist(artist) {
+            // Navigate to individual artist profile page
+            const artistSlug = artist.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            window.location.href = `/artist/${artistSlug}`;
+        },
+        
+        viewRandomArtist() {
+            if (this.artists.length > 0) {
+                const randomArtist = this.artists[Math.floor(Math.random() * this.artists.length)];
+                this.viewArtist(randomArtist);
+            }
+        },
+        
+        
+        async followArtist(artist) {
+            try {
+                const isCurrentlyFollowing = this.isFollowing(artist);
+                const response = await fetch(isCurrentlyFollowing ? '/api/artists/unfollow' : '/api/artists/follow', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        artist_id: artist.id
+                    })
+                });
+                
+                if (response.ok) {
+                    artist.following = !isCurrentlyFollowing;
+                    if (isCurrentlyFollowing) {
+                        artist.followers = Math.max(0, (artist.followers || 0) - 1);
+                    } else {
+                        artist.followers = (artist.followers || 0) + 1;
+                    }
+                    
+                    // Sync with Saved (Bookmarks)
+                    try {
+                        if (window.AhoyBookmarks) {
+                            const idStr = String(artist.slug || artist.id || artist.name);
+                            const isSaved = window.AhoyBookmarks.isBookmarked('artist', idStr);
+                            const item = {
+                                type: 'artist',
+                                id: idStr,
+                                title: artist?.name || 'Artist',
+                                artwork: artist?.image || ''
+                            };
+                            if (artist.following && !isSaved) {
+                                window.AhoyBookmarks.toggle(item);
+                            } else if (!artist.following && isSaved) {
+                                window.AhoyBookmarks.toggle(item);
+                            }
+                        }
+                    } catch (e) { console.warn('Bookmark sync failed:', e); }
+                    
+                    this.showNotification(isCurrentlyFollowing ? 'Unfollowed artist' : 'Following artist', 'success');
+                }
+            } catch (error) {
+                console.error('Error following artist:', error);
+                this.showNotification('Failed to follow artist', 'error');
+            }
+        },
+        
+        isFollowing(artist) {
+            return artist.following || false;
+        },
+        
+        // Utility functions
+        showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                font-weight: 500;
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        },
+        
+        // Bookmark methods
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+            }
+        },
+        
+        isBookmarked(type, id) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
+        }
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/unified-hero.js') }}"></script>
+<style>
+/* Defaults */
+.mobile-only { display: none; }
+.artists-mobile-controls { display: none; }
+
+/* Mobile artists uses Podcasts layout (episode rows) */
+@media (max-width: 768px) {
+    /* Toggle mobile/desktop helpers */
+    .mobile-only { display: block; }
+    .desktop-only { display: none !important; }
+
+    /* Hide large rotating hero + desktop header on mobile */
+    .unified-hero.tv-hero { display: none; }
+    .unified-header.artists-subheader { display: none !important; }
+
+    /* Match Podcasts padding */
+    .artists-page { padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px; }
+    .artists-container { padding: 0; }
+
+    /* Keep the mobile controls compact, above the episode rows */
+    .artists-mobile-controls { display: block; margin: 10px 2px 12px 2px; }
+    .artists-mobile-controls .search-bar { margin-bottom: 10px; }
+
+    /* Mobile: Horizontal scrollable filter tabs */
+    .filter-tabs-mobile {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding: 0.5rem 0;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+    }
+    .filter-tabs-mobile::-webkit-scrollbar { display: none; }
+    .filter-tab-mobile {
+        scroll-snap-align: start;
+        flex: 0 0 auto;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        color: #d1d5db;
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .filter-tab-mobile:active { transform: scale(0.98); }
+    .filter-tab-mobile.active {
+        background: #a855f7;
+        border-color: #a855f7;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    }
+    .filter-tab-mobile i { font-size: 0.75rem; }
+
+    /* Hide desktop/grid/table implementations on mobile */
+    .artists-grid-section { display: none !important; }
+
+    /* Make episode rows flush and responsive for artists */
+    .artists-page .episode-row {
+        grid-template-columns: 48px 1fr auto !important;
+        gap: 10px !important;
+        padding: 10px 12px !important;
+        margin: 0 0 8px 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        align-items: center !important;
+        max-width: 100% !important;
+    }
+
+    /* Ensure episode meta takes available space and doesn't overflow */
+    .artists-page .episode-meta {
+        min-width: 0 !important;
+        flex: 1 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    /* Make title flush and prevent overflow */
+    .artists-page .episode-title {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Hide descriptions on mobile for artists */
+    .artists-page .episode-desc {
+        display: none !important;
+    }
+
+    /* Hide subtitle if present on mobile for artists */
+    .artists-page .episode-subtitle {
+        display: none !important;
+    }
+
+    /* Ensure actions are properly aligned and don't shrink */
+    .artists-page .episode-actions {
+        flex-shrink: 0 !important;
+        gap: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Make episode art consistent and prevent shrinking */
+    .artists-page .episode-art {
+        flex-shrink: 0 !important;
+        width: 48px !important;
+        height: 48px !important;
+        object-fit: cover !important;
+    }
+
+    /* Ensure episode list container is flush */
+    .artists-page .episode-list {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+}
+</style>
+{% endblock %}

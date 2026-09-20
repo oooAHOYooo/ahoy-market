@@ -1,0 +1,124 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 3729 >>
+stream
+BT /F1 8 Tf 54 764.00 Td (Ahoy Rights Controls Checklist) Tj ET
+BT /F2 18 Tf 54 738.00 Td (Rights Future-Proofing Checklist) Tj ET
+1 w 54 730.00 m 558 730.00 l S
+BT /F1 10 Tf 54 706.00 Td (Goal: make future App Store, Play Store, and platform reviews easy to answer with records) Tj ET
+BT /F1 10 Tf 54 692.00 Td (instead of memory.) Tj ET
+BT /F2 13 Tf 54 664.00 Td (Before Publishing Any Creator Content) Tj ET
+BT /F1 10 Tf 60 638.00 Td (-) Tj ET
+BT /F1 10 Tf 76 638.00 Td (Confirm the creator/rights holder has a signed authorization, accepted creator terms,) Tj ET
+BT /F1 10 Tf 76 624.00 Td (or written approval on file.) Tj ET
+BT /F1 10 Tf 60 607.00 Td (-) Tj ET
+BT /F1 10 Tf 76 607.00 Td (Save the evidence path in the rights register.) Tj ET
+BT /F1 10 Tf 60 590.00 Td (-) Tj ET
+BT /F1 10 Tf 76 590.00 Td (Confirm the authorization covers the actual content type: audio, video, podcast,) Tj ET
+BT /F1 10 Tf 76 576.00 Td (artwork, metadata, or AHOY TV scheduling.) Tj ET
+BT /F1 10 Tf 60 559.00 Td (-) Tj ET
+BT /F1 10 Tf 76 559.00 Td (Confirm samples, covers, collaborators, producers, labels, publishers, artwork, stock) Tj ET
+BT /F1 10 Tf 76 545.00 Td (footage, and archive footage are cleared when applicable.) Tj ET
+BT /F1 10 Tf 60 528.00 Td (-) Tj ET
+BT /F1 10 Tf 76 528.00 Td (Mark content unpublished or hidden until rights are confirmed.) Tj ET
+BT /F2 13 Tf 54 501.00 Td (Database Fields To Add Later) Tj ET
+BT /F1 10 Tf 54 475.00 Td (Add a rights table or fields so the app can prove its content state directly:) Tj ET
+BT /F1 10 Tf 60 451.00 Td (-) Tj ET
+BT /F1 10 Tf 76 451.00 Td (`rights_status`: `pending`, `authorized`, `owned`, `licensed`, `rejected`, `expired`,) Tj ET
+BT /F1 10 Tf 76 437.00 Td (`revoked`.) Tj ET
+BT /F1 10 Tf 60 420.00 Td (-) Tj ET
+BT /F1 10 Tf 76 420.00 Td (`rights_holder_name`.) Tj ET
+BT /F1 10 Tf 60 403.00 Td (-) Tj ET
+BT /F1 10 Tf 76 403.00 Td (`rights_holder_email`.) Tj ET
+BT /F1 10 Tf 60 386.00 Td (-) Tj ET
+BT /F1 10 Tf 76 386.00 Td (`rights_agreement_id`.) Tj ET
+BT /F1 10 Tf 60 369.00 Td (-) Tj ET
+BT /F1 10 Tf 76 369.00 Td (`rights_evidence_url` or internal file reference.) Tj ET
+BT /F1 10 Tf 60 352.00 Td (-) Tj ET
+BT /F1 10 Tf 76 352.00 Td (`rights_scope`: audio, video, podcast, artwork, metadata, live_tv, promo, mobile_app.) Tj ET
+BT /F1 10 Tf 60 335.00 Td (-) Tj ET
+BT /F1 10 Tf 76 335.00 Td (`rights_effective_date`.) Tj ET
+BT /F1 10 Tf 60 318.00 Td (-) Tj ET
+BT /F1 10 Tf 76 318.00 Td (`rights_expiration_date`.) Tj ET
+BT /F1 10 Tf 60 301.00 Td (-) Tj ET
+BT /F1 10 Tf 76 301.00 Td (`rights_last_reviewed_at`.) Tj ET
+BT /F1 10 Tf 60 284.00 Td (-) Tj ET
+BT /F1 10 Tf 76 284.00 Td (`rights_reviewed_by`.) Tj ET
+BT /F1 10 Tf 60 267.00 Td (-) Tj ET
+BT /F1 10 Tf 76 267.00 Td (`rights_notes`.) Tj ET
+BT /F2 13 Tf 54 240.00 Td (App Behavior To Add Later) Tj ET
+BT /F1 10 Tf 60 214.00 Td (-) Tj ET
+BT /F1 10 Tf 76 214.00 Td (Hide content from public APIs unless `rights_status` is `authorized`, `owned`, or) Tj ET
+BT /F1 10 Tf 76 200.00 Td (`licensed`.) Tj ET
+BT /F1 10 Tf 60 183.00 Td (-) Tj ET
+BT /F1 10 Tf 76 183.00 Td (Exclude pending/expired/revoked content from `/api/music`, `/api/shows`,) Tj ET
+BT /F1 10 Tf 76 169.00 Td (`/api/podcasts`, `/api/artists`, `/api/radio/manifest`, and `/api/live-tv/channels`.) Tj ET
+BT /F1 10 Tf 60 152.00 Td (-) Tj ET
+BT /F1 10 Tf 76 152.00 Td (Add an admin-only rights dashboard outside the consumer app.) Tj ET
+BT /F1 10 Tf 60 135.00 Td (-) Tj ET
+BT /F1 10 Tf 76 135.00 Td (Add an export command that regenerates the Apple/Google rights packet from the live) Tj ET
+BT /F1 10 Tf 76 121.00 Td (database.) Tj ET
+BT /F1 10 Tf 60 104.00 Td (-) Tj ET
+BT /F1 10 Tf 76 104.00 Td (Add upload storage for signed agreements and release forms.) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Length 1682 >>
+stream
+BT /F1 8 Tf 54 764.00 Td (Ahoy Rights Controls Checklist) Tj ET
+BT /F2 13 Tf 54 734.00 Td (App Review Wording) Tj ET
+BT /F2 10 Tf 54 708.00 Td (Use this positioning consistently:) Tj ET
+0.5 w 204 706.00 m 558 706.00 l S
+BT /F1 10 Tf 54 682.00 Td (Ahoy is a direct-to-artist media platform. It does not aggregate unauthorized third-party) Tj ET
+BT /F1 10 Tf 54 668.00 Td (streaming services. Content is either produced by Ahoy / Little Market LLC, submitted by) Tj ET
+BT /F1 10 Tf 54 654.00 Td (creators and rights holders who authorized Ahoy distribution, or otherwise licensed/cleared) Tj ET
+BT /F1 10 Tf 54 640.00 Td (for app distribution.) Tj ET
+BT /F1 10 Tf 54 616.00 Td (AHOY TV is a scheduled marketing and discovery surface for Ahoy-controlled video catalog) Tj ET
+BT /F1 10 Tf 54 602.00 Td (items. It is not a third-party TV, cable, IPTV, or broadcast retransmission service.) Tj ET
+BT /F2 13 Tf 54 574.00 Td (Ongoing Review Cadence) Tj ET
+BT /F1 10 Tf 60 548.00 Td (-) Tj ET
+BT /F1 10 Tf 76 548.00 Td (Review the rights register before every iOS release.) Tj ET
+BT /F1 10 Tf 60 531.00 Td (-) Tj ET
+BT /F1 10 Tf 76 531.00 Td (Review the rights register before every major content import.) Tj ET
+BT /F1 10 Tf 60 514.00 Td (-) Tj ET
+BT /F1 10 Tf 76 514.00 Td (Keep an annual rights audit folder by year.) Tj ET
+BT /F1 10 Tf 60 497.00 Td (-) Tj ET
+BT /F1 10 Tf 76 497.00 Td (Save App Review correspondence next to the supporting rights packet.) Tj ET
+BT /F1 10 Tf 60 480.00 Td (-) Tj ET
+BT /F1 10 Tf 76 480.00 Td (If a creator asks for removal, document the request and remove or hide the content) Tj ET
+BT /F1 10 Tf 76 466.00 Td (before the next public content refresh.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Kids [5 0 R 6 0 R] /Count 2 >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000154 00000 n 
+0000003935 00000 n 
+0000005669 00000 n 
+0000005805 00000 n 
+0000005941 00000 n 
+0000006004 00000 n 
+trailer << /Size 9 /Root 8 0 R >>
+startxref
+6053
+%%EOF

@@ -1,0 +1,267 @@
+name: Desktop Release
+
+# Builds AppImage + DEB for x64 and arm64, uploads to GitHub Releases.
+# Trigger: push a version tag (v0.2.2, v1.0.0) or run manually from Actions tab.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: 'Create as draft release?'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: spa/package-lock.json
+
+      - name: Install SPA dependencies
+        run: cd spa && npm install --legacy-peer-deps
+
+      - name: Build Vue SPA
+        run: cd spa && npm run build
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+
+      - name: Build Linux packages (AppImage + DEB + Snap)
+        run: npm run electron:build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List build output
+        run: ls -lh dist-electron/
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          generate_release_notes: true
+          files: |
+            dist-electron/*.AppImage
+            dist-electron/*.deb
+            dist-electron/*.snap
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to Snap Store
+        if: startsWith(github.ref, 'refs/tags/') && secrets.SNAPCRAFT_STORE_CREDENTIALS != ''
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          snapcraft upload dist-electron/ahoy-*.snap --release=stable
+
+  post-release-checklist:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-windows, build-mac]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Post platform checklist to release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.version.outputs.VERSION }}';
+            const releaseUrl = `https://github.com/${{ github.repository }}/releases/tag/v${version}`;
+            const checklist = `## 📋 Platform Deployment Checklist — v${version}
+
+### ✅ AUTOMATED & COMPLETE
+- ✓ Linux: AppImage (x64 + arm64) → GitHub Releases
+- ✓ Linux: DEB (x64 + arm64) → GitHub Releases
+- ✓ Linux: Snap → Snap Store (if credentials set)
+- ✓ Windows: NSIS installer (x64 + arm64) → GitHub Releases
+- ✓ macOS: DMG (x64 + arm64) → GitHub Releases
+
+---
+
+### ⚠️ MANUAL TASKS — Do These When Ready
+
+#### 1️⃣ **AUR (Arch Linux)**
+\`\`\`bash
+# 1. Get sha256 of AppImage from Release
+cd ~
+curl -sL $(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${version}" | jq -r '.assets[] | select(.name | contains("x86_64.AppImage")) | .browser_download_url') -o app.AppImage
+sha256=$(sha256sum app.AppImage | cut -d' ' -f1)
+
+# 2. Update PKGBUILD
+sed -i "s/pkgver=.*/pkgver=${version}/" packaging/PKGBUILD-bin
+sed -i "s/sha256sum=.*/sha256sum='$sha256'/" packaging/PKGBUILD-bin
+
+# 3. Regenerate .SRCINFO
+cd packaging && makepkg --printsrcinfo > .SRCINFO
+
+# 4. Push to AUR
+cd ~ && git add packaging/PKGBUILD-bin packaging/.SRCINFO
+git commit -m "v${version}" && git push ssh://aur@aur.archlinux.org/ahoy.git main
+\`\`\`
+
+#### 2️⃣ **macOS App Store**
+\`\`\`bash
+./packaging/build-ios.sh upload
+# Wait for App Review (24–48h)
+\`\`\`
+
+#### 3️⃣ **Android Play Store**
+\`\`\`bash
+cd android && ./gradlew bundleRelease
+# Upload .aab to Google Play Console
+\`\`\`
+
+---
+**Automation:** See [scripts/deploy.sh](https://github.com/${{ github.repository }}/blob/main/scripts/deploy.sh)`;
+
+            try {
+              const releases = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 1
+              });
+
+              if (releases.data.length > 0) {
+                const release = releases.data[0];
+                if (release.tag_name === \`v\${version}\`) {
+                  await github.rest.repos.updateRelease({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    release_id: release.id,
+                    body: release.body + '\n\n' + checklist
+                  });
+                }
+              }
+            } catch (err) {
+              console.log('Could not update release (non-blocking)', err.message);
+            }
+
+      - name: Upload artifacts (manual runs / no tag)
+        uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: linux-packages
+          path: |
+            dist-electron/*.AppImage
+            dist-electron/*.deb
+            dist-electron/*.snap
+          retention-days: 30
+
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: spa/package-lock.json
+
+      - name: Install SPA dependencies
+        run: cd spa && npm install --legacy-peer-deps
+
+      - name: Build Vue SPA
+        run: cd spa && npm run build
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Build Windows installer (x64 + arm64)
+        run: npx electron-builder --win --x64 --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          files: |
+            dist-electron/*-setup.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (manual runs / no tag)
+        uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: windows-packages
+          path: dist-electron/*-setup.exe
+          retention-days: 30
+
+  build-mac:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: spa/package-lock.json
+
+      - name: Install SPA dependencies
+        run: cd spa && npm install --legacy-peer-deps
+
+      - name: Build Vue SPA
+        run: cd spa && npm run build
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Build Mac DMG (x64 + arm64)
+        run: npx electron-builder --mac --x64 --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          files: |
+            dist-electron/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (manual runs / no tag)
+        uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          name: mac-packages
+          path: dist-electron/*.dmg
+          retention-days: 30

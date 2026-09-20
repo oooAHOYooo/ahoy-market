@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<!--
+  ╔══════════════════════════════════════════════════════╗
+  ║  AHOY NEWSLETTER — May 2026                                ║
+  ║  Edit this file, preview in browser, then send:     ║
+  ║  python scripts/newsletter_send.py newsletters/2026-may.html  ║
+  ╚══════════════════════════════════════════════════════╝
+
+  QUICK EDIT GUIDE
+  ────────────────────────────────────────────────────
+  • Subject line   →  change <title> below
+  • Inbox preview  →  change the PREHEADER div text
+  • Personal note  →  find the "FROM THE EDITOR" block
+  • Any headline   →  edit the bold text in each row
+-->
+
+<!-- EDIT: becomes the email subject line -->
+<title>What's New at Ahoy — May 2026</title>
+
+<style>
+  /* ── BROWSER PREVIEW ONLY ─────────────────────────────────────────
+     Styles here are ignored by email clients.
+     Inline styles in the body handle email rendering.
+     ────────────────────────────────────────────────────────────────── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8e4dc;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  .preview-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fffbe6;
+    border-bottom: 1px solid #d4b84a;
+    padding: 9px 20px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #6b5c00;
+    text-align: center;
+  }
+  .preview-bar code {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Widescreen blur-background photo trick (browser only) ──────────────
+     The <table class="photo-wrap"> carries background-image so email clients
+     see a filled 400px box. In the browser, ::before inherits that background,
+     scales it up slightly, and blurs it to fill the letterbox bars. The
+     foreground <img class="photo-main"> sits on top at z-index 1.
+     ─────────────────────────────────────────────────────────────────────── */
+  table.photo-wrap {
+    position: relative;
+    overflow: hidden;
+    max-height: 400px;
+  }
+
+  table.photo-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -32px;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.06);
+    filter: blur(22px) grayscale(100%) brightness(0.42) contrast(1.2) sepia(10%);
+    -webkit-filter: blur(22px) grayscale(100%) brightness(0.42) contrast(1.2) sepia(10%);
+    z-index: 0;
+  }
+
+  td.photo-cell {
+    position: relative;
+    z-index: 1;
+  }
+
+  img.photo-main {
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background:#e8e4dc;
+             font-family:Georgia,'Times New Roman',serif;
+             -webkit-text-size-adjust:100%; mso-line-height-rule:exactly;">
+
+  <!-- BROWSER PREVIEW BAR — hidden in email -->
+  <div class="preview-bar" style="mso-hide:all;">
+    <strong>Draft</strong> &mdash; May 2026 &mdash; 6 item(s) &nbsp;|&nbsp;
+    Send: <code>python scripts/newsletter_send.py newsletters/2026-may.html</code>
+  </div>
+
+  <!-- PREHEADER — inbox snippet, invisible in body -->
+  <!-- EDIT: customize the inbox preview text below -->
+  <div style="display:none; font-size:1px; color:#e8e4dc; line-height:1px;
+              max-height:0; max-width:0; opacity:0; overflow:hidden; mso-hide:all;">
+    Your May 2026 update from Ahoy &mdash; new music, videos, shows, and more from the indie media platform.
+  </div>
+
+  <!-- ══════════════════════════════════════════════ EMAIL BODY -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+         style="background:#e8e4dc; padding:40px 16px 64px;">
+    <tr><td align="center">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"
+           style="max-width:600px; width:100%; background:#faf9f6;">
+
+      <!-- ══ MASTHEAD ══════════════════════════════════════════════ -->
+      <tr>
+        <td style="padding:0; border-top:4px solid #0a0a0a; border-bottom:none;">
+
+          <!-- Top rule strip -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="padding:11px 52px 10px; border-bottom:1px solid #0a0a0a;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-family:Georgia,'Times New Roman',serif; font-size:9px; letter-spacing:0.25em;
+                                text-transform:uppercase; color:#555555;">
+                      Est.&nbsp;MMXXV &nbsp;&middot;&nbsp; Indie Media
+                    </td>
+                    <td style="font-family:Georgia,'Times New Roman',serif; font-size:9px; letter-spacing:0.25em;
+                                text-transform:uppercase; color:#555555; text-align:right;">
+                      Monthly Edition
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Nameplate -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="padding:28px 52px 24px; text-align:center; border-bottom:1px solid #0a0a0a;">
+                <div style="font-family:Georgia,'Times New Roman',serif; font-size:58px; font-weight:bold;
+                            color:#0a0a0a; letter-spacing:-0.03em; line-height:0.92;
+                            text-transform:uppercase;">
+                  Ahoy
+                </div>
+                <div style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.42em;
+                            text-transform:uppercase; color:#0a0a0a; margin-top:12px;">
+                  Indie&nbsp; Media&nbsp; Dispatch
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Date bar -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="padding:9px 52px 10px; border-bottom:3px solid #0a0a0a;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-family:Georgia,'Times New Roman',serif; font-size:9px; letter-spacing:0.22em;
+                                text-transform:uppercase; color:#0a0a0a;">
+                      MAY&nbsp;2026
+                    </td>
+                    <td style="font-family:Georgia,'Times New Roman',serif; font-size:9px; letter-spacing:0.22em;
+                                text-transform:uppercase; color:#0a0a0a; text-align:right;">
+                      ahoy.ooo
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+
+      <!-- ══ FROM THE EDITOR ══════════════════════════════════════ -->
+      <tr>
+        <td style="padding:40px 52px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                 style="border:1px solid #0a0a0a;">
+
+            <!-- Header bar -->
+            <tr>
+              <td style="background:#0a0a0a; padding:6px 20px; text-align:center;">
+                <span style="font-family:Georgia,'Times New Roman',serif; font-size:8px; font-weight:bold;
+                             letter-spacing:0.38em; text-transform:uppercase; color:#faf9f6;">
+                  From the Editor
+                </span>
+              </td>
+            </tr>
+
+            <!-- Note body -->
+            <tr>
+              <td style="padding:22px 26px 26px;">
+                <!-- EDIT: Replace this with your personal note each month. -->
+                <!-- Keep it warm and brief — 2 to 4 sentences. -->
+                <div style="font-family:Georgia,'Times New Roman',serif; font-size:14px; font-style:italic;
+                            color:#0a0a0a; line-height:1.9;">
+                  Write your personal note here. What made this month worth writing about?
+                  Keep it warm, brief, and in your own voice &mdash; this is the part they
+                  actually look forward to.
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+
+      <!-- ══ CONTENT SECTIONS ══════════════════════════════════════ -->
+      
+        <!-- ===== MUSIC UPDATES ===== -->
+        <tr>
+          <td style="padding:44px 52px 0;">
+            <div style="border-top:3px solid #0a0a0a; padding-top:10px;">
+              <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-weight:bold;
+                           letter-spacing:0.34em; text-transform:uppercase;
+                           color:#0a0a0a;">&#9670;&ensp;MUSIC UPDATES&ensp;&#9670;</span>
+            </div>
+            <div style="border-top:1px solid #0a0a0a; margin-top:9px;"></div>
+          </td>
+        </tr>
+        <!-- photo item -->
+        <tr>
+          <td style="padding:24px 0 0; line-height:0; font-size:0;">
+            <table role="presentation" class="photo-wrap"
+                   width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#1a1a18;
+                          background-image:url('https://storage.googleapis.com/ahoy-song-collection/sinecera/album%20%3D%20%20___told%20me%20to%20slow%20down%2C%20I%20can%20hardly%20know%20now%2C%20if%20I%27m%20dosing%20the%20coda%20with%20work%20of%20the%20heart%20or%20lines%20from%20a%20tale.../sinecera-album-%20___told%20me%20to%20slow%20down%2C%20I%20can%20hardly%20know%20now%2C%20if%20I%27m%20dosing%20the%20coda%20with%20work%20of%20the%20heart%20or%20lines%20from%20a%20tale....jpg'); background-size:cover;
+                          background-position:center;">
+              <tr>
+                <td class="photo-cell" height="400"
+                    style="height:400px; text-align:center; vertical-align:middle;
+                           padding:0; line-height:0; font-size:0; overflow:hidden;">
+                  <img src="https://storage.googleapis.com/ahoy-song-collection/sinecera/album%20%3D%20%20___told%20me%20to%20slow%20down%2C%20I%20can%20hardly%20know%20now%2C%20if%20I%27m%20dosing%20the%20coda%20with%20work%20of%20the%20heart%20or%20lines%20from%20a%20tale.../sinecera-album-%20___told%20me%20to%20slow%20down%2C%20I%20can%20hardly%20know%20now%2C%20if%20I%27m%20dosing%20the%20coda%20with%20work%20of%20the%20heart%20or%20lines%20from%20a%20tale....jpg" class="photo-main" alt=""
+                       style="display:inline-block; height:400px; width:auto;
+                              max-width:100%; max-height:400px;
+                              filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);
+                              -webkit-filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 52px 32px; border-bottom:1px solid #d8d4cc;">
+            <div style="border-top:2px solid #0a0a0a; margin-bottom:9px;"></div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:bold;
+                           color:#0a0a0a; line-height:1.35; padding-right:18px;
+                           vertical-align:bottom;">
+                  Sinecera &amp; The Knife Kickers - Full Album
+                </td>
+                <td style="vertical-align:bottom; text-align:right; white-space:nowrap;
+                           padding-bottom:1px;">
+                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.06em; color:#888888;">May 7</span><span style="color:#cccccc;">&ensp;&middot;&ensp;</span><a href="https://ahoy.ooo/music" style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-style:italic; color:#0a0a0a; text-decoration:none; letter-spacing:0.04em;">Listen&nbsp;&#8594;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- photo item -->
+        <tr>
+          <td style="padding:24px 0 0; line-height:0; font-size:0;">
+            <table role="presentation" class="photo-wrap"
+                   width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#1a1a18;
+                          background-image:url('https://storage.googleapis.com/ahoy-song-collection/sinecera/Sincera.jpg'); background-size:cover;
+                          background-position:center;">
+              <tr>
+                <td class="photo-cell" height="400"
+                    style="height:400px; text-align:center; vertical-align:middle;
+                           padding:0; line-height:0; font-size:0; overflow:hidden;">
+                  <img src="https://storage.googleapis.com/ahoy-song-collection/sinecera/Sincera.jpg" class="photo-main" alt=""
+                       style="display:inline-block; height:400px; width:auto;
+                              max-width:100%; max-height:400px;
+                              filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);
+                              -webkit-filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 52px 32px; ">
+            <div style="border-top:2px solid #0a0a0a; margin-bottom:9px;"></div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:bold;
+                           color:#0a0a0a; line-height:1.35; padding-right:18px;
+                           vertical-align:bottom;">
+                  Sinecera - I wanna tell you
+                </td>
+                <td style="vertical-align:bottom; text-align:right; white-space:nowrap;
+                           padding-bottom:1px;">
+                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.06em; color:#888888;">May 4</span><span style="color:#cccccc;">&ensp;&middot;&ensp;</span><a href="https://ahoy.ooo/music" style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-style:italic; color:#0a0a0a; text-decoration:none; letter-spacing:0.04em;">Listen&nbsp;&#8594;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- ===== VIDEO UPDATES ===== -->
+        <tr>
+          <td style="padding:44px 52px 0;">
+            <div style="border-top:3px solid #0a0a0a; padding-top:10px;">
+              <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-weight:bold;
+                           letter-spacing:0.34em; text-transform:uppercase;
+                           color:#0a0a0a;">&#9670;&ensp;VIDEO UPDATES&ensp;&#9670;</span>
+            </div>
+            <div style="border-top:1px solid #0a0a0a; margin-top:9px;"></div>
+          </td>
+        </tr>
+        <!-- photo item -->
+        <tr>
+          <td style="padding:24px 0 0; line-height:0; font-size:0;">
+            <table role="presentation" class="photo-wrap"
+                   width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#1a1a18;
+                          background-image:url('https://storage.googleapis.com/ahoy-videos/live/poets/poets-10/Poets%20%2310.jpg'); background-size:cover;
+                          background-position:center;">
+              <tr>
+                <td class="photo-cell" height="400"
+                    style="height:400px; text-align:center; vertical-align:middle;
+                           padding:0; line-height:0; font-size:0; overflow:hidden;">
+                  <img src="https://storage.googleapis.com/ahoy-videos/live/poets/poets-10/Poets%20%2310.jpg" class="photo-main" alt=""
+                       style="display:inline-block; height:400px; width:auto;
+                              max-width:100%; max-height:400px;
+                              filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);
+                              -webkit-filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 52px 32px; ">
+            <div style="border-top:2px solid #0a0a0a; margin-bottom:9px;"></div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:bold;
+                           color:#0a0a0a; line-height:1.35; padding-right:18px;
+                           vertical-align:bottom;">
+                  Poets &amp; Friends #10 — Full Show Recap
+                </td>
+                <td style="vertical-align:bottom; text-align:right; white-space:nowrap;
+                           padding-bottom:1px;">
+                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.06em; color:#888888;">May 21</span><span style="color:#cccccc;">&ensp;&middot;&ensp;</span><a href="https://ahoy.ooo/videos?play=poets-and-friends-10" style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-style:italic; color:#0a0a0a; text-decoration:none; letter-spacing:0.04em;">Watch&nbsp;&#8594;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- ===== PLATFORM UPDATES ===== -->
+        <tr>
+          <td style="padding:44px 52px 0;">
+            <div style="border-top:3px solid #0a0a0a; padding-top:10px;">
+              <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-weight:bold;
+                           letter-spacing:0.34em; text-transform:uppercase;
+                           color:#0a0a0a;">&#9670;&ensp;PLATFORM UPDATES&ensp;&#9670;</span>
+            </div>
+            <div style="border-top:1px solid #0a0a0a; margin-top:9px;"></div>
+          </td>
+        </tr>
+        <!-- photo item -->
+        <tr>
+          <td style="padding:24px 0 0; line-height:0; font-size:0;">
+            <table role="presentation" class="photo-wrap"
+                   width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#1a1a18;
+                          background-image:url('https://www.citypng.com/public/uploads/preview/hd-get-it-on-google-play-button-transparent-png-70408169470949159xr9ct69w.png'); background-size:cover;
+                          background-position:center;">
+              <tr>
+                <td class="photo-cell" height="400"
+                    style="height:400px; text-align:center; vertical-align:middle;
+                           padding:0; line-height:0; font-size:0; overflow:hidden;">
+                  <img src="https://www.citypng.com/public/uploads/preview/hd-get-it-on-google-play-button-transparent-png-70408169470949159xr9ct69w.png" class="photo-main" alt=""
+                       style="display:inline-block; height:400px; width:auto;
+                              max-width:100%; max-height:400px;
+                              filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);
+                              -webkit-filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 52px 32px; ">
+            <div style="border-top:2px solid #0a0a0a; margin-bottom:9px;"></div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:bold;
+                           color:#0a0a0a; line-height:1.35; padding-right:18px;
+                           vertical-align:bottom;">
+                  We are out on Google Play Store
+                </td>
+                <td style="vertical-align:bottom; text-align:right; white-space:nowrap;
+                           padding-bottom:1px;">
+                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.06em; color:#888888;">May 4</span><span style="color:#cccccc;">&ensp;&middot;&ensp;</span><a href="https://play.google.com/store/apps/details?id=ooo.ahoy.app" style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-style:italic; color:#0a0a0a; text-decoration:none; letter-spacing:0.04em;">Open&nbsp;&#8594;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- ===== EVENTS UPDATES ===== -->
+        <tr>
+          <td style="padding:44px 52px 0;">
+            <div style="border-top:3px solid #0a0a0a; padding-top:10px;">
+              <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-weight:bold;
+                           letter-spacing:0.34em; text-transform:uppercase;
+                           color:#0a0a0a;">&#9670;&ensp;EVENTS UPDATES&ensp;&#9670;</span>
+            </div>
+            <div style="border-top:1px solid #0a0a0a; margin-top:9px;"></div>
+          </td>
+        </tr>
+        <!-- photo item -->
+        <tr>
+          <td style="padding:24px 0 0; line-height:0; font-size:0;">
+            <table role="presentation" class="photo-wrap"
+                   width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#1a1a18;
+                          background-image:url('https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/63jXIXgcLBX0GcqxcI6Rt?fit=clip&w=800&auto=format'); background-size:cover;
+                          background-position:center;">
+              <tr>
+                <td class="photo-cell" height="400"
+                    style="height:400px; text-align:center; vertical-align:middle;
+                           padding:0; line-height:0; font-size:0; overflow:hidden;">
+                  <img src="https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/63jXIXgcLBX0GcqxcI6Rt?fit=clip&w=800&auto=format" class="photo-main" alt=""
+                       style="display:inline-block; height:400px; width:auto;
+                              max-width:100%; max-height:400px;
+                              filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);
+                              -webkit-filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 52px 32px; border-bottom:1px solid #d8d4cc;">
+            <div style="border-top:2px solid #0a0a0a; margin-bottom:9px;"></div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:bold;
+                           color:#0a0a0a; line-height:1.35; padding-right:18px;
+                           vertical-align:bottom;">
+                  Poets &amp; Friends #11
+                </td>
+                <td style="vertical-align:bottom; text-align:right; white-space:nowrap;
+                           padding-bottom:1px;">
+                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.06em; color:#888888;">May 20</span><span style="color:#cccccc;">&ensp;&middot;&ensp;</span><a href="https://ahoy.ooo/events/v/2026-05-28T18:30:00" style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-style:italic; color:#0a0a0a; text-decoration:none; letter-spacing:0.04em;">Details&nbsp;&#8594;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- photo item -->
+        <tr>
+          <td style="padding:24px 0 0; line-height:0; font-size:0;">
+            <table role="presentation" class="photo-wrap"
+                   width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:100%; max-width:600px; background-color:#1a1a18;
+                          background-image:url('https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/yUIvRp87Y9u5eKuqGd1p2?fit=clip&w=920&auto=format'); background-size:cover;
+                          background-position:center;">
+              <tr>
+                <td class="photo-cell" height="400"
+                    style="height:400px; text-align:center; vertical-align:middle;
+                           padding:0; line-height:0; font-size:0; overflow:hidden;">
+                  <img src="https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/yUIvRp87Y9u5eKuqGd1p2?fit=clip&w=920&auto=format" class="photo-main" alt=""
+                       style="display:inline-block; height:400px; width:auto;
+                              max-width:100%; max-height:400px;
+                              filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);
+                              -webkit-filter:grayscale(100%) contrast(1.18) brightness(0.86) sepia(8%);" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 52px 32px; ">
+            <div style="border-top:2px solid #0a0a0a; margin-bottom:9px;"></div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-family:Georgia,'Times New Roman',serif; font-size:15px; font-weight:bold;
+                           color:#0a0a0a; line-height:1.35; padding-right:18px;
+                           vertical-align:bottom;">
+                  AHOY @ THE NIGHT MARKET
+                </td>
+                <td style="vertical-align:bottom; text-align:right; white-space:nowrap;
+                           padding-bottom:1px;">
+                  <span style="font-family:Georgia,'Times New Roman',serif; font-size:10px; letter-spacing:0.06em; color:#888888;">May 1</span><span style="color:#cccccc;">&ensp;&middot;&ensp;</span><a href="https://ahoy.ooo/events/v/2026-05-15T17:30:00" style="font-family:Georgia,'Times New Roman',serif; font-size:10px; font-style:italic; color:#0a0a0a; text-decoration:none; letter-spacing:0.04em;">Details&nbsp;&#8594;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      <!-- ══ SPACER ════════════════════════════════════════════════ -->
+      <tr>
+        <td style="padding:44px 52px 0;">
+          <div style="border-top:3px solid #0a0a0a;"></div>
+        </td>
+      </tr>
+
+      <!-- ══ READ ONLINE ═══════════════════════════════════════════ -->
+      <tr>
+        <td style="padding:28px 52px; text-align:center;">
+          <a href="https://ahoy.ooo/whats-new/2026/may"
+             style="font-family:Georgia,'Times New Roman',serif; font-size:11px; letter-spacing:0.22em;
+                    text-transform:uppercase; color:#0a0a0a; text-decoration:none;
+                    border-bottom:1px solid #0a0a0a; padding-bottom:2px;">
+            Read the full edition at Ahoy &nbsp;&#8594;
+          </a>
+        </td>
+      </tr>
+
+      <!-- ══ FOOTER ════════════════════════════════════════════════ -->
+      <tr>
+        <td style="padding:0 52px 44px; border-top:1px solid #0a0a0a;">
+          <div style="font-family:Georgia,'Times New Roman',serif; font-size:9px; letter-spacing:0.18em;
+                      text-transform:uppercase; color:#888888; text-align:center;
+                      margin-top:20px; line-height:2.2;">
+            <a href="https://ahoy.ooo" style="color:#888888; text-decoration:none;">ahoy.ooo</a>
+            &nbsp;&middot;&nbsp;
+            You are receiving this because you subscribed to Ahoy updates.
+          </div>
+        </td>
+      </tr>
+
+    </table>
+    </td></tr>
+  </table>
+
+</body>
+</html>

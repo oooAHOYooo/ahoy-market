@@ -1,0 +1,10 @@
+{
+  "_help": "Add/remove subscribers here. Set status to 'inactive' to stop sending without deleting the record.",
+  "subscribers": [
+    {
+      "email": "alex@ahoy.ooo",
+      "name": "Alex",
+      "status": "active"
+    }
+  ]
+}

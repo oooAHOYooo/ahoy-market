@@ -1,0 +1,167 @@
+name: Auto-Release on Main Push
+
+# Automatically bump version, tag, and release desktop apps
+# when new commits are pushed to main.
+# This runs AFTER Render deploys (since Render shows in main commit history).
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'DEPLOYMENT.md'
+      - 'README.md'
+      - '*.md'
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history to check tags
+
+      - name: Check if new commits since last tag
+        id: check_version
+        run: |
+          # Get last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "LAST_TAG=$LAST_TAG" >> $GITHUB_OUTPUT
+
+          # Count commits since tag
+          COMMITS_SINCE=$(git rev-list ${LAST_TAG}..HEAD --count)
+          echo "COMMITS_SINCE=$COMMITS_SINCE" >> $GITHUB_OUTPUT
+
+          if [ "$COMMITS_SINCE" -eq 0 ]; then
+            echo "No new commits since $LAST_TAG, skipping release"
+            exit 0
+          fi
+
+          echo "Found $COMMITS_SINCE new commits since $LAST_TAG"
+
+      - name: Parse and bump build version
+        id: version
+        if: steps.check_version.outputs.COMMITS_SINCE > 0
+        run: |
+          # Get current version from package.json (base version, e.g., 0.2.4)
+          CURRENT=$(grep '"version"' package.json | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+          echo "CURRENT=$CURRENT" >> $GITHUB_OUTPUT
+
+          # Get last tag to extract build number
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v${CURRENT}.0")
+          echo "LAST_TAG=$LAST_TAG" >> $GITHUB_OUTPUT
+
+          # Extract build number from tag (e.g., v0.2.4.5 → 5)
+          # If tag is just v0.2.4, build number is 0
+          if [[ $LAST_TAG =~ ^v([0-9]+\.[0-9]+\.[0-9]+)\.([0-9]+)$ ]]; then
+            BASE_VERSION="${BASH_REMATCH[1]}"
+            BUILD_NUM="${BASH_REMATCH[2]}"
+          elif [[ $LAST_TAG =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            BASE_VERSION="${BASH_REMATCH[1]}"
+            BUILD_NUM="0"
+          else
+            BASE_VERSION=$CURRENT
+            BUILD_NUM="0"
+          fi
+
+          # Verify base version matches current (if not, reset build counter)
+          if [ "$BASE_VERSION" != "$CURRENT" ]; then
+            BUILD_NUM="0"
+            BASE_VERSION=$CURRENT
+          fi
+
+          # Increment build number
+          NEW_BUILD=$((BUILD_NUM + 1))
+          NEW_VERSION="${CURRENT}.${NEW_BUILD}"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          echo "Build version: $LAST_TAG → v${NEW_VERSION}"
+
+      - name: Update package.json versions
+        if: steps.check_version.outputs.COMMITS_SINCE > 0
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.NEW_VERSION }}"
+
+          # Update root package.json
+          sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" package.json
+
+          # Update spa/package.json if it exists
+          if [ -f spa/package.json ]; then
+            sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$NEW_VERSION\"/" spa/package.json
+          fi
+
+          # Verify
+          echo "Updated to version $NEW_VERSION"
+          grep '"version"' package.json | head -1
+
+      - name: Generate CHANGELOG and update README
+        if: steps.check_version.outputs.COMMITS_SINCE > 0
+        run: |
+          node scripts/generate-changelog.js
+          node scripts/update-readme-badge.js
+
+      - name: Commit version bump + docs
+        if: steps.check_version.outputs.COMMITS_SINCE > 0
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.NEW_VERSION }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add package.json spa/package.json CHANGELOG.md README.md 2>/dev/null || git add package.json spa/package.json
+          git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git push origin main
+
+      - name: Create tag and trigger release
+        if: steps.check_version.outputs.COMMITS_SINCE > 0
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.NEW_VERSION }}"
+          TAG="v${NEW_VERSION}"
+
+          git tag "$TAG"
+          git push origin "$TAG"
+
+          echo "✅ Released $TAG"
+          echo "🚀 Desktop builds starting (Linux/Windows/Mac)..."
+          echo "📦 Check releases: https://github.com/${{ github.repository }}/releases/tag/$TAG"
+
+  # Wait a bit, then post checklist
+  checklist:
+    if: success()
+    runs-on: ubuntu-latest
+    needs: auto-release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Wait for release workflow
+        run: sleep 5  # Give release-desktop.yml time to start
+
+      - name: Post summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commitUrl = `${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}`;
+            const comment = `## 🚀 Auto-Release Triggered
+
+Detected new commits on main. Desktop apps are building now.
+
+- **Commit:** [${{ github.sha }}](${commitUrl})
+- **Builds:** [release-desktop workflow](https://github.com/${{ github.repository }}/actions/workflows/release-desktop.yml)
+- **Releases:** Check back in 10-15 min for artifacts
+
+⏭️ Once complete, manual platforms (AUR, App Store, Play Store) are listed in release notes.`;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: 1,  // This creates a discussion/comment
+              body: comment
+            }).catch(() => {
+              // Silently fail if no issue #1
+            });

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Webhook Monitor{% endblock %}
+
+{% block content %}
+<section class="ops-page">
+    <header class="ops-page-header">
+        <p class="ops-kicker">Private ops</p>
+        <h1>Webhook Monitor</h1>
+        <p class="ops-subtitle">Recent wallet transactions, purchases, and tips from the production database.</p>
+        <p class="ops-meta">Generated {{ data.timestamp }}</p>
+    </header>
+
+    {% if data.status != 'ok' %}
+    <div class="ops-error">
+        <strong>Monitor unavailable:</strong> {{ data.error }}
+    </div>
+    {% else %}
+    <section class="ops-grid">
+        <article class="ops-card">
+            <span class="ops-label">Transactions</span>
+            <strong>{{ data.recent_transactions | length }}</strong>
+        </article>
+        <article class="ops-card">
+            <span class="ops-label">Purchases</span>
+            <strong>{{ data.recent_purchases | length }}</strong>
+        </article>
+        <article class="ops-card">
+            <span class="ops-label">Tips</span>
+            <strong>{{ data.recent_tips | length }}</strong>
+        </article>
+    </section>
+
+    <section class="ops-panel">
+        <h2>Wallet Transactions</h2>
+        <table class="ops-table">
+            <thead><tr><th>ID</th><th>User</th><th>Type</th><th>Amount</th><th>Balance After</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for row in data.recent_transactions %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.user_id }}</td>
+                    <td>{{ row.type }}</td>
+                    <td>{{ row.amount }}</td>
+                    <td>{{ row.balance_after }}</td>
+                    <td>{{ row.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="ops-panel">
+        <h2>Recent Purchases</h2>
+        <table class="ops-table">
+            <thead><tr><th>ID</th><th>Status</th><th>Amount</th><th>Total</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for row in data.recent_purchases %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.status }}</td>
+                    <td>{{ row.amount }}</td>
+                    <td>{{ row.total }}</td>
+                    <td>{{ row.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="ops-panel">
+        <h2>Recent Tips</h2>
+        <table class="ops-table">
+            <thead><tr><th>ID</th><th>Artist</th><th>Amount</th><th>Payout</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for row in data.recent_tips %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.artist_id }}</td>
+                    <td>{{ row.amount }}</td>
+                    <td>{{ row.artist_payout }}</td>
+                    <td>{{ row.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .ops-page {
+        display: grid;
+        gap: 24px;
+    }
+
+    .ops-page-header h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        letter-spacing: -0.04em;
+    }
+
+    .ops-kicker {
+        margin: 0 0 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .ops-subtitle, .ops-meta {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.72);
+        max-width: 72ch;
+    }
+
+    .ops-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+    }
+
+    .ops-card, .ops-panel, .ops-error {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 18px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ops-card {
+        padding: 18px;
+    }
+
+    .ops-card strong {
+        display: block;
+        font-size: 2rem;
+        line-height: 1;
+        margin-top: 10px;
+    }
+
+    .ops-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .ops-panel {
+        padding: 18px;
+    }
+
+    .ops-panel h2 {
+        margin: 0 0 14px;
+        font-size: 1.1rem;
+    }
+
+    .ops-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .ops-table th, .ops-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .ops-table th {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .ops-error {
+        padding: 18px;
+        color: #ffd7d7;
+    }
+</style>
+{% endblock %}

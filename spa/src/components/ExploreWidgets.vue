@@ -1,0 +1,747 @@
+<template>
+  <section class="explore-widgets-container" v-if="!loading">
+
+    <!-- 1. Featured / This Week -->
+    <div v-if="isSuperFeaturedPeriod" class="explore-widget super-featured-widget">
+      <div class="widget-header">
+        <div class="header-icon featured-glow"><i class="fas fa-star"></i></div>
+        <div class="header-text">
+          <h3>Poets & Friends #8 — Guest Shorts</h3>
+          <p>Watch individual performances from the "Stupid Cupid" show</p>
+        </div>
+      </div>
+      <div class="featured-scroll-container">
+        <div class="widget-grid featured-grid">
+          <component
+            v-for="video in featuredVideos"
+            :key="video.id"
+            :is="'router-link'"
+            :to="videoUrl(video)"
+            class="widget-card featured-card"
+            v-tilt="{ target: '.card-image img', scale: 1, speed: 600, max: 10 }"
+            @mouseenter="playHoverSound"
+            @click="playClickSound"
+          >
+            <div class="card-image">
+              <img :src="video.thumbnail" :alt="video.title" loading="lazy" />
+              <div class="play-icon"><i class="fas fa-play"></i></div>
+            </div>
+            <div class="card-title">{{ video.title }}</div>
+          </component>
+        </div>
+      </div>
+      <div class="widget-cta cta-featured" style="cursor: default">
+        Find all Poets & Friends content in the <router-link to="/videos" class="inline-link" @click="playClickSound">Videos</router-link> section
+      </div>
+    </div>
+
+    <!-- 2. Videos -->
+    <div class="explore-widget video-widget">
+      <div class="widget-header">
+        <div class="header-icon"><i class="fas fa-video"></i></div>
+        <div class="header-text">
+          <h3>Videos</h3>
+          <p>Discover videos</p>
+        </div>
+      </div>
+      <div class="widget-grid">
+        <component
+          v-for="video in randomVideos"
+          :key="video.id"
+          :is="'router-link'"
+          :to="videoUrl(video)"
+          class="widget-card"
+          v-tilt="{ target: '.card-image img', scale: 1, speed: 600, max: 10 }"
+          @mouseenter="playHoverSound"
+          @click="playClickSound"
+        >
+          <div class="card-image">
+            <img :src="video.thumbnail || '/static/img/default-cover.jpg'" :alt="video.title" loading="lazy" />
+            <div class="play-icon"><i class="fas fa-play"></i></div>
+          </div>
+          <div class="card-title">{{ video.title }}</div>
+        </component>
+      </div>
+      <router-link to="/videos" class="widget-cta cta-red" @click="playClickSound">
+        Watch Now
+      </router-link>
+    </div>
+
+    <!-- 4. My Saves -->
+    <div v-if="mySaves.length > 0" class="explore-widget saves-widget">
+      <div class="widget-header">
+        <div class="header-icon"><i class="fas fa-heart"></i></div>
+        <div class="header-text">
+          <h3>My Saves</h3>
+          <p>Your bookmarked content</p>
+        </div>
+      </div>
+      <div class="widget-grid">
+        <router-link
+          v-for="item in mySaves"
+          :key="item.id || item.slug"
+          :to="item.url || `/${item.type === 'show' ? 'shows' : item.type === 'podcast' ? 'podcasts' : 'music'}/${item.id || item.slug}`"
+          class="widget-card"
+          v-tilt="{ target: '.card-image img', scale: 1, speed: 600, max: 10 }"
+          @mouseenter="playHoverSound"
+          @click="playClickSound"
+        >
+          <div class="card-image">
+            <img :src="item.artwork || item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'" :alt="item.title" loading="lazy" />
+            <div class="play-icon"><i class="fas fa-play"></i></div>
+          </div>
+          <div class="card-title">{{ item.title }}</div>
+        </router-link>
+      </div>
+      <div class="widget-cta cta-gold" style="cursor: default">
+        Your Saved Collection
+      </div>
+    </div>
+
+    <!-- 5. Podcasts -->
+    <div class="explore-widget podcast-widget">
+      <div class="widget-header">
+        <div class="header-icon"><i class="fas fa-podcast"></i></div>
+        <div class="header-text">
+          <h3>Podcasts</h3>
+          <p>Discover episodes</p>
+        </div>
+      </div>
+      <div class="widget-grid">
+        <router-link
+          v-for="ep in randomPodcasts"
+          :key="ep.id || ep.title"
+          :to="`/podcasts/${ep.showSlug}?play=${ep.id || ep.title}`"
+          class="widget-card"
+          v-tilt="{ target: '.card-image img', scale: 1, speed: 600, max: 10 }"
+          @mouseenter="playHoverSound"
+          @click="playClickSound"
+        >
+          <div class="card-image">
+            <img :src="ep.artwork || ep.cover_art || '/static/img/default-cover.jpg'" :alt="ep.title" loading="lazy" />
+          </div>
+          <div class="card-title">{{ ep.title }}</div>
+        </router-link>
+      </div>
+      <router-link to="/podcasts" class="widget-cta cta-purple" @click="playClickSound">
+        Explore Podcasts
+      </router-link>
+    </div>
+
+    <!-- 6. Music -->
+    <div class="explore-widget music-widget">
+      <div class="widget-header">
+        <div class="header-icon"><i class="fas fa-music"></i></div>
+        <div class="header-text">
+          <h3>Music</h3>
+          <p>Albums & Singles</p>
+        </div>
+      </div>
+      <div class="widget-grid">
+        <router-link
+          v-for="item in randomMusic"
+          :key="item.id || item.title"
+          :to="item.type === 'album' ? { path: '/music', query: { q: item.title } } : musicUrl(item)"
+          class="widget-card"
+          v-tilt="{ target: '.card-image img', scale: 1, speed: 600, max: 10 }"
+          @mouseenter="playHoverSound"
+          @click="playClickSound"
+        >
+          <div class="card-image">
+            <img :src="item.cover_art || '/static/img/default-cover.jpg'" :alt="item.title" loading="lazy" />
+          </div>
+          <div class="card-title">{{ item.title }}</div>
+        </router-link>
+      </div>
+      <router-link to="/music" class="widget-cta cta-blue" @click="playClickSound">
+        Music Library
+      </router-link>
+    </div>
+
+    <!-- 7. Artists -->
+    <div class="explore-widget artist-widget">
+      <div class="widget-header">
+        <div class="header-icon"><i class="fas fa-users"></i></div>
+        <div class="header-text">
+          <h3>Artists</h3>
+          <p>Meet the creators</p>
+        </div>
+      </div>
+      <div class="widget-grid">
+        <router-link
+          v-for="artist in randomArtists"
+          :key="artist.slug"
+          :to="`/artists/${artist.slug}`"
+          class="widget-card"
+          v-tilt="{ target: '.card-image img', scale: 1, speed: 600, max: 10 }"
+          @mouseenter="playHoverSound"
+          @click="playClickSound"
+        >
+          <div class="card-image">
+            <img :src="artist.image || '/static/img/default-avatar.png'" :alt="artist.name" loading="lazy" />
+          </div>
+          <div class="card-title">{{ artist.name }}</div>
+        </router-link>
+      </div>
+      <router-link to="/artists" class="widget-cta cta-green" @click="playClickSound">
+        Discover Artists
+      </router-link>
+    </div>
+
+
+  </section>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue'
+import { apiFetchCached } from '../composables/useApi'
+import { useBookmarks } from '../composables/useBookmarks'
+import { useUISounds } from '../composables/useUISounds'
+import { musicUrl, videoUrl } from '../utils/urls'
+import vTilt from '../directives/vTilt'
+
+const loading = ref(true)
+const randomPodcasts = ref([])
+const allPodcastEpisodes = ref([])
+const randomVideos = ref([])
+const allVideos = ref([])
+const randomMusic = ref([]) // Albums or Tracks
+const randomArtists = ref([])
+const mySaves = ref([])
+
+// Super Featured Logic (currently disabled - update dates for next period)
+const isSuperFeaturedPeriod = computed(() => {
+  // TODO: Update dates when next featured period begins
+  return false
+})
+
+const featuredVideos = [
+  { id: 'poets-and-friends-8-part-1-micky-vampiro', title: 'Micky Vampiro', thumbnail: '/static/thumbnails/poets-and-friends-8-part-1-micky-vampiro_237ad45b4daf.jpg' },
+  { id: 'poets-and-friends-8-part-2-paul-wildly', title: 'Paul Wildly', thumbnail: '/static/thumbnails/poets-and-friends-8-part-2-paul-wildly_15b205fcd89a.jpg' },
+  { id: 'poets-and-friends-8-part-3-aidan-bauer', title: 'Aidan Bauer', thumbnail: '/static/thumbnails/poets-and-friends-8-part-3-aidan-bauer_67d7b782e0b1.jpg' },
+  { id: 'poets-and-friends-8-part-4-layne-boles', title: 'Layne Boles', thumbnail: '/static/thumbnails/poets-and-friends-8-part-4-layne-boles_682273f75b1a.jpg' },
+  { id: 'poets-and-friends-8-part-5-alex-gonzalez', title: 'Alex Gonzalez', thumbnail: '/static/thumbnails/poets-and-friends-8-part-5-alex-gonzalez_7eb38214c93d.jpg' },
+  { id: 'poets-and-friends-8-part-6-miranda-copps', title: 'Miranda Copps', thumbnail: '/static/thumbnails/poets-and-friends-8-part-6-miranda-copps_92b855547115.jpg' },
+  { id: 'poets-and-friends-8-part-7-katie-myerscough', title: 'Katie Myerscough', thumbnail: '/static/thumbnails/poets-and-friends-8-part-7-katie-myerscough_b7a010b513c6.jpg' },
+  { id: 'poets-and-friends-8-part-8-pat-clendenen', title: 'Pat Clendenen', thumbnail: '/static/thumbnails/poets-and-friends-8-part-8-pat-clendenen_a6ac77087db1.jpg' },
+  { id: 'poets-and-friends-8-part-9-ellen-martin', title: 'Ellen Martin', thumbnail: '/static/thumbnails/poets-and-friends-8-part-9-ellen-martin_e461d8577672.jpg' },
+  { id: 'poets-and-friends-8-part-10-samuel-chen', title: 'Samuel Chen', thumbnail: '/static/thumbnails/poets-and-friends-8-part-10-samuel-chen_53b23b9add7b.jpg' },
+  { id: 'poets-and-friends-8-part-11-sasha', title: 'Sasha', thumbnail: '/static/thumbnails/poets-and-friends-8-part-11-sasha_7bdbfa69b5ea.jpg' },
+]
+
+const bookmarks = useBookmarks()
+const { playHoverSound, playClickSound } = useUISounds()
+
+// Determine if we can use tilt (desktop only mostly)
+const canTilt = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches
+
+function getRandomItems(arr, count) {
+  if (!arr || arr.length === 0) return []
+  const shuffled = [...arr].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
+}
+
+function updateMySaves() {
+    const all = Object.values(bookmarks.bookmarks.value || {})
+    mySaves.value = all.reverse().slice(0, 6)
+}
+
+onMounted(async () => {
+  try {
+    // Fetch all data in parallel
+    const [podData, videoData, musicData, artistData] = await Promise.all([
+      apiFetchCached('/api/podcasts').catch(() => ({ shows: [] })),
+      apiFetchCached('/api/shows').catch(() => ({ shows: [] })),
+      apiFetchCached('/api/music').catch(() => ({ tracks: [], albums: [] })),
+      apiFetchCached('/api/artists').catch(() => ({ artists: [] }))
+    ])
+
+    // Process Podcasts - Flat episodes instead of series shows
+    const allEpisodes = []
+    if (podData.shows) {
+      podData.shows.forEach(show => {
+        if (show.episodes) {
+          show.episodes.forEach(ep => {
+            allEpisodes.push({
+              ...ep,
+              showSlug: show.slug,
+              showTitle: show.title
+            })
+          })
+        }
+      })
+    }
+    allPodcastEpisodes.value = allEpisodes
+    randomPodcasts.value = getRandomItems(allPodcastEpisodes.value, 6)
+
+    // Process Videos
+    allVideos.value = videoData.shows || []
+    randomVideos.value = getRandomItems(allVideos.value, 6)
+
+    // Process Music
+    const allTracks = musicData.tracks || []
+    const albumMap = new Map()
+    const singles = []
+    
+    for (const t of allTracks) {
+      if (t.album && t.album !== 'Single' && !albumMap.has(t.album)) {
+        albumMap.set(t.album, {
+          id: t.album,
+          title: t.album,
+          cover_art: t.cover_art || t.artwork,
+          artist: t.artist,
+          type: 'album'
+        })
+      } else {
+        singles.push({
+          id: t.id,
+          title: t.title,
+          cover_art: t.cover_art || t.artwork,
+          artist: t.artist,
+          type: 'track'
+        })
+      }
+    }
+    
+    let musicItems = Array.from(albumMap.values())
+    
+    if (musicItems.length < 6) {
+      const needed = 6 - musicItems.length
+      const randomSingles = getRandomItems(singles, needed)
+      musicItems = [...musicItems, ...randomSingles]
+    }
+    
+    if (musicItems.length < 6) {
+       const remaining = 6 - musicItems.length
+       const existingIds = new Set(musicItems.map(i => i.id || i.title))
+       const moreTracks = allTracks.filter(t => !existingIds.has(t.id) && !existingIds.has(t.title))
+       
+       const randomMore = getRandomItems(moreTracks, remaining).map(t => ({
+          id: t.id,
+          title: t.title,
+          cover_art: t.cover_art || t.artwork,
+          artist: t.artist,
+          type: 'track'
+       }))
+       musicItems = [...musicItems, ...randomMore]
+    }
+    
+    randomMusic.value = musicItems.slice(0, 6)
+
+    // Process Artists
+    const artists = (artistData.artists || []).map(a => ({
+       ...a,
+       slug: a.slug || a.id || (a.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    }))
+    randomArtists.value = getRandomItems(artists, 6)
+
+    // Load Local Data
+    updateMySaves()
+    window.addEventListener('bookmarks:changed', updateMySaves)
+
+  } catch (e) {
+    console.error('Error loading explore widgets', e)
+  } finally {
+    loading.value = false
+  }
+})
+
+onActivated(() => {
+  if (allVideos.value.length > 0) {
+    randomVideos.value = getRandomItems(allVideos.value, 6)
+  }
+  if (allPodcastEpisodes.value.length > 0) {
+    randomPodcasts.value = getRandomItems(allPodcastEpisodes.value, 6)
+  }
+})
+
+onUnmounted(() => {
+    window.removeEventListener('bookmarks:changed', updateMySaves)
+})
+</script>
+
+<style scoped>
+.explore-widgets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 2rem 0;
+  max-width: 1800px;
+  margin: 0;
+}
+
+/* Base Widget Style */
+.explore-widget {
+  background: rgba(0, 0, 0, 0.4); /* Darker base */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  box-shadow: 
+    0 20px 50px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 0 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  position: relative;
+  overflow: hidden;
+  /* Parallax container setup */
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.explore-widget::before {
+    /* Subtle noise/texture overlay could go here, but keeping clean glass */
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 100%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.explore-widget:hover {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: none;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* Header */
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.header-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  background: #fff; /* Default, overridden by themes */
+}
+
+.header-text h3 {
+  font-size: 1.75rem;
+  font-weight: 900;
+  margin: 0;
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  color: rgba(255,255,255,0.95);
+}
+
+.header-text p {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Grid */
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 1025px) {
+  .widget-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* Removed redundant specific grid selectors for unification as they broke mobile media queries due to specificity. */
+
+.video-widget .card-image,
+.podcast-widget .card-image,
+.music-widget .card-image,
+.artist-widget .card-image {
+  aspect-ratio: 1 / 1;
+}
+
+/* Card */
+.widget-card {
+  display: block;
+  min-width: 0; /* Allow grid items to shrink below their content size */
+  text-decoration: none;
+  color: inherit;
+  transition: none;
+  cursor: pointer;
+  group: card;
+}
+
+/* 
+   REMOVED: .widget-card:hover transform 
+   Reason: We want the frame to be static while the content moves in 3D 
+*/
+/*.widget-card:hover {
+  transform: translateY(-8px) scale(1.05) rotate(1deg);
+}*/
+
+.card-image {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  background: #000;
+  position: relative;
+  border: 0;
+  /* 3D Context for inner image tilt */
+  transform-style: preserve-3d;
+  perspective: 1000px; 
+}
+
+/* removed video-card 16:9 override for unification */
+
+.card-image.circle {
+    border-radius: 50%;
+    aspect-ratio: 1;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: none;
+  /* Ensure image can be tilted */
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* 
+   REMOVED: .widget-card:hover .card-image img transform
+   Reason: Handled by v-tilt directive now 
+*/
+/*
+.widget-card:hover .card-image img {
+    transform: scale(1.1);
+}
+*/
+
+.card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0.25rem;
+  color: rgba(255,255,255,0.9);
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.widget-card:hover .card-title {
+    opacity: 1;
+}
+
+/* Play Icon Overlay */
+.play-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.play-icon i {
+    font-size: 3rem;
+    color: #fff;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+.widget-card:hover .play-icon {
+    opacity: 1;
+}
+
+/* Empty State for Saves/Recent */
+.empty-placeholder {
+    grid-column: span 3;
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255,255,255,0.4);
+    font-style: italic;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+}
+
+/* CTA Buttons */
+.widget-cta {
+  display: block;
+  text-align: center;
+  padding: 1.1rem 0;
+  border-radius: 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.05); /* Glass base */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Base border */
+  color: #fff;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
+  margin-top: 0.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.widget-cta:hover {
+  background: rgba(255, 255, 255, 0.1); 
+  border-color: rgba(255, 255, 255, 0.4);
+  /* do not scale as requested */
+  transform: none;
+  box-shadow: 
+    0 0 30px rgba(0, 0, 0, 0.8),
+    0 10px 40px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+/* Theme Colors - Affects Icons and Button Borders/Glows */
+
+/* CYAN (Podcasts) */
+.podcast-widget .header-icon { background: #00cccc; box-shadow: none; }
+.cta-purple { border-color: rgba(0, 255, 255, 0.3); color: #00ffff; }
+.cta-purple:hover { border-color: #00ffff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
+
+/* ELECTRIC BLUE (Videos) */
+.video-widget .header-icon { background: #0080cc; box-shadow: none; }
+.cta-red { border-color: rgba(0, 162, 255, 0.3); color: #00a2ff; }
+.cta-red:hover { border-color: #00a2ff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
+
+/* DEEP BLUE (Music) */
+.music-widget .header-icon { background: #0050cc; box-shadow: none; }
+.cta-blue { border-color: rgba(0, 102, 255, 0.3); color: #0066ff; }
+.cta-blue:hover { border-color: #0066ff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
+
+/* SILVER (Artists) */
+.artist-widget .header-icon { background: #c4c9d4; color: #111; box-shadow: none; }
+.cta-green { border-color: rgba(255, 255, 255, 0.2); color: #e5e7eb; }
+.cta-green:hover { border-color: #fff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #000; background: #fff; }
+
+/* INDIGO (My Saves / Recent) */
+.saves-widget .header-icon { background: #4c1d95; box-shadow: none; }
+.cta-gold { border-color: rgba(91, 33, 182, 0.3); color: #a78bfa; }
+.cta-gold:hover { border-color: #a78bfa; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
+
+.recent-widget .header-icon { background: #3b1578; box-shadow: none; }
+.cta-indigo { border-color: rgba(76, 29, 149, 0.3); color: #c4b5fd; }
+.cta-indigo:hover { border-color: #c4b5fd; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
+
+/* Super Featured Styles */
+.super-featured-widget {
+  background: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid rgba(255, 0, 204, 0.5) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 204, 0.08), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+}
+
+.featured-glow {
+  background: rgba(180, 20, 140, 0.8) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  animation: none;
+}
+
+.featured-badge {
+  display: inline-block;
+  background: #ff00cc;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.featured-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  margin: 0 -1rem;
+  padding: 0 1rem 1rem 1rem;
+}
+
+.featured-grid {
+  display: flex !important;
+  grid-template-columns: none !important;
+  gap: 1.5rem;
+  width: max-content;
+}
+
+.featured-card {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.cta-featured {
+  background: linear-gradient(90deg, rgba(255, 0, 204, 0.1), rgba(51, 51, 255, 0.1));
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.cta-featured:hover {
+  background: linear-gradient(90deg, rgba(255, 0, 204, 0.2), rgba(51, 51, 255, 0.2));
+  border-color: #ff00cc;
+}
+
+.inline-link {
+  color: #ff00cc;
+  text-decoration: underline;
+  font-weight: 900;
+}
+
+.inline-link:hover {
+  color: #fff;
+}
+
+
+@media (max-width: 768px) {
+  .widget-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+  .widget-grid .widget-card:nth-child(n+5) {
+    display: none;
+  }
+  .explore-widget {
+    padding: 1rem;
+    border-radius: 20px;
+    gap: 1rem;
+  }
+  .card-title {
+      font-size: 0.7rem;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.2;
+      opacity: 1; /* Keep title fully visible on mobile */
+  }
+  .header-text h3 { font-size: 1.4rem; }
+  .header-icon { width: 42px; height: 42px; font-size: 1.25rem; border-radius: 12px; }
+  .widget-cta { padding: 0.9rem 0; font-size: 0.9rem; }
+}
+</style>

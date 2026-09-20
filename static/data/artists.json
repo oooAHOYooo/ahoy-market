@@ -1,0 +1,272 @@
+[
+  {
+    "id": "greg-weese",
+    "name": "Greg Weese",
+    "slug": "greg-weese",
+    "type": "athlete",
+    "genres": ["Disc Golf", "Sports", "Outdoors"],
+    "description": "Disc golf content creator documenting his PDGA journey.",
+    "image": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.30808-1/414662453_122104868180161808_2368049915707527315_n.jpg?stp=dst-jpg_s480x480_tt6&_nc_cat=111&ccb=1-7&_nc_sid=e99d92&_nc_ohc=6WEDZfyzsVsQ7kNvwEZs816&_nc_oc=AdrvUgQfuO2WwVCCyJAwFP0aUCZVTp4-ALvhNYvHYGpHoLIsHJp_IT_UnFSx4mraDqk&_nc_zt=24&_nc_ht=scontent-bos5-1.xx&_nc_gid=cXXfWyzdasSVhcU89Mkkjw&_nc_ss=7a3a8&oh=00_Af3AYJDdtcIkhHjhHoUWHMRd6ZmMe0e_7D5m2P6ExIQuGg&oe=69D36CFD",
+    "bio": "Disc golf content creator and PDGA journey host",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "dave-gunn",
+    "name": "Dave Gunn",
+    "slug": "dave-gunn",
+    "type": "athlete",
+    "genres": ["Clips"],
+    "description": "Athlete and content creator: Dave Gunn",
+    "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclip%5D%5BTallboyz%5D%5BDave%20Gunn%20-%20Hotdog%20Days%5D.png",
+    "bio": "Athlete and content creator: Dave Gunn",
+    "followers": 0,
+    "verified": false,
+    "featured": false,
+    "shows": [
+      {
+        "id": "clip_21",
+        "title": "[Tallboyz] - [Dave Gunn]-[30 Days 30 Hotdogs]",
+        "type": "clip"
+      },
+      {
+        "id": "clip_22",
+        "title": "[Tallboyz] - [Full Part] - [Always Next Time]-[Dave Gunn]",
+        "type": "clip"
+      }
+    ]
+  },
+  {
+    "id": "alex-figueroa",
+    "name": "Alex Figueroa",
+    "slug": "alex-figueroa",
+    "type": "athlete",
+    "genres": ["Clips"],
+    "description": "Athlete and content creator: Alex Figueroa",
+    "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5Bfig-theGnarth%5D.jpg",
+    "bio": "Athlete and content creator: Alex Figueroa",
+    "followers": 0,
+    "verified": false,
+    "featured": false,
+    "shows": [
+      {
+        "id": "clip_2",
+        "title": "[Alex Figueroa] - [Full Part] - [The Gnarth]",
+        "type": "clip"
+      }
+    ]
+  },
+  {
+    "id": "andrew-leverton",
+    "name": "Andrew Leverton",
+    "slug": "andrew-leverton",
+    "type": "athlete",
+    "genres": ["Clips"],
+    "description": "Athlete and content creator: Andrew Leverton",
+    "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bfullpart%5D%5BAndrewLeverton%5D%5BFormatility%5D.jpg",
+    "bio": "Athlete and content creator: Andrew Leverton",
+    "followers": 0,
+    "verified": false,
+    "featured": false,
+    "shows": [
+      {
+        "id": "clip_3",
+        "title": "[Tallboyz] - [Full Part] - [Andrew Leverton]-[Formaility]",
+        "type": "clip"
+      }
+    ]
+  },
+  {
+    "id": "micky-vampiro",
+    "name": "Micky Vampiro",
+    "slug": "micky-vampiro",
+    "type": "host",
+    "genres": ["Poetry", "Talk", "Interview"],
+    "description": "Host of Poets & Friends, Ahoy's poetry and conversation series.",
+    "image": "https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg",
+    "bio": "Host of Poets & Friends",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "rob-meglio",
+    "name": "Rob Meglio",
+    "slug": "rob-meglio",
+    "type": "host",
+    "genres": ["Talk", "Comedy", "Interview"],
+    "description": "Host of The Rob Show.",
+    "image": "https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg",
+    "bio": "Host of The Rob Show",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "tyler-mirando",
+    "name": "Tyler Mirando",
+    "slug": "tyler-mirando",
+    "type": "host",
+    "genres": ["Talk", "Comedy"],
+    "description": "Host of Tyler Needs a Break.",
+    "image": "https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg",
+    "bio": "Host of Tyler Needs a Break",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "tallboyz",
+    "name": "Tallboyz",
+    "slug": "tallboyz",
+    "type": "athlete",
+    "genres": ["Skateboarding", "Action Sports"],
+    "description": "The hometown skating crew bringing raw energy and progressive talent to the scene.",
+    "image": "https://storage.googleapis.com/ahoy-videos/skating/flux/Ahoy-FLUX_CashContest.jpg",
+    "bio": "The hometown crew bringing raw energy and progressive talent to the skating scene.",
+    "followers": 0,
+    "verified": false,
+    "featured": false,
+    "shows": [
+      {
+        "id": "flux-tb-cash-contest",
+        "title": "Flux TB Cash Contest",
+        "type": "clip"
+      }
+    ]
+  },
+  {
+    "id": "alex-gonzalez",
+    "name": "Alex Gonzalez",
+    "slug": "alex-gonzalez",
+    "type": "filmmaker",
+    "genres": ["Skateboarding", "Action Sports", "Film"],
+    "description": "Visionary filmmaker and editor specializing in high-energy skateboarding and cinematic storytelling.",
+    "image": "https://storage.googleapis.com/ahoy-videos/skating/flux/Ahoy-FLUX_CashContest.jpg",
+    "bio": "Visionary filmmaker and editor specializing in high-energy skateboarding and cinematic storytelling.",
+    "followers": 0,
+    "verified": false,
+    "featured": false,
+    "shows": [
+      {
+        "id": "flux-tb-cash-contest",
+        "title": "Flux TB Cash Contest",
+        "type": "clip"
+      }
+    ]
+  },
+  {
+    "id": "mintea",
+    "name": "mintea",
+    "slug": "mintea",
+    "type": "musician",
+    "genres": ["Indie", "Alternative"],
+    "description": "Independent musician and artist.",
+    "image": "https://storage.googleapis.com/ahoy-song-collection/mintea%20-%20The%20Lost%20Clause%20-%20Album%20Cover.jpg",
+    "bio": "Musician and artist: mintea",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "jake-custer",
+    "name": "Jake Custer",
+    "slug": "jake-custer",
+    "type": "musician",
+    "genres": ["Indie"],
+    "description": "Jake Custer's indie album entry for Ahoy music discovery.",
+    "image": "https://storage.googleapis.com/ahoy-song-collection/ahoy_jake-custer.jpg",
+    "bio": "Indie singer-songwriter.",
+    "followers": 0,
+    "verified": false,
+    "featured": false,
+    "albums": [
+      {
+        "id": "jake-custer-i-think-were-lost",
+        "title": "I Think We're Lost",
+        "release_date": "",
+        "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+        "new": true,
+        "tags": ["indie", "jake-custer", "album", "new", "new music"],
+        "tracks": [
+          { "id": "song_53", "title": "A Routine Affair" },
+          { "id": "song_54", "title": "Between Us Two" },
+          { "id": "song_55", "title": "ClockedIn, Checked Out" },
+          { "id": "song_56", "title": "Feel That Way Again" },
+          { "id": "song_57", "title": "Hide Away" },
+          { "id": "song_58", "title": "I Get To Love You" },
+          { "id": "song_59", "title": "Interstellar" },
+          { "id": "song_60", "title": "Let Go" },
+          { "id": "song_61", "title": "Wake UpSpread Some Love" },
+          { "id": "song_62", "title": "We'll Be Right Back" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "artist_17",
+    "name": "Jack Galvin",
+    "slug": "jack-galvin",
+    "type": "filmmaker",
+    "genres": ["Filmmaker"],
+    "description": "Filmmaker: Jack Galvin",
+    "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bepisode%5D%5BAlive%20on%20Central%5D%5BEpisode%202%5D.png",
+    "bio": "Filmmaker: Jack Galvin",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "ellen-martin",
+    "name": "Ellen Martin",
+    "slug": "ellen-martin",
+    "type": "poet",
+    "genres": ["Poetry", "Poets & Friends"],
+    "description": "Poet and contributor to the Poets & Friends series.",
+    "image": "",
+    "bio": "Poet and contributor to the Poets & Friends series.",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "kyle-middleton",
+    "name": "Kyle Middleton",
+    "slug": "kyle-middleton",
+    "type": "poet",
+    "genres": ["Poetry", "Poets & Friends"],
+    "description": "Poet and contributor to the Poets & Friends series.",
+    "image": "https://scontent.fijd1-1.fna.fbcdn.net/v/t39.30808-6/471833687_10236105224588802_1759823471792789682_n.jpg?stp=dst-jpegr_tt6&_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=iImrGuV9duwQ7kNvwGcnW_L&_nc_oc=AdqUjCzhFpb9dhchMcyEN1Wz44HdiShLAL21-VgnJeSLYmRzYqbj12zVx3Y8Y2LI-CM&_nc_zt=23&se=-1&_nc_ht=scontent.fijd1-1.fna&_nc_gid=S-VWI8g5DUvCEfKmwrJt9w&_nc_ss=7b2a8&oh=00_Af_3Jq3U1venQocNVIngyf2ro5UqZFGIs-F7z9JqIs7URA&oe=6A24B187",
+    "bio": "Poet and contributor to the Poets & Friends series.",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "claire-cooper",
+    "name": "Claire Cooper",
+    "slug": "claire-cooper",
+    "type": "poet",
+    "genres": ["Poetry", "Poets & Friends"],
+    "description": "Poet and contributor to the Poets & Friends series.",
+    "image": "https://media.licdn.com/dms/image/v2/D5603AQGUre_-4bLkUQ/profile-displayphoto-shrink_200_200/B56ZOyEUvsGsAc-/0/1733859303028?e=2147483647&v=beta&t=5Hm84xpEDFb0wO-RZsRg1lNRtAgLAgdgSpZG7PdIw0I",
+    "bio": "Poet and contributor to the Poets & Friends series.",
+    "followers": 0,
+    "verified": false,
+    "featured": false
+  },
+  {
+    "id": "cambell-rice",
+    "name": "Cambell Rice",
+    "slug": "cambell-rice",
+    "type": "musician",
+    "genres": ["Indie"],
+    "description": "Indie singer-songwriter on Ahoy with three tracks — bedroom-recorded, lo-fi, and unpolished on purpose. \"Sunflower\" is the pick of the catalog.",
+    "image": "https://m.media-amazon.com/images/I/61APLxryThL._UXNaN_FMjpg_QL85_.jpg",
+    "bio": "Indie singer-songwriter on Ahoy with three tracks — bedroom-recorded, lo-fi, and unpolished on purpose. \"Sunflower\" is the pick of the catalog.",
+    "followers": 0,
+    "verified": false,
+    "featured": true
+  }
+]

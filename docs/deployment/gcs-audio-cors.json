@@ -1,0 +1,22 @@
+[
+  {
+    "origin": [
+      "https://ahoy-indie-media.onrender.com",
+      "https://ahoy.ooo",
+      "https://app.ahoy.ooo",
+      "capacitor://localhost",
+      "http://localhost",
+      "http://localhost:5001",
+      "http://localhost:3000"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range",
+      "Accept-Ranges",
+      "Authorization"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

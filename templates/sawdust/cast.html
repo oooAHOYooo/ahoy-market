@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Legacy Cast - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="page-container cast-page">
+  {% from "macros/subpage_header.html" import subpage_hero %}
+  {{ subpage_hero(title="Legacy Cast", subtitle="Archived for future review. This is not part of the active shipment.", icon_class="fas fa-archive") }}
+
+  <section class="header-simple desktop-only">
+    <h1><i class="fas fa-archive"></i> Legacy Cast</h1>
+    <p>This page is an outdated feature marker. The active app does not ship cast controls in v1.0.8.</p>
+  </section>
+
+  <section class="cast-quickstart">
+    <div class="quick-grid">
+      <div class="quick-card">
+        <h3><i class="fas fa-bolt"></i> Archived Notes</h3>
+        <ol>
+          <li>This is kept for reference only.</li>
+          <li>Future cast work should live behind an explicit feature flag.</li>
+          <li>Do not treat this page as a shipped user flow.</li>
+        </ol>
+        <div class="badges">
+          <span class="badge">Outdated</span>
+          <span class="badge">Archived</span>
+        </div>
+      </div>
+      <div class="quick-card">
+        <h3><i class="fab fa-apple"></i> Replacement ideas</h3>
+        <ul>
+          <li>Use AirPlay on Apple devices.</li>
+          <li>Use browser-native tab sharing where available.</li>
+          <li>Keep future cast work behind a feature flag until it is ready to ship.</li>
+        </ul>
+      </div>
+      <div class="quick-card">
+        <h3><i class="fab fa-chrome"></i> Why it is hidden</h3>
+        <ul>
+          <li>It is not part of the active v1.0.8 shipping set.</li>
+          <li>Navigation and indexing hooks now treat it as legacy.</li>
+          <li>Any future rework should be introduced deliberately, not implicitly.</li>
+        </ul>
+      </div>
+      <div class="quick-card">
+        <h3><i class="fas fa-wifi"></i> Historical reminder</h3>
+        <ul>
+          <li>Older device-sharing patterns may still be useful as references.</li>
+          <li>Do not rely on this page for current app behavior.</li>
+          <li>Use this as a placeholder for future planning only.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="cast-section">
+    <h2><i class="fas fa-signal"></i> Legacy status</h2>
+    <ul>
+      <li>This page is archived.</li>
+      <li>It remains in the repo for future review only.</li>
+      <li>It is not intended to ship with the current release.</li>
+    </ul>
+  </section>
+
+  <section class="cast-section">
+    <h2><i class="fas fa-plug"></i> Future work</h2>
+    <p>If this feature is revisited, add it behind an explicit feature flag and keep it out of release notes until it is ready to ship.</p>
+  </section>
+
+  <style>
+    .cast-page .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px
+    }
+
+    .cast-page .quick-card {
+      background: var(--surface, rgba(255, 255, 255, 0.04));
+      border-radius: 14px;
+      padding: 16px
+    }
+
+    .cast-page .quick-card h3 {
+      margin: 0 0 8px
+    }
+
+    .cast-page .badges .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 8px;
+      border-radius: 9999px;
+      margin-right: 6px;
+      font-size: .85em;
+      font-weight: 600
+    }
+
+    .cast-page .cast-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+
+    .cast-page .hint {
+      font-size: .9em;
+      color: #a0a0a0;
+      margin-top: 6px
+    }
+  </style>
+
+  <section class="cast-section">
+    <h2>4) DLNA / Miracast (device mirroring)</h2>
+    <ul>
+      <li>Windows: Settings → System → Display → Connect to a wireless
+        display.</li>
+      <li>Android: Quick Settings → Cast / Smart View (varies by device).</li>
+      <li>Many Smart TVs expose a "DLNA receiver"; mirroring your device works
+        with Ahoy’s player.</li>
+    </ul>
+  </section>
+
+  <section class="cast-section">
+    <h2>Receiver Window</h2>
+    <p>This receiver flow is archived. Keep any future implementation behind an explicit feature flag until it is ready to ship.</p>
+  </section>
+</div>
+{% endblock %}

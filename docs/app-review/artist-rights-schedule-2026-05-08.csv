@@ -1,0 +1,26 @@
+artist_id,name,slug,artist_type,genres,verified,featured,db_created_at,db_updated_at,rights_status,rights_evidence_reference,notes
+artist_19,Alex Figueroa,alex-figueroa,skater,Clips,false,false,2025-09-12T10:51:54.404386,2025-09-12T10:51:54.404387,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_22,Alex Gonzalez,alex-gonzalez,filmmaker,Filmmaker,false,false,2025-01-28T12:00:00.000000,2025-01-28T12:00:00.000000,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_20,Andrew Leverton,andrew-leverton,skater,Clips,false,false,2025-09-12T10:51:54.404589,2025-09-12T10:51:54.404590,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_4,Cambell Rice,cambell-rice,musician,Indie,false,false,2025-09-12T10:51:54.401989,2025-09-12T10:51:54.401991,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_9,Clones of Clarence,clones-of-clarence,musician,Indie,false,false,2025-09-12T10:51:54.402762,2025-09-12T10:51:54.402765,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_10,Coral Reefer,coral-reefer,musician,Indie,false,false,2025-09-12T10:51:54.402909,2025-09-12T10:51:54.402910,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_21,Dave Gunn,dave-gunn,skater,Clips,false,false,2025-09-12T10:51:54.404795,2025-09-12T10:51:54.404796,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_6,Fella Gazelle,fella-gazelle,musician,Indie,false,false,2025-09-12T10:51:54.402269,2025-09-12T10:51:54.402270,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_100,Greg Weese,greg-weese,,,false,false,,,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_17,Jack Galvin,jack-galvin,filmmaker,Filmmaker,false,false,2025-09-12T10:51:54.403959,2025-09-12T10:51:54.403960,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_14,Jake Custer,jake-custer,musician,Indie,false,false,2025-09-12T10:51:54.403454,2025-09-12T10:51:54.403455,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_8,Justin Arena,justin-arena,musician,"Indie, Music Video",false,false,2025-09-12T10:51:54.402587,2025-09-12T10:51:54.402590,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_101,Micky Vampiro,micky-vampiro,,,false,false,,,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_16,mintea,mintea,musician,Indie,false,false,2025-09-12T10:51:54.403717,2025-09-12T10:51:54.403718,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_11,My Own Grenade,my-own-grenade,musician,Indie,false,false,2025-09-12T10:51:54.403040,2025-09-12T10:51:54.403042,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_7,Riddle M,riddle-m,musician,Indie,false,false,2025-09-12T10:51:54.402403,2025-09-12T10:51:54.402405,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_001,Rob Meglio,rob-meglio,filmmaker,"Promos, Short Film, Promo, Episodes",true,false,,,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_3,Samuel Dylan Witch,samuel-dylan-witch,musician,"Indie, Music Video",false,false,2025-09-12T10:51:54.401838,2025-09-12T10:51:54.401846,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_12,S.G. Carlson,s.g.-carlson,musician,Indie,false,false,2025-09-12T10:51:54.403176,2025-09-12T10:51:54.403177,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+sinecera,Sinecera,sinecera,musician,Alternative Rock,false,false,2026-05-04,2026-05-04,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_15,Spider in Stereo,spider-in-stereo,musician,Indie,false,false,2025-09-12T10:51:54.403587,2025-09-12T10:51:54.403588,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_18,Tallboyz,tallboyz,skater,"Clips, Promos",false,false,2025-09-12T10:51:54.404177,2025-09-12T10:51:54.404178,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_13,The Tines,the-tines,musician,Indie,false,false,2025-09-12T10:51:54.403321,2025-09-12T10:51:54.403323,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_23,Tyler Mirando,tyler-mirando,host,Tyler Needs a Break,true,false,,,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display
+artist_5,Youth XL,youth-xl,musician,Indie,false,false,2025-09-12T10:51:54.402137,2025-09-12T10:51:54.402138,claimed platform authorization,,Confirm written authorization covers app streaming/catalog display

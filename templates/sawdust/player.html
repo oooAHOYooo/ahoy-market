@@ -1,0 +1,977 @@
+{% extends "base.html" %}
+
+{% block title %}Player - Ahoy Indie Media{% endblock %}
+
+{% block head %}
+<script src="/static/js/media-session.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="player-container" x-data="fullPlayer()" x-init="loadMedia()">
+
+    <!-- Main Player Area -->
+    <div class="player-main">
+        <!-- Video Player (for shows) -->
+        <div x-show="mediaType === 'show'" class="video-player">
+            <video :src="currentMedia?.video_url || currentMedia?.mp4_link"
+                :poster="currentMedia?.thumbnail"
+                preload="metadata"
+                @loadedmetadata="onVideoLoaded()"
+                @timeupdate="onTimeUpdate()"
+                @ended="onMediaEnded()"
+                controls
+                autoplay
+                x-ref="videoPlayer">
+                Your browser does not support the video tag.
+            </video>
+
+            <!-- YouTube Theater Style Title -->
+            <div class="video-theater-info">
+                <div class="video-title-section">
+                    <h1 class="video-title"
+                        x-text="currentMedia?.title || 'Untitled'"></h1>
+                    <div class="video-stats">
+                        <span class="upload-date"
+                            x-text="formatDate(currentMedia?.published_date)"></span>
+                    </div>
+                </div>
+                <div class="video-actions">
+                    <button @click="toggleLike()" class="action-btn like-btn"
+                        :class="{'liked': isLiked}">
+                        <i class="fas fa-heart"></i>
+                        <span x-text="currentMedia?.likes || 0"></span>
+                    </button>
+                    <button @click="toggleBookmark()"
+                        class="action-btn bm-btn save-btn"
+                        :class="{ 'just-bookmarked': isBookmarked() }"
+                        :aria-pressed="isBookmarked()">
+                        <i
+                            :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                            :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Player (for music) -->
+        <div x-show="mediaType === 'music'" class="audio-player">
+            <div class="audio-visualizer">
+                <div class="album-art">
+                    <img
+                        :src="currentMedia?.cover_art || '/static/img/default-cover.jpg'"
+                        :alt="currentMedia?.title">
+                    <div class="vinyl-effect" :class="{'spinning': isPlaying}">
+                        <div class="vinyl-ring"></div>
+                    </div>
+                </div>
+            </div>
+
+            <audio :src="currentMedia?.audio_url"
+                preload="metadata"
+                @loadedmetadata="onAudioLoaded()"
+                @timeupdate="onTimeUpdate()"
+                @ended="onMediaEnded()"
+                @durationchange="onDurationChange()"
+                x-ref="audioPlayer">
+                Your browser does not support the audio tag.
+            </audio>
+
+            <!-- Timeline -->
+            <div class="timeline">
+                <input type="range" min="0"
+                    :max="Math.floor(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)"
+                    :value="Math.floor(currentTime)" @input="seekAudio($event)"
+                    @change="seekAudio($event)">
+            </div>
+            <div class="time-info">
+                <span x-text="formatTime(currentTime)"></span> / <span
+                    x-text="formatTime(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)"></span>
+            </div>
+
+            <!-- Bookmark Button -->
+            <button type="button"
+                @click="toggleBookmark(currentMedia.id)"
+                class="bookmark-button bm-btn save-btn"
+                :aria-pressed="isBookmarked(currentMedia.id)"
+                title="Bookmark this media">
+                <i
+                    :class="isBookmarked(currentMedia.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                    :style="isBookmarked(currentMedia.id) ? 'color: var(--accent-color)' : ''"></i>
+                <span
+                    x-text="isBookmarked(currentMedia.id) ? 'Bookmarked' : 'Bookmark'"></span>
+            </button>
+        </div>
+
+        <!-- Media Info -->
+        <div class="media-info">
+            <div class="media-header">
+                <div class="media-text">
+                    <h2 x-text="currentMedia?.title"></h2>
+                    <p class="artist-name" x-text="currentMedia?.artist"></p>
+                    <div class="media-meta">
+                        <span class="genre" x-text="currentMedia?.genre"></span>
+                    </div>
+                </div>
+                <div class="media-actions">
+                    <button @click="toggleBookmark()"
+                        class="action-btn bm-btn save-btn floating-bookmark"
+                        :class="{ 'just-bookmarked': isBookmarked() }"
+                        :aria-pressed="isBookmarked()"
+                        title="Bookmark this media">
+                        <i
+                            :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                            :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="description" x-text="currentMedia?.description"></p>
+        </div>
+    </div>
+
+    <!-- Player Controls -->
+    <div class="player-controls">
+        <div class="control-buttons">
+            <button @click="previousTrack()" class="control-btn"
+                title="Previous">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <button @click="seekBackward()" class="control-btn"
+                title="15 seconds back">
+                <i class="fas fa-backward"></i>
+            </button>
+            <button @click="togglePlay()" class="control-btn play-btn"
+                :title="isPlaying ? 'Pause' : 'Play'">
+                <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+            </button>
+            <button @click="seekForward()" class="control-btn"
+                title="15 seconds forward">
+                <i class="fas fa-forward"></i>
+            </button>
+            <button @click="nextTrack()" class="control-btn" title="Next">
+                <i class="fas fa-step-forward"></i>
+            </button>
+            <button @click="toggleShuffle()"
+                class="control-btn"
+                :class="{'active': isShuffled}"
+                title="Shuffle">
+                <i class="fas fa-random"></i>
+            </button>
+            <button @click="toggleRepeat()"
+                class="control-btn"
+                :class="{'active': isRepeated}"
+                title="Repeat">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-bar" @click="seekTo($event)">
+                <div class="progress-fill"
+                    :style="`width: ${progressPercent}%`"></div>
+                <div class="progress-handle"
+                    :style="`left: ${progressPercent}%`"></div>
+            </div>
+        </div>
+
+        <div class="volume-section">
+            <button @click="toggleMute()" class="volume-btn">
+                <i
+                    :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+            </button>
+            <div class="volume-bar" @click="setVolume($event)">
+                <div class="volume-fill"
+                    :style="`width: ${volume * 100}%`"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Sidebar -->
+    <div class="playlist-sidebar" :class="{'open': showPlaylist}">
+        <div class="sidebar-header">
+            <h3>Up Next</h3>
+            <button @click="showPlaylist = false" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="playlist-items">
+            <template x-for="(item, index) in playlist" :key="item.id">
+                <div class="playlist-item"
+                    :class="{'active': currentIndex === index}"
+                    @click="playTrack(index)">
+                    <img :src="item.cover_art || item.thumbnail"
+                        :alt="item.title"
+                        class="item-thumb">
+                    <div class="item-info">
+                        <h4 x-text="item.title"></h4>
+                        <p x-text="item.artist"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Playlist Toggle -->
+    <button @click="showPlaylist = !showPlaylist" class="playlist-toggle">
+        <i class="fas fa-list"></i>
+    </button>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading media...</p>
+    </div>
+</div>
+
+<script>
+function fullPlayer() {
+    return {
+        // State
+        currentMedia: null,
+        mediaType: 'music',
+        isPlaying: false,
+        isMuted: false,
+        isShuffled: false,
+        isRepeated: false,
+        currentTime: 0,
+        volume: 1,
+        progressPercent: 0,
+        isLiked: false,
+        showPlaylist: false,
+        playlist: [],
+        currentIndex: 0,
+        isLoading: true,
+        
+        // Initialize
+        async loadMedia() {
+            const mediaId = new URLSearchParams(window.location.search).get('id');
+            const mediaType = new URLSearchParams(window.location.search).get('type') || 'music';
+            
+            if (mediaId) {
+                await this.loadMediaById(mediaId, mediaType);
+            } else {
+                // Load from global player or default
+                this.loadDefaultMedia();
+            }
+        },
+        
+        async loadMediaById(id, type) {
+            try {
+                this.isLoading = true;
+                this.mediaType = type;
+                
+                // Load media based on type
+                const response = await fetch(`/api/${type}/${id}`);
+                const data = await response.json();
+                
+                this.currentMedia = data;
+                this.setupMediaPlayer();
+                this.setupMediaSession();
+                this.setupGlobalPlayerSync();
+            } catch (error) {
+                console.error('Error loading media:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        loadDefaultMedia() {
+            // Load from global player if there's a current track, otherwise use default
+            if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
+                this.currentMedia = window.mediaPlayer.currentTrack;
+                this.mediaType = (this.currentMedia.type === 'show' || this.currentMedia.video_url || this.currentMedia.mp4_link) ? 'show' : 'music';
+                this.isPlaying = window.mediaPlayer.isPlaying;
+                this.currentTime = window.mediaPlayer.currentTime || 0;
+            } else {
+                this.currentMedia = {
+                    id: 'default',
+                    title: 'Welcome to Ahoy',
+                    artist: 'Ahoy Indie Media',
+                    duration_seconds: 180,
+                    cover_art: '/static/img/default-cover.jpg'
+                };
+            }
+            this.setupMediaPlayer();
+            this.setupGlobalPlayerSync();
+        },
+        
+        setupMediaPlayer() {
+            // Setup media player based on type
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.load();
+            } else if (this.mediaType === 'music') {
+                // For music, route playback through global mediaPlayer for unified audio + visualizer
+                // Do not auto-play here; wait for user interaction via togglePlay()
+            }
+        },
+        
+        setupMediaSession() {
+            // Initialize media session for background audio controls
+            if (window.mediaSessionManager && this.currentMedia) {
+                const player = {
+                    play: () => this.togglePlay(),
+                    pause: () => this.togglePlay(),
+                    prev: () => this.previousTrack(),
+                    next: () => this.nextTrack(),
+                    seek: (time) => this.seekTo(time)
+                };
+                
+                window.mediaSessionManager.init(player);
+                window.mediaSessionManager.updateMetadata(this.currentMedia);
+            }
+        },
+        
+        // Keep this view in sync with the global player (used for music)
+        setupGlobalPlayerSync() {
+            if (!window.mediaPlayer) return;
+            
+            // Initial sync
+            this.isPlaying = window.mediaPlayer.isPlaying;
+            this.volume = window.mediaPlayer.volume;
+            this.isMuted = window.mediaPlayer.isMuted;
+            this.currentTime = window.mediaPlayer.currentTime || 0;
+            const duration = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+            this.progressPercent = duration > 0 ? (this.currentTime / duration) * 100 : 0;
+            
+            // Sync current media if global player has a track
+            if (this.mediaType === 'music' && window.mediaPlayer.currentTrack && !this.currentMedia) {
+                this.currentMedia = window.mediaPlayer.currentTrack;
+            }
+            
+            // Event listeners
+            window.mediaPlayer.on('play', () => {
+                this.isPlaying = true;
+                // Update current media if it changed
+                if (this.mediaType === 'music' && window.mediaPlayer.currentTrack) {
+                    this.currentMedia = window.mediaPlayer.currentTrack;
+                }
+            });
+            window.mediaPlayer.on('pause', () => {
+                this.isPlaying = false;
+            });
+            window.mediaPlayer.on('timeupdate', (time) => {
+                if (this.mediaType === 'music') {
+                    this.currentTime = time || 0;
+                    const duration = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+                    this.progressPercent = duration > 0 ? (this.currentTime / duration) * 100 : 0;
+                }
+            });
+            window.mediaPlayer.on('durationchange', (duration) => {
+                if (this.mediaType === 'music') {
+                    // Prefer media metadata if present; fallback to player-reported duration
+                    const total = this.currentMedia?.duration_seconds || duration || 0;
+                    this.progressPercent = total > 0 ? (this.currentTime / total) * 100 : 0;
+                }
+            });
+            window.mediaPlayer.on('volumechange', (data) => {
+                this.volume = data.volume;
+                this.isMuted = data.muted;
+            });
+            window.mediaPlayer.on('trackchange', () => {
+                if (this.mediaType === 'music' && window.mediaPlayer.currentTrack) {
+                    this.currentMedia = window.mediaPlayer.currentTrack;
+                }
+            });
+        },
+        
+        // Player controls
+        togglePlay() {
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                if (this.isPlaying) {
+                    this.$refs.videoPlayer.pause();
+                    this.isPlaying = false;
+                } else {
+                    this.$refs.videoPlayer.play().then(() => {
+                        this.isPlaying = true;
+                    }).catch(err => {
+                        console.error('Error playing video:', err);
+                    });
+                }
+            } else if (this.mediaType === 'music') {
+                const mp = window.mediaPlayer;
+                if (!mp) return;
+                if (mp.isPlaying) {
+                    mp.pause();
+                } else if (mp.currentTrack) {
+                    mp.resume();
+                }
+            }
+            
+            // Update media session state
+            if (window.mediaSessionManager) {
+                window.mediaSessionManager.updatePlaybackState(this.isPlaying ? 'paused' : 'playing');
+            }
+        },
+        
+        seekBackward() {
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                const newTime = Math.max(0, (window.mediaPlayer.currentTime || this.currentTime || 0) - 15);
+                window.mediaPlayer.seekTo(newTime);
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                const newTime = Math.max(0, (this.$refs.videoPlayer.currentTime || 0) - 15);
+                this.$refs.videoPlayer.currentTime = newTime;
+                this.currentTime = newTime;
+            }
+        },
+        
+        seekForward() {
+            const duration = this.currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0;
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                const newTime = Math.min(duration, (window.mediaPlayer.currentTime || this.currentTime || 0) + 15);
+                window.mediaPlayer.seekTo(newTime);
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                const newTime = Math.min(duration, (this.$refs.videoPlayer.currentTime || 0) + 15);
+                this.$refs.videoPlayer.currentTime = newTime;
+                this.currentTime = newTime;
+            }
+        },
+        
+        previousTrack() {
+            if (this.currentIndex > 0) {
+                this.currentIndex--;
+                this.playTrack(this.currentIndex);
+            }
+        },
+        
+        nextTrack() {
+            if (this.currentIndex < this.playlist.length - 1) {
+                this.currentIndex++;
+                this.playTrack(this.currentIndex);
+            } else if (this.isRepeated) {
+                this.currentIndex = 0;
+                this.playTrack(0);
+            }
+        },
+        
+        playTrack(index) {
+            this.currentIndex = index;
+            this.currentMedia = this.playlist[index];
+            this.setupMediaPlayer();
+            this.togglePlay();
+        },
+        
+        toggleMute() {
+            this.isMuted = !this.isMuted;
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.setMuted(this.isMuted);
+            } else {
+                if (this.$refs.audioPlayer) {
+                    this.$refs.audioPlayer.muted = this.isMuted;
+                }
+                if (this.$refs.videoPlayer) {
+                    this.$refs.videoPlayer.muted = this.isMuted;
+                }
+            }
+        },
+        
+        toggleShuffle() {
+            this.isShuffled = !this.isShuffled;
+            if (this.isShuffled) {
+                this.shufflePlaylist();
+            }
+        },
+        
+        toggleRepeat() {
+            this.isRepeated = !this.isRepeated;
+        },
+        
+        // Media events
+        onVideoLoaded() {
+            this.isLoading = false;
+        },
+        
+        onAudioLoaded() {
+            this.isLoading = false;
+            // Ensure duration is set from audio element if available
+            if (this.$refs.audioPlayer && this.$refs.audioPlayer.duration) {
+                if (!this.currentMedia.duration_seconds) {
+                    this.currentMedia.duration_seconds = this.$refs.audioPlayer.duration;
+                }
+            }
+        },
+        
+        onDurationChange() {
+            // Update duration when it becomes available
+            if (this.$refs.audioPlayer && this.$refs.audioPlayer.duration) {
+                if (!this.currentMedia.duration_seconds || this.currentMedia.duration_seconds === 0) {
+                    this.currentMedia.duration_seconds = this.$refs.audioPlayer.duration;
+                }
+            }
+        },
+        
+        onTimeUpdate() {
+            const player = this.mediaType === 'show' ? this.$refs.videoPlayer : null;
+            if (player) {
+                this.currentTime = player.currentTime;
+                this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || 1)) * 100;
+            } else if (this.mediaType === 'music') {
+                // For music, always use global player for consistency
+                if (window.mediaPlayer) {
+                    this.currentTime = window.mediaPlayer.currentTime || 0;
+                    const total = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+                    this.progressPercent = (total > 0 ? (this.currentTime / total) * 100 : 0);
+                } else if (this.$refs.audioPlayer) {
+                    // Fallback to local audio element if global player not available
+                    this.currentTime = this.$refs.audioPlayer.currentTime || 0;
+                    const total = this.currentMedia?.duration_seconds || this.$refs.audioPlayer.duration || 0;
+                    this.progressPercent = (total > 0 ? (this.currentTime / total) * 100 : 0);
+                }
+            }
+        },
+        
+        onMediaEnded() {
+            this.isPlaying = false;
+            this.nextTrack();
+        },
+        
+        // Progress and volume
+        seekAudio(event) {
+            // Handle range input seeking (timeline slider)
+            const newTime = parseFloat(event.target.value) || 0;
+            this.currentTime = newTime;
+            
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.currentTime = newTime;
+            } else if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.seekTo(newTime);
+            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.currentTime = newTime;
+            }
+        },
+        
+        seekTo(event) {
+            // Handle progress bar click seeking
+            const progressBar = event.currentTarget;
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+            const duration = this.currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0;
+            const newTime = percentage * duration;
+            
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.currentTime = newTime;
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.seekTo(newTime);
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.currentTime = newTime;
+                this.currentTime = newTime;
+            }
+        },
+        
+        setVolume(event) {
+            const volumeBar = event.currentTarget;
+            const rect = volumeBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            this.volume = Math.max(0, Math.min(1, clickX / rect.width));
+            
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.setVolume(this.volume);
+            } else {
+                if (this.$refs.videoPlayer) {
+                    this.$refs.videoPlayer.volume = this.volume;
+                }
+                if (this.$refs.audioPlayer) {
+                    this.$refs.audioPlayer.volume = this.volume;
+                }
+            }
+        },
+        
+        // Actions
+        toggleLike() {
+            this.isLiked = !this.isLiked;
+            // Implement like functionality
+        },
+        
+        toggleBookmark(id) {
+            if (this.currentMedia && window.AhoyBookmarks) {
+                const bookmarkItem = {
+                    type: this.mediaType === 'music' ? 'track' : 'show',
+                    id: id,
+                    title: this.currentMedia.title,
+                    artwork: this.currentMedia.cover_art || this.currentMedia.thumbnail
+                };
+                window.AhoyBookmarks.toggle(bookmarkItem);
+            }
+        },
+        
+        isBookmarked(id) {
+            if (this.currentMedia && window.AhoyBookmarks) {
+                const type = this.mediaType === 'music' ? 'track' : 'show';
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
+        },
+        
+        addToPlaylist() {
+            // Implement add to playlist
+        },
+        
+        // Utility functions
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        formatDuration(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        },
+        
+        shufflePlaylist() {
+            // Shuffle playlist array
+            for (let i = this.playlist.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+            }
+        }
+    };
+}
+</script>
+
+<style>
+/* Timeline styling */
+.timeline {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.timeline input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.timeline input[type="range"]:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.timeline input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent-color, #00d4ff);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.timeline input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.timeline input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--accent-color, #00d4ff);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.timeline input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.time-info {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Player-specific bookmark styling */
+.media-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.media-text {
+    flex: 1;
+}
+
+.media-actions {
+    flex-shrink: 0;
+}
+
+.floating-bookmark {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: var(--accent-color);
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.floating-bookmark:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+}
+
+.floating-bookmark[aria-pressed="true"] {
+    background: linear-gradient(45deg, var(--accent-color), rgba(0, 212, 255, 0.8));
+    color: var(--background-dark);
+    border-color: var(--accent-color);
+}
+
+.floating-bookmark.just-bookmarked {
+    animation: bookmarkSuccess 0.6s ease-out;
+}
+
+@keyframes bookmarkSuccess {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        background: var(--accent-color);
+        box-shadow: 0 0 30px var(--accent-color);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.video-actions .bm-btn {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: var(--accent-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.video-actions .bm-btn:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.video-actions .bm-btn[aria-pressed="true"] {
+    background: var(--accent-color);
+    color: var(--background-dark);
+    border-color: var(--accent-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    /* Make player container compact and flush to bottom on mobile */
+    .player-container {
+        min-height: auto !important;
+        position: fixed;
+        bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom));
+        left: 0;
+        right: 0;
+        top: auto;
+        z-index: 10005;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        padding: 0;
+        max-height: calc(100vh - var(--bottom-nav-h, 60px) - var(--secondary-nav-h, 48px) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        height: auto;
+    }
+    
+    /* Ensure body has padding to account for fixed player */
+    body:has(.player-container) {
+        padding-bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom) + 200px);
+    }
+    
+    /* Compact player main area */
+    .player-main {
+        padding: 12px !important;
+        flex: 0 0 auto !important;
+        justify-content: flex-start !important;
+        max-height: none;
+    }
+    
+    /* Compact audio player */
+    .audio-player {
+        max-width: 100% !important;
+        width: 100%;
+    }
+    
+    /* Smaller album art on mobile */
+    .audio-visualizer {
+        margin-bottom: 12px !important;
+    }
+    
+    .album-art {
+        width: 50px !important;
+        height: 50px !important;
+        margin: 0 auto 8px;
+    }
+    
+    /* Compact timeline */
+    .timeline {
+        width: 100%;
+        margin: 8px 0;
+    }
+    
+    .timeline input[type="range"] {
+        width: 100%;
+        height: 4px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    .timeline input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        background: var(--accent-color, #00d4ff);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    
+    .timeline input[type="range"]::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        background: var(--accent-color, #00d4ff);
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+    }
+    
+    /* Compact time info */
+    .time-info {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        margin: 4px 0 8px;
+    }
+    
+    /* Compact media info */
+    .media-info {
+        max-width: 100%;
+        padding: 0 8px;
+    }
+    
+    .media-info h2 {
+        font-size: 14px !important;
+        margin-bottom: 4px;
+    }
+    
+    .artist-name {
+        font-size: 12px !important;
+        margin-bottom: 8px;
+    }
+    
+    .description {
+        font-size: 11px;
+        display: none; /* Hide description on mobile to save space */
+    }
+    
+    /* Compact player controls - position at bottom */
+    .player-controls {
+        position: relative !important;
+        bottom: auto !important;
+        padding: 8px 12px !important;
+        background: transparent !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .control-buttons {
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .control-btn {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 14px !important;
+    }
+    
+    .play-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 16px !important;
+    }
+    
+    /* Compact progress section */
+    .progress-section {
+        margin-bottom: 8px !important;
+        gap: 8px !important;
+    }
+    
+    .progress-bar {
+        height: 3px !important;
+    }
+    
+    .time-current,
+    .time-total {
+        font-size: 10px !important;
+        min-width: 35px;
+    }
+    
+    /* Hide volume section on mobile to save space */
+    .volume-section {
+        display: none;
+    }
+    
+    /* Compact bookmark button */
+    .bookmark-button {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        margin: 8px auto;
+        display: block;
+    }
+    
+    .media-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .floating-bookmark {
+        align-self: flex-start;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    /* Hide video player controls overlay on mobile if needed */
+    .video-player {
+        max-height: 40vh;
+    }
+}
+</style>
+{% endblock %}

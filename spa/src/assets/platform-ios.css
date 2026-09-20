@@ -1,0 +1,230 @@
+/*
+ * iOS-only overrides. Scoped to `body.platform-ios` (set at runtime in
+ * main.js via Capacitor.getPlatform()). Web and Android are unaffected.
+ */
+
+body.platform-ios .content-area {
+  /* Keep the shared dock reserve consistent with the fixed mobile shell. */
+  padding-bottom: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.platform-ios {
+  background: #070b0f;
+  --np-mobile-dock-height: 152px;
+  --mobile-bottom-clear: 152px;
+  --mobile-bottom-clear-sm: 140px;
+}
+
+body.platform-ios #app {
+  background: #070b0f;
+}
+
+/*
+ * Native iOS uses the phone-style touch shell on both iPhone and iPad.
+ * Do not let iPad viewport width fall back into the desktop/Mac chrome.
+ */
+body.platform-ios .desktop-only,
+body.platform-ios .mini-player-desktop,
+body.platform-ios .app-sidebar,
+body.platform-ios .navbar.desktop-nav,
+body.platform-ios .custom-scrollbar {
+  display: none !important;
+}
+
+body.platform-ios .mobile-only {
+  display: block !important;
+}
+
+body.platform-ios .mobile-footer-logo,
+body.platform-ios .mobile-footer-logo-img {
+  display: none !important;
+}
+
+body.platform-ios .bottom-deck.mobile-only,
+body.platform-ios .bottom-deck {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+body.platform-ios .mobile-top-nav {
+  display: flex !important;
+}
+
+body.platform-ios .dock-wrapper {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.platform-ios .app-shell {
+  padding-left: 0 !important;
+}
+
+body.platform-ios .main-content {
+  margin-left: 0 !important;
+  padding-top: var(--ds-topbar-height) !important;
+}
+
+body.platform-ios .bottom-deck {
+  bottom: 0 !important;
+  top: auto !important;
+  height: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: 0 !important;
+  overflow: visible !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.platform-ios .deck-frame {
+  height: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: 0 !important;
+  background: linear-gradient(180deg, rgba(10, 14, 18, 0.86) 0%, rgba(4, 8, 8, 0.9) 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.platform-ios .deck-header {
+  top: -34px !important;
+  right: 0 !important;
+  width: 92px !important;
+  height: 62px !important;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-bottom: none !important;
+  border-radius: 18px 18px 12px 12px !important;
+}
+
+body.platform-ios .deck-header::before {
+  left: 0 !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 14px !important;
+}
+
+body.platform-ios .deck-toggle {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/*
+ * iPadOS WebKit can leak backdrop-filter sampling from fixed overlays across
+ * the full WebView. Keep native iOS app-wide overlays flat unless they own a
+ * visible modal surface.
+ */
+body.platform-ios .offcanvas-overlay,
+body.platform-ios .modal-overlay,
+body.platform-ios .mobile-menu-overlay,
+body.platform-ios .mobile-sheet-overlay,
+body.platform-ios .cast-modal-backdrop,
+body.platform-ios .notification-overlay,
+body.platform-ios .checkout-overlay,
+body.platform-ios .xp-overlay,
+body.platform-ios .viz-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.platform-ios .deck-frame .dock-wrapper {
+  height: 100% !important;
+}
+
+body.platform-ios .deck-frame .deck-slot,
+body.platform-ios .deck-frame .now-playing-wrapper,
+body.platform-ios .deck-frame .now-playing-glass {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+body.platform-ios .deck-frame .now-playing-glass {
+  background: transparent !important;
+}
+
+body.platform-ios .deck-frame .now-playing-container.mobile-slot-2 {
+  height: 100% !important;
+  min-height: 100% !important;
+  box-sizing: border-box !important;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  justify-content: flex-start !important;
+  padding: 8px 8px calc(env(safe-area-inset-bottom, 0px) + 0px) !important;
+  background: #07090d !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock::before {
+  background: transparent !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock-row {
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  background: transparent !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock-row-secondary,
+body.platform-ios .deck-frame .mobile-dock-row-primary {
+  min-height: 56px !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock-row-secondary {
+  padding: 8px 4px 5px !important;
+  border-bottom: none !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock-row-primary {
+  padding: 5px 4px 7px !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock .mobile-tab {
+  flex: 1 1 0 !important;
+  min-height: 50px !important;
+  padding: 4px 3px 5px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  overflow: hidden !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock .mobile-tab i {
+  font-size: 17px !important;
+}
+
+body.platform-ios .deck-frame .mobile-dock .mobile-tab span {
+  font-size: 10px !important;
+  line-height: 1 !important;
+}
+
+body.platform-ios .now-playing-overlay {
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  padding: 24px 20px calc(32px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(var(--np-mobile-dock-height, 152px) + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-y: auto !important;
+}
+
+@media (min-width: 481px) {
+  body.platform-ios .now-playing-overlay {
+    display: none !important;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "web":            {"version": "live",    "released": "always"},
+  "linux_appimage": {"version": "0.2.3",   "released": "2026-03-11"},
+  "linux_aur":      {"version": "0.2.3",   "released": "2026-03-11"},
+  "linux_snap":     {"version": "pending", "released": null},
+  "windows_nsis":   {"version": "0.2.3",   "released": "2026-03-11"},
+  "windows_winget": {"version": "pending", "released": null},
+  "mac_dmg":        {"version": "1.0.6",   "released": null},
+  "mac_homebrew":   {"version": "pending", "released": null},
+  "android":        {"version": "1.0.6",   "released": null},
+  "ios":            {"version": "1.0.6",   "released": null}
+}

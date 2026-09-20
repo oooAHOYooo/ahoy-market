@@ -1,0 +1,230 @@
+/* Desktop header ownership: SPA topbar layout, controls, breadcrumbs, and unread badge. */
+
+.app {
+  --notification-badge-color: var(--primary-color, #ff0060);
+  --notification-badge-text: #fff;
+}
+
+:root[data-theme='fractal'] .app {
+  --notification-badge-color: var(--color-accent-peach, #FFA586);
+  --notification-badge-text: var(--color-bg-base, #101E2E);
+}
+
+.app .app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: linear-gradient(180deg,
+      rgba(8, 8, 12, 0.82) 0%,
+      rgba(6, 6, 10, 0.78) 50%,
+      rgba(5, 5, 8, 0.75) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.app .app-header .navbar {
+  width: 100%;
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+}
+
+.app .app-header .nav-container {
+  width: 100%;
+}
+
+.app .app-header .ds-statusbar__left {
+  flex: 0 1 auto;
+}
+
+.app .app-header .ds-statusbar__right {
+  margin-left: auto;
+  padding-right: 8px;
+}
+
+.app .app-header .mobile-status-bar,
+.app .app-header .mobile-nav-root,
+.app .app-header .mobile-top-nav {
+  background: transparent;
+}
+
+@media (min-width: 1025px) {
+  /* Offset header past the fixed sidebar so logo and nav bar sit on the same row */
+  body:not(.force-mobile-shell) .app .app-header {
+    left: 173px;
+  }
+
+  .app .app-header .ds-statusbar__left,
+  .app .app-header .ds-statusbar__right,
+  .app .app-header .nav-history,
+  .app .app-header .ds-crumbs {
+    height: 32px;
+    align-items: center;
+  }
+
+  .app .app-header .ds-statusbar__right {
+    gap: 4px;
+  }
+
+  .app .app-header .nav-history {
+    gap: 7px;
+  }
+
+  .app .app-header .nav-history-btn,
+  .app .app-header .notification-btn,
+  .app .app-header .account-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-left: 0;
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 11px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 54%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.014));
+    backdrop-filter: blur(14px) saturate(125%);
+    -webkit-backdrop-filter: blur(14px) saturate(125%);
+    color: rgba(255, 255, 255, 0.70);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 1px 6px rgba(0, 0, 0, 0.16);
+  }
+
+  .app .app-header .nav-history-btn {
+    border-radius: 999px;
+  }
+
+  .app .app-header .nav-history-btn i {
+    font-size: 12px;
+    opacity: 0.78;
+  }
+
+  .app .app-header .account-icon-btn i {
+    font-size: 15px;
+    display: block;
+    line-height: 1;
+  }
+
+  .app .app-header .account-username {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    max-width: 140px;
+    min-width: 56px;
+    height: 32px;
+    padding: 0 10px 0 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.045), transparent 54%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.014));
+    backdrop-filter: blur(14px) saturate(125%);
+    -webkit-backdrop-filter: blur(14px) saturate(125%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 1px 6px rgba(0, 0, 0, 0.16);
+    box-sizing: border-box;
+    color: rgba(255, 255, 255, 0.54);
+    text-decoration: none;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: auto;
+  }
+
+  .app .app-header .has-notifications .account-username {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .app .app-header .ds-crumbs {
+    gap: 6px;
+  }
+
+  .app .app-header .ds-crumbs__link {
+    color: var(--primary-color, #ff0060);
+    text-decoration: none;
+    transition: color 0.16s ease, opacity 0.16s ease, text-shadow 0.16s ease;
+  }
+
+  .app .app-header .ds-crumbs__link:hover {
+    color: color-mix(in srgb, var(--primary-color, #ff0060) 74%, #fff);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--primary-color, #ff0060) 28%, transparent);
+  }
+
+  .app .app-header .ds-crumbs__current {
+    text-shadow: 0 0 6px rgba(180, 210, 255, 0.36);
+  }
+
+  .app .app-header .nav-history-btn::before,
+  .app .app-header .notification-btn::before,
+  .app .app-header .account-icon-btn::before {
+    content: "";
+    position: absolute;
+    inset: 1px 3px auto;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+
+  .app .app-header .nav-history-btn i,
+  .app .app-header .notification-btn i,
+  .app .app-header .account-icon-btn i {
+    font-size: 15px;
+    display: block;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .app .app-header .notification-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    z-index: 2;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--notification-badge-color) 22%, rgba(255, 255, 255, 0.14));
+    background: color-mix(in srgb, var(--notification-badge-color) 32%, transparent);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--notification-badge-color) 8%, transparent);
+    color: color-mix(in srgb, var(--notification-badge-text) 58%, transparent);
+    font-size: 7px;
+    line-height: 10px;
+    animation: none;
+    transform: translate(1px, 1px);
+  }
+
+  .app .app-header .notification-btn:hover .notification-badge {
+    border-color: color-mix(in srgb, var(--notification-badge-color) 44%, rgba(255, 255, 255, 0.24));
+    background: color-mix(in srgb, var(--notification-badge-color) 62%, transparent);
+    box-shadow: 0 1px 5px color-mix(in srgb, var(--notification-badge-color) 18%, transparent);
+    color: color-mix(in srgb, var(--notification-badge-text) 88%, transparent);
+  }
+
+  .app .app-header .nav-history-btn:hover,
+  .app .app-header .notification-btn:hover,
+  .app .app-header .account-icon-btn:hover,
+  .app .app-header .account-username:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.075), transparent 56%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.022));
+    color: rgba(255, 255, 255, 0.94);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.20);
+  }
+}

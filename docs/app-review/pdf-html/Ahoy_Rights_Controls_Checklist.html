@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Ahoy Rights Controls Checklist</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="docs/app-review/pdf-style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Ahoy Rights Controls Checklist</h1>
+</header>
+<h1 id="rights-future-proofing-checklist">Rights Future-Proofing
+Checklist</h1>
+<p>Goal: make future App Store, Play Store, and platform reviews easy to
+answer with records instead of memory.</p>
+<h2 id="before-publishing-any-creator-content">Before Publishing Any
+Creator Content</h2>
+<ul>
+<li>Confirm the creator/rights holder has a signed authorization,
+accepted creator terms, or written approval on file.</li>
+<li>Save the evidence path in the rights register.</li>
+<li>Confirm the authorization covers the actual content type: audio,
+video, podcast, artwork, metadata, or AHOY TV scheduling.</li>
+<li>Confirm samples, covers, collaborators, producers, labels,
+publishers, artwork, stock footage, and archive footage are cleared when
+applicable.</li>
+<li>Mark content unpublished or hidden until rights are confirmed.</li>
+</ul>
+<h2 id="database-fields-to-add-later">Database Fields To Add Later</h2>
+<p>Add a rights table or fields so the app can prove its content state
+directly:</p>
+<ul>
+<li><code>rights_status</code>: <code>pending</code>,
+<code>authorized</code>, <code>owned</code>, <code>licensed</code>,
+<code>rejected</code>, <code>expired</code>, <code>revoked</code>.</li>
+<li><code>rights_holder_name</code>.</li>
+<li><code>rights_holder_email</code>.</li>
+<li><code>rights_agreement_id</code>.</li>
+<li><code>rights_evidence_url</code> or internal file reference.</li>
+<li><code>rights_scope</code>: audio, video, podcast, artwork, metadata,
+live_tv, promo, mobile_app.</li>
+<li><code>rights_effective_date</code>.</li>
+<li><code>rights_expiration_date</code>.</li>
+<li><code>rights_last_reviewed_at</code>.</li>
+<li><code>rights_reviewed_by</code>.</li>
+<li><code>rights_notes</code>.</li>
+</ul>
+<h2 id="app-behavior-to-add-later">App Behavior To Add Later</h2>
+<ul>
+<li>Hide content from public APIs unless <code>rights_status</code> is
+<code>authorized</code>, <code>owned</code>, or
+<code>licensed</code>.</li>
+<li>Exclude pending/expired/revoked content from
+<code>/api/music</code>, <code>/api/shows</code>,
+<code>/api/podcasts</code>, <code>/api/artists</code>,
+<code>/api/radio/manifest</code>, and
+<code>/api/live-tv/channels</code>.</li>
+<li>Add an admin-only rights dashboard outside the consumer app.</li>
+<li>Add an export command that regenerates the Apple/Google rights
+packet from the live database.</li>
+<li>Add upload storage for signed agreements and release forms.</li>
+</ul>
+<h2 id="app-review-wording">App Review Wording</h2>
+<p>Use this positioning consistently:</p>
+<p>Ahoy is a direct-to-artist media platform. It does not aggregate
+unauthorized third-party streaming services. Content is either produced
+by Ahoy / Little Market LLC, submitted by creators and rights holders
+who authorized Ahoy distribution, or otherwise licensed/cleared for app
+distribution.</p>
+<p>AHOY TV is a scheduled marketing and discovery surface for
+Ahoy-controlled video catalog items. It is not a third-party TV, cable,
+IPTV, or broadcast retransmission service.</p>
+<h2 id="ongoing-review-cadence">Ongoing Review Cadence</h2>
+<ul>
+<li>Review the rights register before every iOS release.</li>
+<li>Review the rights register before every major content import.</li>
+<li>Keep an annual rights audit folder by year.</li>
+<li>Save App Review correspondence next to the supporting rights
+packet.</li>
+<li>If a creator asks for removal, document the request and remove or
+hide the content before the next public content refresh.</li>
+</ul>
+</body>
+</html>

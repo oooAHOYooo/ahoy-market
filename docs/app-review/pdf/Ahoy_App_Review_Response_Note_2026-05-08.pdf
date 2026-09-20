@@ -1,0 +1,96 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 3305 >>
+stream
+BT /F1 8 Tf 54 764.00 Td (Ahoy App Review Response Note) Tj ET
+BT /F2 18 Tf 54 738.00 Td (Apple App Review Rights Response) Tj ET
+1 w 54 730.00 m 558 730.00 l S
+BT /F1 10 Tf 54 706.00 Td (Generated: 2026-05-08) Tj ET
+BT /F1 10 Tf 54 688.00 Td (Submission ID: 4c2c87f4-0b40-4932-8e34-34fcfc1d4171) Tj ET
+BT /F1 10 Tf 54 670.00 Td (Version reviewed: 1.0.9 \(202605021129\)) Tj ET
+BT /F2 13 Tf 54 642.00 Td (What Apple Is Asking For) Tj ET
+BT /F1 10 Tf 54 616.00 Td (Apple cited Guidelines 5.2.3 and 5.2.2. They need documentary evidence that Ahoy has) Tj ET
+BT /F1 10 Tf 54 602.00 Td (permission to stream and display third-party audio, video, catalogs, discovery metadata, and) Tj ET
+BT /F1 10 Tf 54 588.00 Td (AHOY TV content in the iOS app.) Tj ET
+BT /F1 10 Tf 54 564.00 Td (The database artist list is useful as a rights schedule, but it is not enough by itself) Tj ET
+BT /F1 10 Tf 54 550.00 Td (unless paired with signed creator/platform terms, contracts, or authorization letters.) Tj ET
+BT /F2 13 Tf 54 522.00 Td (Artist Schedule) Tj ET
+BT /F1 10 Tf 54 496.00 Td (The current production database contains 25 artist records in `content_artists`.) Tj ET
+BT /F1 10 Tf 54 472.00 Td (Use this CSV as the attachment worksheet:) Tj ET
+BT /F1 10 Tf 60 448.00 Td (-) Tj ET
+BT /F1 10 Tf 76 448.00 Td (`docs/app-review/artist-rights-schedule-2026-05-08.csv`) Tj ET
+BT /F1 10 Tf 54 425.00 Td (Before submitting, fill in `rights_evidence_reference` for each artist with the agreement,) Tj ET
+BT /F1 10 Tf 54 411.00 Td (email, release form, or contract file name that proves authorization.) Tj ET
+BT /F2 13 Tf 54 383.00 Td (Suggested App Review Note) Tj ET
+BT /F1 10 Tf 54 357.00 Td (Hello,) Tj ET
+BT /F1 10 Tf 54 333.00 Td (We have attached documentation showing Ahoy's authorization to stream and display the music,) Tj ET
+BT /F1 10 Tf 54 319.00 Td (podcast, video, catalog, and discovery content available in the app.) Tj ET
+BT /F1 10 Tf 54 295.00 Td (Ahoy is a direct-to-artist media platform. The listed creators and rights holders granted) Tj ET
+BT /F1 10 Tf 54 281.00 Td (Ahoy permission to display their artist profiles, catalog metadata, audio, video, podcast,) Tj ET
+BT /F1 10 Tf 54 267.00 Td (and related discovery content in the Ahoy iOS app. The attached artist rights schedule) Tj ET
+BT /F1 10 Tf 54 253.00 Td (identifies each platform artist and cross-references the supporting authorization records.) Tj ET
+BT /F1 10 Tf 54 229.00 Td (For the AHOY TV surface, Ahoy is not providing access to third-party TV providers, cable) Tj ET
+BT /F1 10 Tf 54 215.00 Td (channels, IPTV services, or external broadcast streams. AHOY TV is a marketing-style) Tj ET
+BT /F1 10 Tf 54 201.00 Td (scheduled viewing surface for Ahoy-owned, Ahoy-produced, or Ahoy-authorized platform video) Tj ET
+BT /F1 10 Tf 54 187.00 Td (content. The attached register identifies the creators/rights holders and the supporting) Tj ET
+BT /F1 10 Tf 54 173.00 Td (authorization records.) Tj ET
+BT /F1 10 Tf 54 149.00 Td (Thank you.) Tj ET
+BT /F2 13 Tf 54 121.00 Td (Important Caveat) Tj ET
+BT /F1 10 Tf 54 95.00 Td (If everyone on the platform gave rights through onboarding or a creator agreement, attach) Tj ET
+BT /F1 10 Tf 54 81.00 Td (that agreement too. Apple usually wants the actual rights grant, not just the app's internal) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Length 1047 >>
+stream
+BT /F1 8 Tf 54 764.00 Td (Ahoy App Review Response Note) Tj ET
+BT /F1 10 Tf 54 738.00 Td (artist list.) Tj ET
+BT /F2 10 Tf 54 714.00 Td (The safest package is:) Tj ET
+0.5 w 204 712.00 m 558 712.00 l S
+BT /F1 10 Tf 60 688.00 Td (-) Tj ET
+BT /F1 10 Tf 76 688.00 Td (A signed company statement from Little Market LLC / Ahoy.) Tj ET
+BT /F1 10 Tf 60 671.00 Td (-) Tj ET
+BT /F1 10 Tf 76 671.00 Td (The artist schedule CSV or a PDF version of it.) Tj ET
+BT /F1 10 Tf 60 654.00 Td (-) Tj ET
+BT /F1 10 Tf 76 654.00 Td (The creator terms/agreement showing the rights grant.) Tj ET
+BT /F1 10 Tf 60 637.00 Td (-) Tj ET
+BT /F1 10 Tf 76 637.00 Td (Any direct email approvals or contracts for artists not covered by the standard terms.) Tj ET
+BT /F1 10 Tf 60 620.00 Td (-) Tj ET
+BT /F1 10 Tf 76 620.00 Td (A clear AHOY TV explanation stating that it is an Ahoy-programmed marketing/discovery) Tj ET
+BT /F1 10 Tf 76 606.00 Td (surface for owned or authorized catalog videos, not a third-party television stream) Tj ET
+BT /F1 10 Tf 76 592.00 Td (aggregator.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Kids [5 0 R 6 0 R] /Count 2 >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000154 00000 n 
+0000003511 00000 n 
+0000004610 00000 n 
+0000004746 00000 n 
+0000004882 00000 n 
+0000004945 00000 n 
+trailer << /Size 9 /Root 8 0 R >>
+startxref
+4994
+%%EOF

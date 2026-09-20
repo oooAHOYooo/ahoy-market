@@ -1,0 +1,295 @@
+/**
+ * Dark Liquid Glass Loading Screen
+ * Premium cinematic loading experience with glass morphism
+ */
+
+/* Full Page Loading Screen with Dark Glass Aesthetic */
+#app-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(1200px circle at 50% 20%,
+            rgba(120, 140, 255, 0.12),
+            rgba(10, 12, 18, 0.95) 70%);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding:
+        max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    overflow: hidden;
+}
+
+#app-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Floating Ambient Light Orbs */
+.orb {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    animation: float 12s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.orb.blue {
+    background: #6ddcff;
+    top: 15%;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.orb.purple {
+    background: #9b8cff;
+    top: 60%;
+    right: 25%;
+    animation-delay: -4s;
+}
+
+.orb.blue-alt {
+    background: #6ddcff;
+    bottom: 20%;
+    left: 10%;
+    animation-delay: -8s;
+    width: 200px;
+    height: 200px;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-40px) translateX(30px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+/* Glass Panel Container */
+.loader-content {
+    text-align: center;
+    color: var(--text-primary);
+    max-width: 420px;
+    width: min(420px, 92vw);
+    padding: 48px 40px;
+    position: relative;
+    z-index: 1;
+
+    /* Glass morphism */
+    backdrop-filter: blur(var(--blur-strong)) saturate(160%);
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.06),
+            rgba(255, 255, 255, 0.01)), var(--glass-bg);
+
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-glass);
+}
+
+/* Logo Glass Container */
+.logo-glass {
+    width: 96px;
+    height: 96px;
+    border-radius: 24px;
+    backdrop-filter: blur(var(--blur-soft));
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+        0 0 25px var(--glow-primary),
+        var(--shadow-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    margin: 0 auto 32px;
+    transition: transform 0.3s var(--transition-smooth);
+}
+
+.logo-glass:hover {
+    transform: scale(1.02);
+}
+
+/* Logo Image */
+.loader-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Progress Container */
+.progress-container {
+    width: 100%;
+    margin: 0 auto 24px;
+}
+
+/* Liquid Fill Capsule - Shell */
+.progress-bar-wrapper {
+    width: 100%;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Liquid Fill - Progress Bar */
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+            var(--accent-primary),
+            var(--accent-secondary));
+    border-radius: 999px;
+    box-shadow:
+        0 0 18px var(--glow-primary),
+        inset 0 0 10px rgba(255, 255, 255, 0.25);
+    transition: width 0.6s var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer effect on liquid fill */
+.progress-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+            rgba(255, 255, 255, 0.25),
+            rgba(255, 255, 255, 0.05),
+            rgba(255, 255, 255, 0.25));
+    opacity: 0.4;
+    animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-60%);
+    }
+
+    100% {
+        transform: translateX(60%);
+    }
+}
+
+/* Status Text */
+.status-text {
+    color: var(--text-secondary);
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    margin-top: 16px;
+    min-height: 18px;
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco, "Cascadia Mono", "Cascadia Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", "Ubuntu Mono", monospace;
+}
+
+.status-details {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 8px;
+    min-height: 16px;
+    text-align: center;
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco, "Cascadia Mono", "Cascadia Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", "Ubuntu Mono", monospace;
+    letter-spacing: 0.05em;
+}
+
+/* Percentage Display */
+.progress-percent {
+    font-size: 2.4rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-top: 20px;
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco, "Cascadia Mono", "Cascadia Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", "Ubuntu Mono", monospace;
+    letter-spacing: -0.02em;
+}
+
+/* Mobile: CSS fallback to hide loader (JS also skips loader entirely on mobile).
+   This prevents scroll/touch freeze issues caused by the loader initialization. */
+@media (max-width: 768px) {
+    #app-loader {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
+    }
+}
+
+/* Mobile Responsive (desktop-only; loader hidden on mobile above) */
+@media (max-width: 768px) {
+    .loader-content {
+        max-width: 90vw;
+        padding: 40px 32px;
+    }
+
+    .logo-glass {
+        width: 80px;
+        height: 80px;
+        padding: 14px;
+        margin-bottom: 28px;
+    }
+
+    .progress-bar-wrapper {
+        height: 12px;
+    }
+
+    .progress-percent {
+        font-size: 2rem;
+    }
+
+    .orb {
+        width: 200px;
+        height: 200px;
+        filter: blur(60px);
+    }
+
+    .orb.blue-alt {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 380px) {
+    .loader-content {
+        padding: 32px 24px;
+    }
+
+    .logo-glass {
+        width: 72px;
+        height: 72px;
+        padding: 12px;
+    }
+
+    .progress-percent {
+        font-size: 1.8rem;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .orb,
+    .progress-bar::after {
+        animation: none !important;
+    }
+
+    .loader-logo {
+        transition: none;
+    }
+}

@@ -1,0 +1,112 @@
+################################################################################
+# Ahoy Indie Media — repo ignores
+################################################################################
+
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Flask / runtime data
+instance/
+flask_session/
+local.db
+db_backup/
+
+# Env files (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+production.env
+*.env
+
+# OS / IDE
+.DS_Store
+.local/app-health-agent/
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Electron / desktop builds (build-info.json is generated at build time)
+dist-electron/
+packaging/icons/ahoy.iconset/
+electron/build-info.json
+out/
+release/
+*.map
+
+# SPA build-time copies of /static (source of truth is repo root /static)
+spa/public/static/data/
+spa/public/static/img/
+
+# Packaged app bundles / installers (build outputs)
+downloads/
+*.dmg
+*.exe
+*.msi
+*.AppImage
+*.app/
+
+# Android / Gradle
+android/.gradle/
+android/**/build/
+
+# Local artifacts / one-off files
+cookies.txt
+*.spec
+scripts/poets08_mp3_output/
+
+# Local/dev convenience scripts (keep if you want these tracked)
+start.py
+start.bat
+start_browser.sh
+
+# Local data snapshots (ignore by default)
+data/*.json
+
+# Not for production / app store (dev-only, secrets, local builds)
+.env.local
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+packaging/*.env
+android/keystore/
+ios/ExportOptions.local.plist
+*.mobileprovision
+*.p12
+
+# OpenClaw agent runtime state (never commit — can contain personal context)
+.openclaw/
+memory/
+memory/YYYY-MM-DD.md
+memory/heartbeat-state.json
+AGENTS.md
+SOUL.md
+USER.md
+TOOLS.md
+HEARTBEAT.md
+IDENTITY.md
+MEMORY.md

@@ -1,0 +1,774 @@
+{% extends "base.html" %}
+<div class="track-actions">
+    <button class="action-btn save-btn bm-btn"
+        @click.stop="window.AhoyBookmarks && window.AhoyBookmarks.toggle({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+        :aria-pressed="window.AhoyBookmarks ? window.AhoyBookmarks.isBookmarked('track', track.id) : false"
+        :class="{ 'just-bookmarked': window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked('track', track.id) }">
+        <span aria-hidden="true">
+            <i
+                x-show="window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked('track', track.id)"
+                class="fas fa-bookmark"
+                style="color: var(--accent-color);"></i>
+            <i
+                x-show="!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked('track', track.id))"
+                class="far fa-bookmark"></i>
+        </span>
+        <span class="sr-only">Bookmark</span>
+    </button>
+</div>
+{% block title %}{{ artist.name }} - Artist Profile - Ahoy Indie Media{%
+endblock %}
+
+{% block meta %}
+<meta name="description"
+    content="{{ artist.bio or 'Discover ' + artist.name + ' on Ahoy Indie Media. ' + (artist.genre or 'Indie artist') + ' with ' + (artist.music_count or 0)|string + ' tracks and ' + (artist.show_count or 0)|string + ' shows.' }}">
+<meta name="keywords"
+    content="{{ artist.name }}, {{ artist.genre or 'indie music' }}, {{ artist.type or 'artist' }}, ahoy indie media, music, shows, {{ artist.location or 'indie artist' }}">
+<meta property="og:title" content="{{ artist.name }} - Artist Profile">
+<meta property="og:description"
+    content="{{ artist.bio or 'Discover ' + artist.name + ' on Ahoy Indie Media' }}">
+<meta property="og:image"
+    content="{{ artist.image or '/static/img/default-avatar.png' }}">
+<meta property="og:type" content="profile">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ artist.name }} - Artist Profile">
+<meta name="twitter:description"
+    content="{{ artist.bio or 'Discover ' + artist.name + ' on Ahoy Indie Media' }}">
+<meta name="twitter:image"
+    content="{{ artist.image or '/static/img/default-avatar.png' }}">
+{% endblock %}
+
+{% block content %}
+<div class="artist-detail-page" x-data="artistDetail()" x-init="init()">
+    <!-- Hero Banner with Tailwind-style design -->
+    <section class="artist-hero-banner">
+        <div class="hero-bg-overlay"></div>
+        <div class="hero-bg-image" 
+             :style="`background-image: url(${artist.hero_image_url || artist.cover_image || artist.image || '/static/img/default-avatar.png'})`">
+        </div>
+        <div class="hero-content-wrapper">
+            <div class="hero-content">
+                <div class="hero-avatar">
+                <img :src="artist.image || '/static/img/default-avatar.png'"
+                         :alt="artist.name"
+                         class="avatar-image">
+                </div>
+                <div class="hero-info">
+                    <h1 class="hero-name" x-text="artist.name"></h1>
+                    <p class="hero-genre" x-text="artist.genre || artist.type || 'Artist'"></p>
+                    {% if artist.bio %}
+                    <p class="hero-bio" x-text="artist.bio"></p>
+                    {% endif %}
+                    <div class="hero-actions">
+                        <button 
+                            @click="toggleFollow()"
+                            :class="{ 'following': isFollowing }"
+                            class="follow-button">
+                            <i :class="isFollowing ? 'fas fa-check' : 'fas fa-plus'"></i>
+                            <span x-text="isFollowing ? 'Following' : 'Follow Artist'"></span>
+                        </button>
+                    </div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Boost (inline - no popup) -->
+    <section class="boost-inline-section">
+        <div class="boost-inline-container">
+            <div class="boost-inline-header">
+                <h2><i class="fas fa-heart"></i> Boost</h2>
+                <p class="boost-inline-subtitle">Support <span x-text="artist.name"></span> directly &mdash; 100% goes to the artist</p>
+            </div>
+            <div class="boost-inline-amounts">
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === 1 }" @click="boostAmount = 1">$1</button>
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === 3 }" @click="boostAmount = 3">$3</button>
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === 5 }" @click="boostAmount = 5">$5</button>
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === -1 }" @click="boostAmount = -1">Custom</button>
+            </div>
+            <div class="boost-inline-custom" x-show="boostAmount === -1" x-cloak>
+                <div class="boost-inline-custom-row">
+                    <span class="boost-inline-custom-prefix">$</span>
+                    <input type="number" min="0.50" step="0.01" placeholder="0.50" x-model="boostCustom" class="boost-inline-custom-input">
+                </div>
+            </div>
+            <button type="button" class="boost-inline-confirm" @click="goBoost()">
+                <i class="fas fa-heart"></i> Boost <span x-text="boostAmount === -1 ? (boostCustom ? '$' + boostCustom : '') : '$' + boostAmount"></span>
+            </button>
+            <p class="boost-inline-note">Fees (Stripe + platform) shown on checkout</p>
+        </div>
+    </section>
+
+    <!-- Random Artist FAB -->
+    <button class="random-artist-fab" @click="goRandomArtist()" title="Discover another artist">
+        <i class="fas fa-shuffle"></i>
+        <span class="random-artist-fab-label">Next Artist</span>
+    </button>
+
+    <!-- Merch Section (Future Feature) -->
+    <!--
+    <section class="merch-section">
+        <div class="merch-container">
+            <h2 class="merch-title">Merchandise</h2>
+            <div class="merch-grid">
+                <div class="merch-empty">
+                    <i class="fas fa-tshirt"></i>
+                    <p>Merchandise coming soon!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    -->
+
+    <!-- Mixed media gallery (tracks + shows) -->
+    <section class="artist-content">
+        <div class="content-header">
+            <h2>Media by <span x-text="artist.name"></span></h2>
+        </div>
+
+        <div class="music-grid">
+            <template x-for="item in mediaItems" :key="item.key">
+                <div class="track-card" @click="playItem(item)">
+                    <div class="track-cover">
+                        <img
+                            :src="item.image || '/static/img/default-cover.jpg'"
+                            :alt="item.title" class="image-placeholder"
+                            loading="lazy">
+                        <div class="track-overlay">
+                            <button @click.stop="playItem(item)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="track-actions">
+                                <button class="action-btn save-btn bm-btn"
+                                    @click.stop="toggleBookmark(item)"
+                                    :aria-pressed="isBookmarked(item.kind, item.id)"
+                                    :class="{ 'just-bookmarked': isBookmarked(item.kind, item.id) }">
+                                    <span aria-hidden="true">
+                                        <i
+                                            x-show="isBookmarked(item.kind, item.id)"
+                                            class="fas fa-bookmark"
+                                            style="color: var(--accent-color);"></i>
+                                        <i
+                                            x-show="!isBookmarked(item.kind, item.id)"
+                                            class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only"
+                                        x-text="isBookmarked(item.kind, item.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="track-info">
+                        <h4 x-text="item.title"></h4>
+                        <p x-text="item.subtitle"></p>
+                        <div class="track-meta" x-show="item.kind === 'track'">
+                            <span class="track-duration"
+                                x-text="formatTime(item.data?.duration_seconds || 0)"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="!isLoading && mediaItems.length === 0" class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No media found</h3>
+        </div>
+    </section>
+</div>
+
+<script>
+function artistDetail() {
+    return {
+        artist: {{ artist|tojson }},
+        isFollowing: {{ is_following|tojson }},
+        mediaItems: [],
+        isLoading: true,
+        boostAmount: 1,
+        boostCustom: '',
+
+        init() {
+            // Prefer client bootstrap artist if provided
+            if (window.__ARTIST__) this.artist = window.__ARTIST__;
+            this.composeMedia();
+        },
+
+        getArtistId() {
+            return this.artist.slug || this.artist.id || this.artist.name;
+        },
+
+        async toggleFollow() {
+            const artistId = this.getArtistId();
+            
+            try {
+                const response = await fetch(`/artists/${encodeURIComponent(artistId)}/follow`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.isFollowing = data.following;
+                    
+                    // Sync with Saved (Bookmarks): add on follow, remove on unfollow
+                    try {
+                        if (window.AhoyBookmarks) {
+                            const artistIdStr = String(artistId);
+                            const isSaved = window.AhoyBookmarks.isBookmarked('artist', artistIdStr);
+                            const bookmarkItem = {
+                                type: 'artist',
+                                id: artistIdStr,
+                                title: this.artist?.name || this.artist?.title || 'Artist',
+                                artwork: this.artist?.image || this.artist?.avatar || ''
+                            };
+                            if (this.isFollowing && !isSaved) {
+                                window.AhoyBookmarks.toggle(bookmarkItem);
+                            } else if (!this.isFollowing && isSaved) {
+                                window.AhoyBookmarks.toggle(bookmarkItem);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Bookmark sync failed:', e);
+                    }
+                    
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(data.message || 'Updated', 'success');
+                    }
+                } else {
+                    const error = await response.json();
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(error.error || 'Failed to update follow status', 'error');
+                    }
+                }
+            } catch (e) {
+                console.error('Follow error:', e);
+                if (window.ahoyApp?.showNotification) {
+                    window.ahoyApp.showNotification('Error updating follow status', 'error');
+                }
+            }
+        },
+
+        async composeMedia() {
+            this.isLoading = true;
+            const items = [];
+            const tracks = Array.isArray(this.artist.tracks) ? this.artist.tracks : [];
+            const shows  = Array.isArray(this.artist.shows)  ? this.artist.shows  : [];
+
+            for (const t of tracks) {
+                items.push({
+                    key: `track:${t.id}`,
+                    kind: 'track',
+                    id: t.id,
+                    title: t.title || 'Untitled',
+                    subtitle: t.genre || 'Music',
+                    image: t.cover_art || this.artist.image,
+                    data: t
+                });
+            }
+            for (const s of shows) {
+                items.push({
+                    key: `show:${s.id}`,
+                    kind: 'show',
+                    id: s.id,
+                    title: s.title || 'Untitled',
+                    subtitle: s.host || s.category || 'Show',
+                    image: s.thumbnail || this.artist.image,
+                    data: s
+                });
+            }
+
+            // If the artist object didn't include media, build from global JSONs
+            if (items.length === 0) {
+                const slug = (window.slugify ? window.slugify(this.artist.slug || this.artist.name) : (this.artist.slug || (this.artist.name || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')));
+                try {
+                    const [musicRes, showsRes] = await Promise.all([
+                        fetch('/api/music'),
+                        fetch('/api/shows')
+                    ]);
+                    const musicJson = musicRes.ok ? await musicRes.json() : { tracks: [] };
+                    const showsJson = showsRes.ok ? await showsRes.json() : { shows: [] };
+
+                    const mTracks = Array.isArray(musicJson.tracks) ? musicJson.tracks.filter(t => (t.artist_slug || '').toLowerCase() === slug) : [];
+                    for (const t of mTracks) {
+                        items.push({
+                            key: `track:${t.id}`,
+                            kind: 'track',
+                            id: t.id,
+                            title: t.title || 'Untitled',
+                            subtitle: t.artist || 'Music',
+                            image: t.cover_art || this.artist.image,
+                            data: t
+                        });
+                    }
+
+                    const mShows = Array.isArray(showsJson.shows) ? showsJson.shows.filter(s => (s.host_slug || '').toLowerCase() === slug) : [];
+                    for (const s of mShows) {
+                        items.push({
+                            key: `show:${s.id}`,
+                            kind: 'show',
+                            id: s.id,
+                            title: s.title || 'Untitled',
+                            subtitle: s.host || s.category || 'Show',
+                            image: s.thumbnail || this.artist.image,
+                            data: s
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to build media from global JSONs', e);
+                }
+            }
+
+            // Deduplicate by key in case of repeats
+            const seen = new Set();
+            const unique = [];
+            for (const it of items) { if (!seen.has(it.key)) { seen.add(it.key); unique.push(it); } }
+
+            unique.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            this.mediaItems = unique;
+            this.isLoading = false;
+        },
+
+        playItem(item) {
+            const type = item.kind === 'show' ? 'show' : 'music';
+            window.location.href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;
+        },
+
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle({ type: item.kind === 'show' ? 'show' : 'track', id: item.id, title: item.title, artwork: item.image });
+                this.lastBookmarkAction = Date.now();
+            }
+        },
+
+        isBookmarked(type, id) {
+            this.lastBookmarkAction;
+            if (window.AhoyBookmarks) return window.AhoyBookmarks.isBookmarked(type === 'show' ? 'show' : 'track', id);
+            return false;
+        },
+
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        },
+
+        goBoost() {
+            const artistId = encodeURIComponent(this.artist.slug || this.artist.id || this.artist.name || '');
+            let amount = this.boostAmount === -1 ? parseFloat(this.boostCustom) : this.boostAmount;
+            if (!amount || amount < 0.50) {
+                if (window.ahoyApp?.showNotification) window.ahoyApp.showNotification('Minimum boost is $0.50', 'error');
+                return;
+            }
+            window.location.href = `/checkout?type=boost&artist_id=${artistId}&amount=${amount}`;
+        },
+
+        async goRandomArtist() {
+            try {
+                const res = await fetch('/api/artists');
+                const data = await res.json();
+                const artists = (data.artists || []).filter(a => {
+                    const slug = (a.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    const currentSlug = (this.artist.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    return slug !== currentSlug;
+                });
+                if (artists.length > 0) {
+                    const pick = artists[Math.floor(Math.random() * artists.length)];
+                    const slug = (pick.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    window.location.href = `/artist/${slug}`;
+                }
+            } catch (e) {
+                console.error('Random artist error:', e);
+            }
+        },
+
+        lastBookmarkAction: 0
+    };
+}
+
+</script>
+
+<style>
+/* Hero Banner Styles - Tailwind-inspired */
+.artist-hero-banner {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+}
+
+.hero-bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.hero-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+    z-index: 2;
+}
+
+.hero-content-wrapper {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: white;
+}
+
+.hero-avatar {
+    flex-shrink: 0;
+}
+
+.avatar-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.hero-info {
+    flex: 1;
+}
+
+.hero-name {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-genre {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin: 0 0 1rem 0;
+}
+
+.hero-bio {
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin: 0 0 1.5rem 0;
+    max-width: 600px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.follow-button {
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    color: rgba(102, 126, 234, 1);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.follow-button:hover {
+    background: rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.follow-button.following {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: rgba(34, 197, 94, 1);
+}
+
+.follow-button.following:hover {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* Merch Section */
+.merch-section {
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.merch-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.merch-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+    color: white;
+}
+
+.merch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.merch-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.merch-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.merch-empty p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Inline Boost Section */
+.boost-inline-section {
+    margin-bottom: 2rem;
+}
+
+.boost-inline-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 1rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.boost-inline-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: #fff;
+}
+
+.boost-inline-header h2 i {
+    color: #ff006e;
+    margin-right: 0.5rem;
+}
+
+.boost-inline-subtitle {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0 1rem 0;
+}
+
+.boost-inline-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+.boost-inline-amt {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.boost-inline-amt:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.boost-inline-amt.active {
+    background: rgba(255, 0, 110, 0.2);
+    border-color: rgba(255, 0, 110, 0.5);
+    color: #ff006e;
+}
+
+.boost-inline-custom {
+    margin-bottom: 1rem;
+}
+
+.boost-inline-custom-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 8px 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.boost-inline-custom-prefix {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.boost-inline-custom-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+}
+
+.boost-inline-confirm {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 0, 110, 0.3);
+    background: rgba(255, 0, 110, 0.15);
+    color: #ff006e;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.boost-inline-confirm:hover {
+    background: rgba(255, 0, 110, 0.25);
+    border-color: rgba(255, 0, 110, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(255, 0, 110, 0.2);
+}
+
+.boost-inline-note {
+    text-align: center;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+    margin: 0.75rem 0 0 0;
+}
+
+/* Random Artist FAB */
+.random-artist-fab {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    animation: fab-pulse 3s ease-in-out infinite;
+}
+
+.random-artist-fab:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.4);
+}
+
+.random-artist-fab i {
+    color: #00d4ff;
+}
+
+@keyframes fab-pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+    50% { box-shadow: 0 4px 28px rgba(0, 212, 255, 0.2); }
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-name {
+        font-size: 2rem;
+    }
+
+    .hero-genre {
+        font-size: 1rem;
+    }
+
+    .hero-bio {
+        font-size: 0.9rem;
+    }
+
+    .avatar-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .merch-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .boost-inline-amounts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .random-artist-fab {
+        bottom: 90px;
+        right: 14px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+    }
+}
+</style>
+{% endblock %}

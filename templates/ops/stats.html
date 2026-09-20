@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block title %}Ahoy Stats{% endblock %}
+
+{% block content %}
+<section class="ops-page" aria-label="Ahoy stats">
+    <header class="ops-hero">
+        <p class="ops-kicker">Private analytics</p>
+        <h1>Ahoy Stats</h1>
+        <p class="ops-subtitle">Owner-only view for {{ owner_email }}. Arrow keys or WASD move between the main tiles and lists.</p>
+        <p class="ops-meta">Generated {{ snapshot.generated_at }} · {{ snapshot.window_days }} day window</p>
+    </header>
+
+    <section class="ops-panel" id="posthog-sync" aria-label="PostHog sync status">
+        <div class="ops-panel-head">
+            <div>
+                <p class="ops-kicker">PostHog</p>
+                <h2>Sync status</h2>
+            </div>
+            <span class="ops-panel-note">{{ posthog_sync.status | upper }}</span>
+        </div>
+        <div class="ops-shelf ops-shelf--compact">
+            <div class="ops-tile">
+                <span class="ops-label">Runtime key</span>
+                <strong>{{ 'yes' if posthog_sync.env.runtime_enabled else 'no' }}</strong>
+                <small>{{ posthog_sync.env.runtime_key_source }}</small>
+            </div>
+            <div class="ops-tile">
+                <span class="ops-label">Env match</span>
+                <strong>{{ 'yes' if posthog_sync.env.runtime_key_matches_server and posthog_sync.env.runtime_host_matches_server else 'no' }}</strong>
+                <small>{{ posthog_sync.env.runtime_host_source }}</small>
+            </div>
+            <div class="ops-tile">
+                <span class="ops-label">Mirror rows</span>
+                <strong>{{ posthog_sync.mirror.total }}</strong>
+                <small>{{ posthog_sync.mirror.last_7d }} in 7d · {{ posthog_sync.mirror.last_24h }} in 24h</small>
+            </div>
+            <div class="ops-tile">
+                <span class="ops-label">Mirror status</span>
+                <strong>{{ posthog_sync.mirror.status }}</strong>
+                <small>{% if posthog_sync.mirror.latest_at %}Latest {{ posthog_sync.mirror.latest_at }}{% else %}No imported rows yet{% endif %}</small>
+            </div>
+        </div>
+        {% if posthog_sync.notes %}
+        <div class="ops-list" style="margin-top: 16px;">
+            {% for note in posthog_sync.notes %}
+            <div class="ops-row">
+                <div class="ops-row-main">
+                    <strong>{{ note }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+
+    {% if snapshot.status != 'ok' %}
+    <div class="ops-error">
+        <strong>Analytics unavailable:</strong> {{ snapshot.error }}
+    </div>
+    {% else %}
+    <section class="ops-shelf" aria-label="Summary tiles">
+        <a class="ops-tile" href="#top-pages" data-nav-cell tabindex="0">
+            <span class="ops-label">Active users</span>
+            <strong>{{ snapshot.users.active_30d }}</strong>
+            <small>Last {{ snapshot.window_days }} days</small>
+        </a>
+        <a class="ops-tile" href="#top-pages" data-nav-cell tabindex="0">
+            <span class="ops-label">Signups</span>
+            <strong>{{ snapshot.users.new_7d }}</strong>
+            <small>{{ snapshot.users.new_24h }} in the last 24h</small>
+        </a>
+        <a class="ops-tile" href="#top-media" data-nav-cell tabindex="0">
+            <span class="ops-label">Song hours</span>
+            <strong>{{ snapshot.listening.music_hours }}</strong>
+            <small>{{ snapshot.listening.total_hours }} total listening hours</small>
+        </a>
+        <a class="ops-tile" href="#top-media" data-nav-cell tabindex="0">
+            <span class="ops-label">Video watches</span>
+            <strong>{{ snapshot.activity.video_plays_30d }}</strong>
+            <small>{{ snapshot.listening.video_hours }} video hours tracked</small>
+        </a>
+        <a class="ops-tile" href="#top-pages" data-nav-cell tabindex="0">
+            <span class="ops-label">Pageviews</span>
+            <strong>{{ snapshot.activity.pageviews_30d }}</strong>
+            <small>{{ snapshot.activity.unique_paths_30d }} unique paths</small>
+        </a>
+        <a class="ops-tile" href="#top-media" data-nav-cell tabindex="0">
+            <span class="ops-label">Listening sessions</span>
+            <strong>{{ snapshot.listening.sessions_30d }}</strong>
+            <small>{{ snapshot.listening.listeners_30d }} unique listeners</small>
+        </a>
+        <a class="ops-tile" href="#top-pages" data-nav-cell tabindex="0">
+            <span class="ops-label">Guest pageviews</span>
+            <strong>{{ snapshot.activity.guest_pageviews_30d }}</strong>
+            <small>{{ snapshot.activity.guest_visitors_30d }} guest visitors</small>
+        </a>
+        <a class="ops-tile" href="#top-pages" data-nav-cell tabindex="0">
+            <span class="ops-label">Guest listening</span>
+            <strong>{{ snapshot.listening.guest_hours_30d }}</strong>
+            <small>{{ snapshot.listening.guest_sessions_30d }} guest sessions</small>
+        </a>
+        <a class="ops-tile" href="#top-pages" data-nav-cell tabindex="0">
+            <span class="ops-label">Tracked events</span>
+            <strong>{{ snapshot.activity.tracked_events_30d }}</strong>
+            <small>{{ snapshot.activity.unique_visitors_30d }} total visitors</small>
+        </a>
+    </section>
+
+    <section class="ops-panel" id="trends" aria-label="Daily trends">
+        <div class="ops-panel-head">
+            <div>
+                <p class="ops-kicker">Heartbeat</p>
+                <h2>Daily trends</h2>
+            </div>
+            <span class="ops-panel-note">Last {{ snapshot.trends | length }} days</span>
+        </div>
+        <div class="ops-list ops-trends">
+            <div class="ops-trend-head" aria-hidden="true">
+                <span>Date</span>
+                <span>Pageviews</span>
+                <span>Signups</span>
+                <span>Plays</span>
+                <span>Hours</span>
+            </div>
+            {% for row in snapshot.trends %}
+            <div class="ops-trend-row">
+                <span>{{ row.date }}</span>
+                <span>{{ row.pageviews }}</span>
+                <span>{{ row.signups }}</span>
+                <span>{{ row.track_plays + row.video_plays }}</span>
+                <span>{{ row.listening_hours }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="ops-panel" id="top-pages" aria-label="Top pages">
+        <div class="ops-panel-head">
+            <div>
+                <p class="ops-kicker">Browse</p>
+                <h2>Top pages</h2>
+            </div>
+            <span class="ops-panel-note">Focus with arrows, open with Enter</span>
+        </div>
+        <div class="ops-list">
+            {% for row in snapshot.activity.top_pages %}
+            <a class="ops-row" href="{{ row.path if row.path.startswith('/') else '/' }}" data-nav-cell tabindex="0">
+                <div class="ops-row-main">
+                    <code>{{ row.path }}</code>
+                </div>
+                <div class="ops-row-meta">
+                    <span>{{ row.views }} views</span>
+                    <span>{{ row.users }} users</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="ops-panel" id="top-media" aria-label="Top media">
+        <div class="ops-panel-head">
+            <div>
+                <p class="ops-kicker">Content</p>
+                <h2>Top media</h2>
+            </div>
+            <span class="ops-panel-note">Search-style fallback via title</span>
+        </div>
+        <div class="ops-list">
+            {% for row in snapshot.activity.top_media %}
+            <a class="ops-row" href="/search?q={{ row.title | urlencode }}" data-nav-cell tabindex="0">
+                <div class="ops-row-main">
+                    <strong>{{ row.title }}</strong>
+                    {% if row.creator %}<span class="ops-row-sub">{{ row.creator }}</span>{% endif %}
+                    <span class="ops-row-subtle"><code>{{ row.media_type }}:{{ row.media_id }}</code></span>
+                </div>
+                <div class="ops-row-meta">
+                    <span>{{ row.plays }} plays</span>
+                    <span>{{ row.listeners }} listeners</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="ops-panel" id="watching" aria-label="Video watch metrics">
+        <div class="ops-panel-head">
+            <div>
+                <p class="ops-kicker">Video</p>
+                <h2>Watch funnel</h2>
+            </div>
+            <span class="ops-panel-note">{{ snapshot.watching.watch_hours_30d }} hours watched</span>
+        </div>
+        <div class="ops-shelf ops-shelf--compact">
+            <div class="ops-tile">
+                <span class="ops-label">Watch starts</span>
+                <strong>{{ snapshot.watching.watch_starts_30d }}</strong>
+                <small>{{ snapshot.watching.unique_viewers_30d }} viewers</small>
+            </div>
+            <div class="ops-tile">
+                <span class="ops-label">Watch completions</span>
+                <strong>{{ snapshot.watching.watch_completions_30d }}</strong>
+                <small>{{ snapshot.watching.watch_sessions_30d }} terminal sessions</small>
+            </div>
+            <div class="ops-tile">
+                <span class="ops-label">Completion rate</span>
+                <strong>{{ snapshot.watching.completion_rate }}%</strong>
+                <small>Completes / starts</small>
+            </div>
+            <div class="ops-tile">
+                <span class="ops-label">Avg watch</span>
+                <strong>{{ snapshot.watching.average_watch_minutes }}m</strong>
+                <small>{{ snapshot.watching.average_watch_seconds }}s avg</small>
+            </div>
+        </div>
+        <div class="ops-list" style="margin-top: 16px;">
+            {% for row in snapshot.watching.top_videos %}
+            <div class="ops-row">
+                <div class="ops-row-main">
+                    <strong>{{ row.title }}</strong>
+                    {% if row.creator %}<span class="ops-row-sub">{{ row.creator }}</span>{% endif %}
+                    <span class="ops-row-subtle"><code>{{ row.video_id }}</code></span>
+                </div>
+                <div class="ops-row-meta">
+                    <span>{{ row.watch_seconds | round(0) }}s watched</span>
+                    <span>{{ row.starts }} starts</span>
+                    <span>{{ row.completion_rate }}% complete</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    :root {
+        --ops-bg: rgba(255, 255, 255, 0.04);
+        --ops-border: rgba(255, 255, 255, 0.08);
+        --ops-border-strong: rgba(255, 255, 255, 0.16);
+        --ops-text: rgba(255, 255, 255, 0.92);
+        --ops-muted: rgba(255, 255, 255, 0.62);
+        --ops-soft: rgba(255, 255, 255, 0.04);
+        --ops-focus: #9ee6ff;
+    }
+
+    .ops-page {
+        display: grid;
+        gap: 22px;
+    }
+
+    .ops-hero {
+        display: grid;
+        gap: 8px;
+        max-width: 74ch;
+    }
+
+    .ops-hero h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.1rem);
+        letter-spacing: -0.05em;
+        color: var(--ops-text);
+    }
+
+    .ops-kicker {
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .ops-subtitle,
+    .ops-meta {
+        margin: 0;
+        color: var(--ops-muted);
+    }
+
+    .ops-shelf {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 14px;
+    }
+
+    .ops-shelf--compact {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .ops-tile,
+    .ops-row,
+    .ops-panel,
+    .ops-error {
+        border: 1px solid var(--ops-border);
+        background: var(--ops-bg);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+    }
+
+    .ops-tile {
+        padding: 18px;
+        display: grid;
+        gap: 10px;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+    }
+
+    .ops-tile:hover,
+    .ops-row:hover {
+        border-color: var(--ops-border-strong);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .ops-tile:focus-visible,
+    .ops-row:focus-visible {
+        outline: 2px solid var(--ops-focus);
+        outline-offset: 2px;
+    }
+
+    .ops-tile strong {
+        font-size: 2rem;
+        line-height: 1;
+        letter-spacing: -0.05em;
+        color: var(--ops-text);
+    }
+
+    .ops-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255, 255, 255, 0.52);
+    }
+
+    .ops-tile small,
+    .ops-row-sub,
+    .ops-row-subtle,
+    .ops-panel-note {
+        color: var(--ops-muted);
+    }
+
+    .ops-panel {
+        padding: 18px;
+    }
+
+    .ops-panel-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+    }
+
+    .ops-panel h2 {
+        margin: 2px 0 0;
+        font-size: 1.12rem;
+        letter-spacing: -0.03em;
+    }
+
+    .ops-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .ops-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 14px 16px;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+    }
+
+    .ops-row-main {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .ops-row-main strong {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ops-text);
+    }
+
+    .ops-row-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+        color: var(--ops-muted);
+        font-size: 0.92rem;
+    }
+
+    .ops-row-meta span {
+        white-space: nowrap;
+    }
+
+    .ops-row-subtle code {
+        color: #9ee6ff;
+    }
+
+    .ops-trends {
+        gap: 8px;
+    }
+
+    .ops-trend-head,
+    .ops-trend-row {
+        display: grid;
+        grid-template-columns: 1.4fr 0.8fr 0.8fr 0.8fr 0.8fr;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .ops-trend-head {
+        padding: 0 4px 2px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    .ops-trend-row {
+        padding: 12px 14px;
+        border: 1px solid var(--ops-border);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--ops-text);
+    }
+
+    .ops-trend-row span:last-child {
+        text-align: right;
+    }
+
+    .ops-error {
+        padding: 18px;
+        color: #ffd7d7;
+    }
+
+    @media (max-width: 720px) {
+        .ops-panel-head,
+        .ops-row {
+            align-items: start;
+            flex-direction: column;
+        }
+
+        .ops-row-meta {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(() => {
+    const cells = Array.from(document.querySelectorAll('[data-nav-cell]'));
+    if (!cells.length) return;
+
+    const keyToDelta = {
+        ArrowRight: 1,
+        ArrowDown: 1,
+        d: 1,
+        D: 1,
+        ArrowLeft: -1,
+        ArrowUp: -1,
+        a: -1,
+        A: -1,
+        s: 1,
+        S: 1,
+        w: -1,
+        W: -1,
+    };
+
+    function focusCellAt(index) {
+        const cell = cells[(index + cells.length) % cells.length];
+        if (cell && typeof cell.focus === 'function') {
+            cell.focus({ preventScroll: false });
+        }
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
+        const active = document.activeElement;
+        if (active && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) return;
+
+        const key = event.key;
+        if (!(key in keyToDelta)) return;
+
+        const currentIndex = Math.max(
+            0,
+            cells.findIndex((cell) => cell === active || cell.contains(active))
+        );
+        const delta = keyToDelta[key];
+        const nextIndex = delta === 0 ? currentIndex : currentIndex + delta;
+        event.preventDefault();
+        focusCellAt(nextIndex);
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+/**
+ * Fractal Glass Theme — "Vitrium Opus"
+ *
+ * Strictly scoped to :root[data-theme='fractal']. Toggling
+ * `document.documentElement.dataset.theme = 'fractal'` activates this layer
+ * on top of the default app styles; removing the attribute restores the
+ * untouched baseline.
+ *
+ * Existing body-class themes (theme-deep-blue, theme-after-dark,
+ * theme-alien-tundra, theme-mint) are not modified by this file.
+ */
+
+:root[data-theme='fractal'] {
+  --color-bg-base: #101E2E;
+  --color-bg-surface: #242F49;
+  --color-accent-peach: #FFA586;
+  --color-accent-crimson: #B51A2B;
+  --color-glass-border: rgba(56, 67, 88, 0.5);
+  --color-text-primary: #F2F4F7;
+  --color-text-secondary: rgba(242, 244, 247, 0.72);
+
+  --fractal-blur: 16px;
+}
+
+:root[data-theme='fractal'] body {
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+}
+
+:root[data-theme='fractal'] .app,
+:root[data-theme='fractal'] .main-content,
+:root[data-theme='fractal'] .app-shell,
+:root[data-theme='fractal'] .app-main,
+:root[data-theme='fractal'] .content-area {
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+:root[data-theme='fractal'] .neu-card,
+:root[data-theme='fractal'] .settings-page,
+:root[data-theme='fractal'] .app-sidebar,
+:root[data-theme='fractal'] .app-navbar,
+:root[data-theme='fractal'] .mobile-menu-drawer,
+:root[data-theme='fractal'] .mini-player,
+:root[data-theme='fractal'] .mini-player-desktop,
+:root[data-theme='fractal'] .bottom-deck,
+:root[data-theme='fractal'] .deck-frame,
+:root[data-theme='fractal'] .compact-footer,
+:root[data-theme='fractal'] .glass-panel,
+:root[data-theme='fractal'] .glass-deck,
+:root[data-theme='fractal'] .glass-pill {
+  background: var(--color-bg-surface);
+  backdrop-filter: blur(var(--fractal-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--fractal-blur)) saturate(140%);
+  border: 1px solid var(--color-glass-border);
+  color: var(--color-text-primary);
+}
+
+:root[data-theme='fractal'] .neu-btn-primary,
+:root[data-theme='fractal'] .btn-primary {
+  background: var(--color-accent-peach);
+  color: var(--color-bg-base);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 18px rgba(255, 165, 134, 0.32);
+}
+
+:root[data-theme='fractal'] .neu-btn-primary:hover,
+:root[data-theme='fractal'] .btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+:root[data-theme='fractal'] .neu-btn-secondary,
+:root[data-theme='fractal'] .btn-secondary,
+:root[data-theme='fractal'] .btn-danger {
+  background: var(--color-accent-crimson);
+  color: #fff;
+  border: 1px solid var(--color-glass-border);
+}
+
+:root[data-theme='fractal'] .nav-link.active,
+:root[data-theme='fractal'] .router-link-active {
+  color: var(--color-accent-peach);
+}
+
+:root[data-theme='fractal'] .app-sidebar-item.active {
+  background: rgba(255, 165, 134, 0.12);
+  border-left: 3px solid var(--color-accent-peach);
+}
+
+:root[data-theme='fractal'] a {
+  color: var(--color-accent-peach);
+}
+
+:root[data-theme='fractal'] .text-muted,
+:root[data-theme='fractal'] .text-secondary {
+  color: var(--color-text-secondary);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-theme='fractal'] .neu-card,
+  :root[data-theme='fractal'] .app-sidebar,
+  :root[data-theme='fractal'] .app-navbar,
+  :root[data-theme='fractal'] .mini-player,
+  :root[data-theme='fractal'] .compact-footer {
+    background: #2A3654;
+  }
+}

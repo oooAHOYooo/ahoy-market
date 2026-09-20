@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#00a2ff">
+    <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
+
+    <!-- Theme Initialization (Prevents Flash) -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('ahoyTheme') || 'default';
+            var list = ['deep-blue', 'after-dark', 'alien-tundra', 'mint'];
+            if (list.includes(theme)) {
+                document.documentElement.classList.add('theme-' + theme);
+            }
+        })();
+    </script>
+
+    <!-- Design Tokens and Core CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: var(--bg-primary, #0e0e10);
+            color: var(--text-primary, #ffffff);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .ops-header {
+            padding: 20px;
+            background: rgba(24, 24, 27, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .ops-logo img {
+            height: 32px;
+            display: block;
+        }
+
+        .ops-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .ops-nav a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .ops-nav a:hover {
+            color: #fff;
+        }
+
+        .ops-container {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ops-footer {
+            padding: 40px 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 40px;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="ops-header">
+        <div class="ops-logo">
+            <a href="/">
+                <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy">
+            </a>
+        </div>
+        <nav class="ops-nav">
+            <a href="/"><i class="fas fa-arrow-left"></i> Back to SPA</a>
+            {% if current_user.is_authenticated and current_user.email == AHOY_OWNER_EMAIL %}
+                <a href="/ops/stats">Stats</a>
+                <a href="/ops/webhooks/monitor">Webhooks</a>
+                <a href="/readyz">Health</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="ops-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="ops-footer">
+        &copy; 2026 Ahoy Indie Media &bull; Operations & Internal Tools
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

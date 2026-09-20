@@ -1,0 +1,37 @@
+{
+  "name": "ahoy-spa",
+  "version": "1.1.5",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "mkdir -p public/static/data public/static/img && cp ../static/data/*.json public/static/data/ && cp -R ../static/img/* public/static/img/",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@capacitor/preferences": "^5.0.8",
+    "@vueuse/core": "^14.3.0",
+    "@vueuse/motion": "^3.0.3",
+    "cannon-es": "^0.20.0",
+    "crossword-layout-generator": "^0.1.1",
+    "pinia": "^2.1.0",
+    "posthog-js": "^1.376.0",
+    "three": "^0.183.2",
+    "vue": "^3.4.0",
+    "vue-router": "^4.3.0",
+    "vue-virtual-scroller": "^3.0.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "autoprefixer": "^10.4.27",
+    "playwright": "^1.60.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
+    "vite": "^5.4.0"
+  }
+}

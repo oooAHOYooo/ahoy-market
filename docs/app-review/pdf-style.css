@@ -1,0 +1,62 @@
+@page {
+  margin: 0.75in;
+}
+
+body {
+  color: #111;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+h1 {
+  border-bottom: 2px solid #111;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 18px;
+  padding-bottom: 8px;
+}
+
+h2 {
+  font-size: 15px;
+  margin: 22px 0 8px;
+}
+
+p {
+  margin: 0 0 9px;
+}
+
+ul,
+ol {
+  margin: 0 0 12px 20px;
+  padding: 0;
+}
+
+li {
+  margin: 0 0 4px;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 9px;
+  margin: 10px 0 16px;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #c8c8c8;
+  padding: 5px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #f2f2f2;
+  font-weight: 700;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 90%;
+}
