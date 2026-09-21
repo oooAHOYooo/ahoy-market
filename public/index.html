@@ -3,35 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AHOY Market — Sovereign Storefront & Custom Pressings</title>
+  <title>AHOY Store — Catalog Search & Sovereign Pressing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Retro Poster Palette */
-      --bg: #0c1017;
-      --surface: #121822;
-      --surface-card: #17212e;
-      --surface-card-hover: #1e2c3d;
-      --surface-border: #223246;
-      --surface-border-strong: #2dd4bf;
+      /* Base & Typography */
       --text: #fefbf6;
-      --text-muted: #8fa4bd;
+      --text-muted: #8b9eb5;
+      --text-dim: #5c7086;
       
       /* Vibrant Accents */
       --mint: #2dd4bf;
       --mint-hover: #3be2cd;
-      --mint-glow: rgba(45, 212, 191, 0.25);
+      --mint-glow: rgba(45, 212, 191, 0.22);
       
       --coral: #ff6f91;
       --coral-hover: #ff85a2;
-      --coral-glow: rgba(255, 111, 145, 0.3);
+      --coral-glow: rgba(255, 111, 145, 0.28);
       
-      --rose: #ffd3da;
       --gold: #f6c860;
-      --cream: #fef8f0;
+      
+      /* DISTINCT 3-WINDOW COLORWAYS */
+      /* Window 1: Left Dashboard (Deep Obsidian Navy) */
+      --left-bg: #090d14;
+      --left-border: #182230;
+      --left-surface: #0e141f;
+      --left-surface-hover: #141b28;
+      
+      /* Window 2: Center Studio Feed (Rich Studio Slate) */
+      --center-bg: #0e141e;
+      --center-surface: #141d2a;
+      --center-surface-hover: #1a2637;
+      --center-border: #1e2b3d;
+      --center-card-border: #233246;
 
+      /* Window 3: Right Production Terminal (Dark Workshop Charcoal) */
+      --right-bg: #0b1018;
+      --right-border: #192332;
+      --right-surface: #121924;
+      --right-surface-card: #16202e;
+      
       --font-display: 'Cinzel', serif;
       --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
@@ -40,7 +53,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: var(--bg);
+      background-color: var(--center-bg);
       color: var(--text);
       font-family: var(--font-body);
       min-height: 100vh;
@@ -56,13 +69,13 @@
       width: 100%;
     }
 
-    @media (max-width: 1240px) {
+    @media (max-width: 1260px) {
       .dashboard-app {
         grid-template-columns: 240px 1fr 340px;
       }
     }
 
-    @media (max-width: 980px) {
+    @media (max-width: 990px) {
       .dashboard-app {
         grid-template-columns: 1fr;
         display: flex;
@@ -75,21 +88,21 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.55rem 1rem;
+      padding: 0.52rem 0.95rem;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.02em;
       cursor: pointer;
       text-decoration: none;
       border: none;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
       font-family: inherit;
     }
 
     .btn-mint {
       background: var(--mint);
-      color: #0c1017;
+      color: #090d14;
     }
     .btn-mint:hover {
       background: var(--mint-hover);
@@ -99,7 +112,7 @@
 
     .btn-coral {
       background: var(--coral);
-      color: #0c1017;
+      color: #090d14;
     }
     .btn-coral:hover {
       background: var(--coral-hover);
@@ -108,19 +121,19 @@
     }
 
     .btn-secondary {
-      background: var(--surface-card);
+      background: var(--center-surface);
       color: var(--text);
-      border: 1px solid var(--surface-border);
+      border: 1px solid var(--center-border);
     }
     .btn-secondary:hover {
-      background: var(--surface-card-hover);
+      background: var(--center-surface-hover);
       border-color: var(--mint);
     }
 
     .btn-ghost {
       background: transparent;
       color: var(--text-muted);
-      border: 1px dashed var(--surface-border);
+      border: 1px dashed var(--right-border);
     }
     .btn-ghost:hover {
       color: var(--text);
@@ -129,37 +142,39 @@
 
     .pill-tag {
       font-family: var(--font-mono);
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 0.2rem 0.5rem;
+      padding: 0.2rem 0.45rem;
       border-radius: 4px;
     }
 
     .pill-mint {
-      background: rgba(45, 212, 191, 0.12);
+      background: rgba(45, 212, 191, 0.1);
       color: var(--mint);
-      border: 1px solid rgba(45, 212, 191, 0.3);
+      border: 1px solid rgba(45, 212, 191, 0.25);
     }
 
     .pill-coral {
-      background: rgba(255, 111, 145, 0.12);
+      background: rgba(255, 111, 145, 0.1);
       color: var(--coral);
-      border: 1px solid rgba(255, 111, 145, 0.3);
+      border: 1px solid rgba(255, 111, 145, 0.25);
     }
 
     .pill-gold {
-      background: rgba(246, 200, 96, 0.12);
+      background: rgba(246, 200, 96, 0.1);
       color: var(--gold);
-      border: 1px solid rgba(246, 200, 96, 0.3);
+      border: 1px solid rgba(246, 200, 96, 0.25);
     }
 
-    /* LEFT ITUNES STORE RAIL */
+    /* ======================================================== */
+    /* WINDOW 1: LEFT DASHBOARD (OBSIDIAN NAVY) */
+    /* ======================================================== */
     .dashboard-left {
-      background: var(--surface);
-      border-right: 1px solid var(--surface-border);
-      padding: 1.5rem 1.15rem;
+      background: var(--left-bg);
+      border-right: 1px solid var(--left-border);
+      padding: 1.4rem 1.15rem;
       display: flex;
       flex-direction: column;
       position: sticky;
@@ -175,20 +190,20 @@
       gap: 0.75rem;
       text-decoration: none;
       color: var(--text);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.35rem;
     }
 
     .brand-logo-tile {
       width: 34px;
       height: 34px;
-      border-radius: 8px;
+      border-radius: 7px;
       background: linear-gradient(135deg, var(--mint), var(--coral));
       display: grid;
       place-items: center;
       font-family: var(--font-display);
       font-weight: 900;
       font-size: 1.1rem;
-      color: #0c1017;
+      color: #090d14;
       box-shadow: 0 0 14px var(--coral-glow);
     }
 
@@ -199,14 +214,14 @@
 
     .brand-name {
       font-family: var(--font-display);
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 900;
       letter-spacing: 0.08em;
       line-height: 1.1;
     }
 
     .brand-sub {
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.14em;
@@ -214,24 +229,23 @@
     }
 
     .user-profile-section {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
+      background: var(--left-surface);
+      border: 1px solid var(--left-border);
       border-radius: 8px;
       padding: 0.65rem 0.75rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.2rem;
     }
 
-    /* ITUNES-STYLE NAV HEADERS */
     .itunes-nav-header {
       font-family: var(--font-mono);
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      color: #6c8299;
+      color: var(--text-dim);
       font-weight: 800;
-      margin-top: 1rem;
-      margin-bottom: 0.35rem;
-      padding-left: 0.5rem;
+      margin-top: 0.95rem;
+      margin-bottom: 0.3rem;
+      padding-left: 0.45rem;
     }
 
     .dash-nav-list {
@@ -239,7 +253,6 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
-      margin-bottom: 0.5rem;
     }
 
     .dash-nav-item button, .dash-nav-item a {
@@ -248,12 +261,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.45rem 0.65rem;
+      padding: 0.42rem 0.6rem;
       border-radius: 6px;
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
@@ -262,7 +275,7 @@
     }
 
     .dash-nav-item button:hover, .dash-nav-item a:hover {
-      background: var(--surface-card);
+      background: var(--left-surface-hover);
       color: var(--text);
     }
 
@@ -275,61 +288,157 @@
     .eco-links-box {
       margin-top: auto;
       padding-top: 1rem;
-      border-top: 1px solid var(--surface-border);
+      border-top: 1px solid var(--left-border);
     }
 
-    /* MIDDLE CONTENT FEED */
+    /* ======================================================== */
+    /* WINDOW 2: CENTER STUDIO FEED (STUDIO SLATE) */
+    /* ======================================================== */
     .dashboard-center {
+      background: var(--center-bg);
       padding: 1.75rem 2.25rem 6rem;
       overflow-y: auto;
       max-width: 100%;
     }
 
-    @media (max-width: 980px) {
+    @media (max-width: 990px) {
       .dashboard-center {
         padding: 1.25rem 1rem 6rem;
       }
     }
 
-    .center-top-bar {
+    /* SEARCH COMMAND VIBE BAR */
+    .search-command-bar {
+      background: var(--center-surface);
+      border: 1px solid var(--center-border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--center-border);
+      padding-bottom: 0.65rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .search-prefix {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--mint);
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    .search-input:focus {
+      outline: none;
+    }
+    .search-input::placeholder {
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    .search-clear {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid var(--center-border);
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .search-clear:hover {
+      color: var(--coral);
+      border-color: var(--coral);
+    }
+
+    .search-stats-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
     }
 
+    .search-tag-chips {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--center-border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip-btn:hover {
+      background: var(--center-surface-hover);
+      color: var(--text);
+    }
+    .chip-btn.active {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--mint);
+      border-color: rgba(45, 212, 191, 0.35);
+    }
+
+    .search-tally {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--mint);
+      letter-spacing: 0.08em;
+    }
+
     .hero-banner {
-      background: linear-gradient(135deg, rgba(45, 212, 191, 0.08), rgba(255, 111, 145, 0.06));
-      border: 1px solid var(--surface-border);
-      border-radius: 14px;
-      padding: 1.5rem 1.75rem;
-      margin-bottom: 2rem;
-      position: relative;
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.07), rgba(255, 111, 145, 0.05));
+      border: 1px solid var(--center-border);
+      border-radius: 12px;
+      padding: 1.35rem 1.6rem;
+      margin-bottom: 1.75rem;
     }
 
     .hero-banner h1 {
       font-family: var(--font-display);
-      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-size: clamp(1.4rem, 2.3vw, 1.85rem);
       font-weight: 900;
       letter-spacing: 0.02em;
       line-height: 1.2;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
 
     .hero-banner p {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      max-width: 620px;
+      max-width: 600px;
       line-height: 1.5;
     }
 
     .banner-tags {
       display: flex;
-      gap: 1rem;
-      margin-top: 0.85rem;
-      font-size: 0.74rem;
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+      font-size: 0.7rem;
       font-family: var(--font-mono);
       color: var(--mint);
       flex-wrap: wrap;
@@ -341,31 +450,31 @@
       align-items: center;
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--surface-border);
+      border-bottom: 1px solid var(--center-border);
     }
 
     .section-heading {
       font-family: var(--font-display);
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
     }
 
     /* RELEASES & ALBUM GRID */
     .release-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.2rem;
       margin-bottom: 3rem;
     }
 
     .release-card {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 12px;
+      background: var(--center-surface);
+      border: 1px solid var(--center-card-border);
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
       position: relative;
     }
 
@@ -379,7 +488,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 10;
-      background: #000;
+      background: #05070a;
       overflow: hidden;
     }
 
@@ -396,31 +505,31 @@
 
     .art-badge-type {
       position: absolute;
-      top: 0.65rem;
-      left: 0.65rem;
-      background: rgba(12, 16, 23, 0.9);
+      top: 0.6rem;
+      left: 0.6rem;
+      background: rgba(9, 13, 20, 0.92);
       backdrop-filter: blur(4px);
       color: var(--mint);
       border: 1px solid rgba(45, 212, 191, 0.3);
       font-family: var(--font-mono);
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      padding: 0.2rem 0.45rem;
+      padding: 0.15rem 0.45rem;
       border-radius: 4px;
     }
 
     .play-float-btn {
       position: absolute;
-      bottom: 0.65rem;
-      right: 0.65rem;
-      padding: 0.35rem 0.65rem;
+      bottom: 0.6rem;
+      right: 0.6rem;
+      padding: 0.3rem 0.6rem;
       border-radius: 4px;
-      background: rgba(12, 16, 23, 0.9);
+      background: rgba(9, 13, 20, 0.92);
       color: var(--mint);
       border: 1px solid var(--mint);
       font-family: var(--font-mono);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.15s;
@@ -428,11 +537,11 @@
 
     .play-float-btn:hover {
       background: var(--mint);
-      color: #0c1017;
+      color: #090d14;
     }
 
     .card-content {
-      padding: 1rem;
+      padding: 0.95rem;
       display: flex;
       flex-direction: column;
       flex: 1;
@@ -442,41 +551,41 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.15rem;
       gap: 0.5rem;
     }
 
     .card-title-text {
-      font-size: 0.98rem;
+      font-size: 0.94rem;
       font-weight: 700;
       line-height: 1.3;
     }
 
     .card-price-tag {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: var(--mint);
       font-family: var(--font-mono);
     }
 
     .card-artist-sub {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
-      margin-bottom: 0.65rem;
+      margin-bottom: 0.6rem;
     }
 
     .card-description-text {
-      font-size: 0.76rem;
-      color: #8fa4bd;
+      font-size: 0.74rem;
+      color: #879ab0;
       line-height: 1.45;
-      margin-bottom: 1rem;
+      margin-bottom: 0.95rem;
       flex: 1;
     }
 
     .card-button-row {
       display: flex;
       gap: 0.4rem;
-      border-top: 1px solid var(--surface-border);
+      border-top: 1px solid var(--center-border);
       padding-top: 0.75rem;
     }
 
@@ -484,29 +593,29 @@
     .itunes-track-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
-      background: var(--surface-card);
-      border-radius: 10px;
+      font-size: 0.8rem;
+      background: var(--center-surface);
+      border-radius: 8px;
       overflow: hidden;
-      border: 1px solid var(--surface-border);
+      border: 1px solid var(--center-border);
       margin-bottom: 2.5rem;
     }
 
     .itunes-track-table th {
       text-align: left;
-      padding: 0.75rem 0.85rem;
+      padding: 0.7rem 0.85rem;
       background: rgba(255, 255, 255, 0.02);
       color: var(--text-muted);
       font-family: var(--font-mono);
-      font-size: 0.65rem;
+      font-size: 0.64rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      border-bottom: 1px solid var(--surface-border);
+      border-bottom: 1px solid var(--center-border);
     }
 
     .itunes-track-table td {
-      padding: 0.75rem 0.85rem;
-      border-bottom: 1px solid var(--surface-border);
+      padding: 0.7rem 0.85rem;
+      border-bottom: 1px solid var(--center-border);
     }
 
     .itunes-track-table tr:hover td {
@@ -520,19 +629,19 @@
     /* ARTIST CARDS */
     .artist-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.2rem;
       margin-bottom: 3rem;
     }
 
     .artist-card {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 12px;
+      background: var(--center-surface);
+      border: 1px solid var(--center-card-border);
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
     }
 
     .artist-card:hover {
@@ -542,8 +651,8 @@
 
     .artist-banner-wrap {
       width: 100%;
-      height: 90px;
-      background: #000;
+      height: 85px;
+      background: #05070a;
       overflow: hidden;
     }
 
@@ -557,23 +666,47 @@
       display: flex;
       align-items: flex-end;
       gap: 0.75rem;
-      padding: 0 1rem;
-      margin-top: -26px;
+      padding: 0 0.95rem;
+      margin-top: -24px;
     }
 
     .artist-avatar-round {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      border: 2px solid var(--surface-card);
+      border: 2px solid var(--center-surface);
       object-fit: cover;
     }
 
-    /* RIGHT PRODUCTION & FULFILLMENT RAIL */
+    /* SUPPORT / FAQ CARDS */
+    .support-card {
+      background: var(--center-surface);
+      border: 1px solid var(--center-border);
+      border-radius: 8px;
+      padding: 1.15rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .support-card h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .support-card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ======================================================== */
+    /* WINDOW 3: RIGHT PRODUCTION TERMINAL (WORKSHOP CHARCOAL) */
+    /* ======================================================== */
     .dashboard-right {
-      background: var(--surface);
-      border-left: 1px solid var(--surface-border);
-      padding: 1.5rem 1.25rem;
+      background: var(--right-bg);
+      border-left: 1px solid var(--right-border);
+      padding: 1.4rem 1.15rem;
       display: flex;
       flex-direction: column;
       position: sticky;
@@ -587,41 +720,40 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.65rem;
-      border-bottom: 1px solid var(--surface-border);
+      margin-bottom: 0.95rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--right-border);
     }
 
     .right-title {
       font-family: var(--font-display);
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 800;
       letter-spacing: 0.04em;
     }
 
-    /* FORMAT SELECTOR */
     .format-selector-box {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      padding: 0.85rem;
-      margin-bottom: 1rem;
+      background: var(--right-surface);
+      border: 1px solid var(--right-border);
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 0.95rem;
     }
 
     .format-options-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.35rem;
-      margin-top: 0.5rem;
+      gap: 0.3rem;
+      margin-top: 0.45rem;
     }
 
     .format-btn {
-      padding: 0.5rem 0.25rem;
+      padding: 0.45rem 0.2rem;
       border-radius: 6px;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
+      background: var(--right-bg);
+      border: 1px solid var(--right-border);
       color: var(--text-muted);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
@@ -631,14 +763,14 @@
 
     .format-btn span {
       display: block;
-      font-size: 0.62rem;
+      font-size: 0.6rem;
       font-family: var(--font-mono);
       color: var(--text-muted);
-      margin-top: 0.15rem;
+      margin-top: 0.1rem;
     }
 
     .format-btn.active {
-      background: var(--surface-card-hover);
+      background: rgba(45, 212, 191, 0.08);
       color: var(--mint);
       border-color: var(--mint);
     }
@@ -647,12 +779,11 @@
       color: var(--mint);
     }
 
-    /* QUEUE ITEMS LIST */
     .queue-items-container {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
+      gap: 0.45rem;
+      margin-bottom: 0.95rem;
       max-height: 200px;
       overflow-y: auto;
     }
@@ -660,16 +791,16 @@
     .queue-item-card {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 8px;
-      padding: 0.55rem;
+      gap: 0.6rem;
+      background: var(--right-surface);
+      border: 1px solid var(--right-border);
+      border-radius: 6px;
+      padding: 0.5rem;
     }
 
     .queue-thumb {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 4px;
       object-fit: cover;
       flex-shrink: 0;
@@ -681,7 +812,7 @@
     }
 
     .queue-title {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -689,12 +820,12 @@
     }
 
     .queue-artist {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       color: var(--text-muted);
     }
 
     .queue-price {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--mint);
       font-family: var(--font-mono);
@@ -705,100 +836,97 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 0.85rem;
-      padding: 0.2rem;
+      font-size: 0.82rem;
+      padding: 0.15rem;
       font-family: var(--font-mono);
     }
     .queue-remove-btn:hover {
       color: var(--coral);
     }
 
-    /* TERMINALS & INPUTS */
     .terminal-section {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      padding: 0.85rem;
-      margin-bottom: 1rem;
+      background: var(--right-surface);
+      border: 1px solid var(--right-border);
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 0.95rem;
     }
 
     .terminal-label {
       font-family: var(--font-mono);
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--mint);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
       display: block;
     }
 
     .terminal-input {
       width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 6px;
+      background: var(--right-bg);
+      border: 1px solid var(--right-border);
+      border-radius: 5px;
       color: var(--text);
-      padding: 0.45rem 0.65rem;
-      font-size: 0.76rem;
+      padding: 0.42rem 0.6rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.35rem;
     }
     .terminal-input:focus {
       outline: none;
       border-color: var(--mint);
     }
 
-    /* SUMMARY BOX */
     .summary-box {
       margin-top: auto;
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      padding: 1rem;
+      background: var(--right-surface);
+      border: 1px solid var(--right-border);
+      border-radius: 8px;
+      padding: 0.95rem;
     }
 
     .summary-line {
       display: flex;
       justify-content: space-between;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.3rem;
     }
 
     .summary-line.total-line {
-      border-top: 1px solid var(--surface-border);
-      padding-top: 0.55rem;
-      margin-top: 0.55rem;
-      font-size: 0.95rem;
+      border-top: 1px solid var(--right-border);
+      padding-top: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.92rem;
       font-weight: 800;
       color: var(--text);
     }
 
-    /* TIP DRAWER */
     .tip-panel {
-      background: var(--surface-card);
+      background: var(--right-surface);
       border: 1px solid var(--coral);
-      border-radius: 10px;
-      padding: 0.85rem;
-      margin-bottom: 1rem;
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 0.95rem;
     }
 
     .tip-pill-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 0.35rem;
-      margin: 0.5rem 0;
+      gap: 0.3rem;
+      margin: 0.45rem 0;
     }
 
     .tip-pill {
-      padding: 0.35rem 0.1rem;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
+      padding: 0.32rem 0.1rem;
+      background: var(--right-bg);
+      border: 1px solid var(--right-border);
       color: var(--text);
       border-radius: 4px;
       font-weight: 700;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       cursor: pointer;
       text-align: center;
       font-family: var(--font-mono);
@@ -806,30 +934,8 @@
 
     .tip-pill.active {
       background: var(--coral);
-      color: #0c1017;
+      color: #090d14;
       border-color: var(--coral);
-    }
-
-    /* SUPPORT / FAQ CARDS */
-    .support-card {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .support-card h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 0.4rem;
-    }
-
-    .support-card p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      line-height: 1.55;
     }
 
     /* AUDIO BAR */
@@ -838,17 +944,17 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(12, 16, 23, 0.95);
+      background: rgba(9, 13, 20, 0.96);
       border-top: 1px solid var(--mint);
       backdrop-filter: blur(16px);
-      padding: 0.6rem 1.5rem;
+      padding: 0.55rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1.5rem;
       z-index: 100;
       transform: translateY(100%);
-      transition: transform 0.25s ease;
+      transition: transform 0.22s ease;
     }
 
     .audio-player-bar.active {
@@ -868,7 +974,7 @@
   <div class="dashboard-app">
 
     <!-- ========================================== -->
-    <!-- LEFT RAIL: ITUNES STORE STYLE SIDEBAR -->
+    <!-- WINDOW 1: LEFT ITUNES STORE SIDEBAR -->
     <!-- ========================================== -->
     <aside class="dashboard-left">
       <a href="/" class="brand-header">
@@ -881,7 +987,7 @@
 
       <!-- Identity Status -->
       <div id="user-profile-box" class="user-profile-section">
-        <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">Connecting node...</div>
+        <div style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">Connecting node...</div>
       </div>
 
       <!-- ITUNES STORE GROUP: STORE -->
@@ -953,26 +1059,26 @@
         </li>
       </ul>
 
-      <!-- ECOSYSTEM LINKS -->
+      <!-- ECOSYSTEM NODES -->
       <div class="eco-links-box">
         <div class="itunes-nav-header" style="margin-top: 0; padding-left: 0;">AHOY Network</div>
-        <ul class="dash-nav-list" style="margin-bottom: 0.5rem;">
+        <ul class="dash-nav-list" style="margin-bottom: 0.35rem;">
           <li class="dash-nav-item">
             <a href="https://player.ahoy.ooo" target="_blank" rel="noopener">
               <span>Player</span>
-              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">player.ahoy.ooo</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim);">player.ahoy.ooo</span>
             </a>
           </li>
           <li class="dash-nav-item">
             <a href="https://app.ahoy.ooo" target="_blank" rel="noopener">
               <span>The Streamer</span>
-              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">app.ahoy.ooo</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim);">app.ahoy.ooo</span>
             </a>
           </li>
           <li class="dash-nav-item">
             <a href="https://id.ahoy.ooo" target="_blank" rel="noopener">
               <span>Sovereign ID</span>
-              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">id.ahoy.ooo</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim);">id.ahoy.ooo</span>
             </a>
           </li>
         </ul>
@@ -980,26 +1086,34 @@
     </aside>
 
     <!-- ========================================== -->
-    <!-- MIDDLE FEED: DYNAMIC STORE CONTENT -->
+    <!-- WINDOW 2: CENTER STUDIO FEED (SEARCH VIBE) -->
     <!-- ========================================== -->
     <main class="dashboard-center">
       
-      <!-- Top breadcrumb bar -->
-      <div class="center-top-bar">
-        <div style="font-size: 0.76rem; font-family: var(--font-mono); color: var(--text-muted);">
-          AHOY STORE // <span id="current-view-title" style="color: var(--mint);">FEATURED</span>
+      <!-- SEARCH COMMAND BAR -->
+      <div class="search-command-bar">
+        <div class="search-input-wrap">
+          <span class="search-prefix">// SEARCH CATALOG</span>
+          <input type="text" id="catalog-search-input" class="search-input" placeholder="Instant search by title, artist, genre, or keyword... (Press / to focus)" oninput="handleCatalogSearch(this.value)" autocomplete="off" />
+          <span id="search-clear-btn" onclick="clearCatalogSearch()" class="search-clear" style="display: none;">CLEAR [ESC]</span>
         </div>
-        <div style="display: flex; gap: 0.35rem;">
-          <button onclick="filterCatalog('all')" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">All Media</button>
-          <button onclick="filterCatalog('single')" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Singles</button>
-          <button onclick="filterCatalog('folk')" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Coast Folk</button>
+        <div class="search-stats-row">
+          <div class="search-tag-chips">
+            <button id="chip-all" class="chip-btn active" onclick="setSearchFilter('all')">All Media</button>
+            <button id="chip-singles" class="chip-btn" onclick="setSearchFilter('singles')">Singles</button>
+            <button id="chip-folk" class="chip-btn" onclick="setSearchFilter('folk')">Coast &amp; Folk</button>
+            <button id="chip-pop" class="chip-btn" onclick="setSearchFilter('pop')">Indie Pop</button>
+            <button id="chip-cds" class="chip-btn" onclick="setSearchFilter('cds')">On CD</button>
+            <button id="chip-nfc" class="chip-btn" onclick="setSearchFilter('nfc')">NFC Cards</button>
+          </div>
+          <span id="search-results-tally" class="search-tally">INDEXING...</span>
         </div>
       </div>
 
       <!-- VIEW 1: FEATURED STOREFRONT -->
       <section id="view-featured">
         <div class="hero-banner">
-          <span class="pill-tag pill-mint" style="margin-bottom: 0.6rem; display: inline-block;">Sovereign Music Pressing</span>
+          <span class="pill-tag pill-mint" style="margin-bottom: 0.5rem; display: inline-block;">Sovereign Music Pressing</span>
           <h1>Own the music. Build custom editions.</h1>
           <p>
             Acquire permanent digital masters, collect limited NFC cards, or assemble handcrafted audio CDs shipped directly to you or your friends.
@@ -1015,9 +1129,9 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Featured Releases</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Curated sovereign masters ready for digital unlock or physical pressing</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Curated sovereign masters ready for digital unlock or physical pressing</span>
           </div>
-          <span id="featured-counter" style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--mint);"></span>
+          <span id="featured-counter" style="font-family: var(--font-mono); font-size: 0.74rem; color: var(--mint);"></span>
         </div>
         <div id="featured-grid" class="release-grid">
           <!-- Rendered by JS -->
@@ -1029,7 +1143,7 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Albums &amp; EPs</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Complete long-form releases with full artwork packages</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Complete long-form releases with full artwork packages</span>
           </div>
         </div>
         <div id="albums-grid" class="release-grid">
@@ -1042,7 +1156,7 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Tracks &amp; Singles</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Individual masters available for immediate queueing or lossless streaming</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Individual masters available for immediate queueing or lossless streaming</span>
           </div>
           <span id="tracks-total-badge" class="pill-tag pill-mint">0 tracks</span>
         </div>
@@ -1056,7 +1170,7 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Artist Roster &amp; Tip Jars</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Direct patronage with 100% payout to creator</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Direct patronage with 100% payout to creator</span>
           </div>
           <span class="pill-tag pill-coral">Direct Transfer</span>
         </div>
@@ -1070,18 +1184,18 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Hand-Burned Audio CD Editions</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Artisan physical CD-R pressings with customized liner notes</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Artisan physical CD-R pressings with customized liner notes</span>
           </div>
           <span class="pill-tag pill-mint">$15.00 Shipped</span>
         </div>
 
         <div class="support-card" style="border-color: var(--mint); margin-bottom: 1.5rem;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--mint); margin-bottom: 0.4rem;">HOW BURNED CD GIFTING WORKS</div>
-          <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Tangible music made to be gifted and preserved.</h3>
-          <p style="margin-bottom: 0.75rem;">
+          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--mint); margin-bottom: 0.4rem;">HOW BURNED CD GIFTING WORKS</div>
+          <h3 style="font-size: 1.05rem; margin-bottom: 0.45rem;">Tangible music made to be gifted and preserved.</h3>
+          <p style="margin-bottom: 0.65rem;">
             When you commission a Burned CD edition from AHOY Store, we burn your chosen catalog release or custom tracklist onto high-grade silver audio CD media, print a custom matte cardstock sleeve featuring your personalized liner inscription, and ship it directly via USPS.
           </p>
-          <div class="banner-tags" style="margin-top: 0.5rem;">
+          <div class="banner-tags" style="margin-top: 0.4rem;">
             <span>// 80-MIN RED BOOK AUDIO CD</span>
             <span>// CUSTOM SLEEVE LINER DEDICATION</span>
             <span>// INSCRIBES DIGITAL RIGHTS TO RECIPIENT</span>
@@ -1089,7 +1203,7 @@
         </div>
 
         <div class="section-header-row">
-          <h3 class="section-heading" style="font-size: 1rem;">Select a Work to Queue as a Burned CD</h3>
+          <h3 class="section-heading" style="font-size: 0.95rem;">Select a Work to Queue as a Burned CD</h3>
         </div>
         <div id="cds-releases-grid" class="release-grid">
           <!-- Rendered by JS -->
@@ -1101,18 +1215,18 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Archival AHOY NFC Cards</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Limited-edition physical cards that unlock permanent streaming with a tap</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Limited-edition physical cards that unlock permanent streaming with a tap</span>
           </div>
           <span class="pill-tag pill-coral">$15.00 Shipped</span>
         </div>
 
         <div class="support-card" style="border-color: var(--coral); margin-bottom: 1.5rem;">
-          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--coral); margin-bottom: 0.4rem;">PHYSICAL NFC UNLOCK ARCHITECTURE</div>
-          <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">A physical artifact connected to your sovereign account.</h3>
-          <p style="margin-bottom: 0.75rem;">
+          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--coral); margin-bottom: 0.4rem;">PHYSICAL NFC UNLOCK ARCHITECTURE</div>
+          <h3 style="font-size: 1.05rem; margin-bottom: 0.45rem;">A physical artifact connected to your sovereign account.</h3>
+          <p style="margin-bottom: 0.65rem;">
             AHOY Cards are limited physical collectible cards embedded with an NDEF NFC chip. Tap your smartphone to the card to instantly stream the master audio in AHOY Player and write a permanent entitlement to your Sovereign AHOY ID.
           </p>
-          <div class="banner-tags" style="margin-top: 0.5rem;">
+          <div class="banner-tags" style="margin-top: 0.4rem;">
             <span>// NFC CHIP NDEF HARDCODED</span>
             <span>// INTEGRATED WITH CARDS.AHOY.OOO</span>
             <span>// ARCHIVAL SLEEVE &amp; NUMBERED EDITION</span>
@@ -1120,7 +1234,7 @@
         </div>
 
         <div class="section-header-row">
-          <h3 class="section-heading" style="font-size: 1rem;">Available NFC Card Editions</h3>
+          <h3 class="section-heading" style="font-size: 0.95rem;">Available NFC Card Editions</h3>
         </div>
         <div id="cards-releases-grid" class="release-grid">
           <!-- Rendered by JS -->
@@ -1132,9 +1246,9 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Patron Ledger</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Top supporters backing independent music creators</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Top supporters backing independent music creators</span>
           </div>
-          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--gold);">VERIFIED LEDGER</span>
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--gold);">VERIFIED LEDGER</span>
         </div>
         <div id="leaderboard-content" style="margin-bottom: 2rem;">
           <!-- Rendered by JS -->
@@ -1146,7 +1260,7 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">Store Support &amp; FAQ</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Sovereign media, physical pressing fulfillment, and order help</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Sovereign media, physical pressing fulfillment, and order help</span>
           </div>
           <span class="pill-tag pill-mint">24/7 Dispatch</span>
         </div>
@@ -1192,12 +1306,12 @@
         <div class="section-header-row">
           <div>
             <h2 class="section-heading">My Sovereign Library</h2>
-            <span style="font-size: 0.76rem; color: var(--text-muted);">Permanent cryptographic music entitlements</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">Permanent cryptographic music entitlements</span>
           </div>
           <span id="library-count-badge" class="pill-tag pill-mint">0 tracks</span>
         </div>
         <div id="library-content">
-          <div style="text-align: center; padding: 2rem; background: var(--surface-card); border: 1px dashed var(--surface-border); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem;">
+          <div style="text-align: center; padding: 2rem; background: var(--center-surface); border: 1px dashed var(--center-border); border-radius: 8px; color: var(--text-muted); font-size: 0.78rem;">
             Sign in with your AHOY ID to stream and download high-resolution audio.
           </div>
         </div>
@@ -1205,26 +1319,26 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- RIGHT RAIL: PRODUCTION & FULFILLMENT -->
+    <!-- WINDOW 3: RIGHT PRODUCTION TERMINAL -->
     <!-- ========================================== -->
     <aside class="dashboard-right">
       <div class="right-header">
         <span class="right-title">Production Terminal</span>
-        <button onclick="clearQueue()" class="btn-ghost" style="padding: 0.2rem 0.5rem; font-size: 0.68rem; font-family: var(--font-mono);">
+        <button onclick="clearQueue()" class="btn-ghost" style="padding: 0.2rem 0.45rem; font-size: 0.65rem; font-family: var(--font-mono);">
           Clear
         </button>
       </div>
 
       <!-- ACTIVE ARTIST TIP DRAWER -->
       <div id="active-tip-panel" class="tip-panel" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
           <div>
             <span class="pill-tag pill-coral">Direct Tip</span>
-            <div id="tip-target-name" style="font-weight: 700; font-size: 0.92rem; margin-top: 0.2rem;">Artist</div>
+            <div id="tip-target-name" style="font-weight: 700; font-size: 0.88rem; margin-top: 0.2rem;">Artist</div>
           </div>
-          <button onclick="closeTipDrawer()" style="background:none; border:none; color:var(--text-muted); font-family:var(--font-mono); font-size:0.9rem; cursor:pointer;">&times;</button>
+          <button onclick="closeTipDrawer()" style="background:none; border:none; color:var(--text-muted); font-family:var(--font-mono); font-size:0.85rem; cursor:pointer;">&times;</button>
         </div>
-        <p id="tip-target-bio" style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.4;"></p>
+        <p id="tip-target-bio" style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.45rem; line-height: 1.4;"></p>
 
         <div class="tip-pill-grid">
           <button class="tip-pill" onclick="setTipPreset(100)">$1</button>
@@ -1264,9 +1378,9 @@
       </div>
 
       <!-- QUEUED WORKS LIST -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
         <span class="terminal-label" style="margin: 0;">Queued Works</span>
-        <span id="queue-counter" style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">0 items</span>
+        <span id="queue-counter" style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">0 items</span>
       </div>
       <div id="queue-items-box" class="queue-items-container">
         <!-- Rendered by JS -->
@@ -1276,24 +1390,24 @@
       <div class="terminal-section">
         <span class="terminal-label">Sleeve Inscription &amp; Recipient</span>
         
-        <div style="display: flex; gap: 0.3rem; margin-bottom: 0.6rem;">
-          <button id="dest-self-btn" class="btn btn-mint" style="flex: 1; justify-content: center; padding: 0.35rem 0.5rem; font-size: 0.72rem;" onclick="setDestination('self')">
+        <div style="display: flex; gap: 0.3rem; margin-bottom: 0.55rem;">
+          <button id="dest-self-btn" class="btn btn-mint" style="flex: 1; justify-content: center; padding: 0.32rem 0.5rem; font-size: 0.7rem;" onclick="setDestination('self')">
             For Myself
           </button>
-          <button id="dest-gift-btn" class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 0.35rem 0.5rem; font-size: 0.72rem;" onclick="setDestination('gift')">
+          <button id="dest-gift-btn" class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 0.32rem 0.5rem; font-size: 0.7rem;" onclick="setDestination('gift')">
             Gift to Friend
           </button>
         </div>
 
-        <div id="gift-id-input-wrap" style="display: none; margin-bottom: 0.5rem;">
-          <label style="display: block; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+        <div id="gift-id-input-wrap" style="display: none; margin-bottom: 0.45rem;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-muted); margin-bottom: 0.2rem;">
             Friend's AHOY ID (for digital rights):
           </label>
           <input type="text" id="recipient-ahoy-id" class="terminal-input" placeholder="e.g. ahoy_alex" />
         </div>
 
-        <div style="margin-bottom: 0.2rem;">
-          <label style="display: block; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+        <div style="margin-bottom: 0.15rem;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-muted); margin-bottom: 0.2rem;">
             Custom Sleeve Note / Dedication:
           </label>
           <input type="text" id="sleeve-note-input" class="terminal-input" placeholder="e.g. To Jane: Play track 1 loud." maxlength="200" />
@@ -1331,11 +1445,11 @@
           <span id="sum-total-val" style="font-family: var(--font-mono); color: var(--mint);">$0.00</span>
         </div>
 
-        <button id="main-authorize-btn" onclick="executeAuthorize()" class="btn btn-mint" style="width: 100%; justify-content: center; margin-top: 0.75rem;">
+        <button id="main-authorize-btn" onclick="executeAuthorize()" class="btn btn-mint" style="width: 100%; justify-content: center; margin-top: 0.7rem;">
           Authorize &amp; Inscribe ($0.00)
         </button>
 
-        <div id="order-result-box" style="display: none; margin-top: 0.75rem; padding: 0.65rem; background: rgba(45, 212, 191, 0.08); border: 1px solid var(--mint); border-radius: 6px; font-size: 0.72rem;">
+        <div id="order-result-box" style="display: none; margin-top: 0.7rem; padding: 0.6rem; background: rgba(45, 212, 191, 0.08); border: 1px solid var(--mint); border-radius: 6px; font-size: 0.7rem;">
           <div style="font-weight: 700; color: var(--mint); margin-bottom: 0.2rem;">Order Logged in Ledger</div>
           <div id="order-result-text" style="color: var(--text-muted); line-height: 1.4; font-family: var(--font-mono);"></div>
         </div>
@@ -1349,12 +1463,12 @@
     <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 220px;">
       <img id="player-thumb" src="" class="player-thumb" alt="Cover" />
       <div>
-        <div id="player-title" style="font-weight: 700; font-size: 0.82rem; color: var(--text);"></div>
-        <div id="player-artist" style="font-size: 0.7rem; color: var(--mint); font-family: var(--font-mono);"></div>
+        <div id="player-title" style="font-weight: 700; font-size: 0.8rem; color: var(--text);"></div>
+        <div id="player-artist" style="font-size: 0.68rem; color: var(--mint); font-family: var(--font-mono);"></div>
       </div>
     </div>
     <audio id="audio-element" controls style="flex: 1; max-width: 500px; height: 32px;"></audio>
-    <button id="player-close-btn" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Close</button>
+    <button id="player-close-btn" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.7rem;">Close</button>
   </div>
 
   <script>
@@ -1367,6 +1481,8 @@
     let destinationMode = 'self';
     let currentTipCents = 500;
     let activeTipArtist = null;
+    let currentSearchQuery = '';
+    let currentSearchCategory = 'all';
 
     const audioElement = document.getElementById('audio-element');
     const audioBar = document.getElementById('audio-bar');
@@ -1376,6 +1492,18 @@
       await loadReleases();
       await loadArtists();
       await loadLeaderboard();
+
+      // Keyboard shortcuts: '/' focuses search, 'Escape' clears
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== document.getElementById('catalog-search-input')) {
+          e.preventDefault();
+          const inp = document.getElementById('catalog-search-input');
+          inp.focus();
+          inp.select();
+        } else if (e.key === 'Escape') {
+          clearCatalogSearch();
+        }
+      });
 
       const params = new URLSearchParams(window.location.search);
       const tipTarget = params.get('boost') || params.get('artist') || params.get('tip');
@@ -1412,7 +1540,7 @@
         `;
       } else {
         box.innerHTML = `
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.4rem;">Anonymous Sovereign</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.35rem;">Anonymous Sovereign</div>
           <a href="/api/auth/login" class="btn btn-mint" style="width:100%; justify-content:center; padding:0.35rem 0.5rem; font-size:0.72rem;">
             Sign in with AHOY ID
           </a>
@@ -1428,22 +1556,6 @@
         if (el) el.style.display = (v === viewName) ? 'block' : 'none';
         if (btn) btn.classList.toggle('active', v === viewName);
       });
-
-      const titleEl = document.getElementById('current-view-title');
-      const titleMap = {
-        featured: 'FEATURED',
-        albums: 'ALBUMS & EPS',
-        tracks: 'TRACKS & SINGLES',
-        artists: 'ARTIST ROSTER',
-        cds: 'BURNED AUDIO CDS',
-        cards: 'ARCHIVAL NFC CARDS',
-        patrons: 'PATRON LEDGER',
-        support: 'SUPPORT & FAQ',
-        library: 'PURCHASED LIBRARY'
-      };
-      if (titleEl && titleMap[viewName]) {
-        titleEl.textContent = titleMap[viewName];
-      }
 
       if (viewName === 'library') loadLibrary();
       if (viewName === 'patrons') loadLeaderboard();
@@ -1467,21 +1579,88 @@
           });
         });
 
-        document.getElementById('featured-counter').textContent = `${catalogReleases.length} WORKS`;
         document.getElementById('badge-albums-count').textContent = catalogReleases.length;
         document.getElementById('badge-tracks-count').textContent = allTracks.length;
         document.getElementById('tracks-total-badge').textContent = `${allTracks.length} tracks`;
 
-        renderFeaturedReleases(catalogReleases);
+        applySearchAndFilter();
       } catch (err) {
         console.error('Catalog fetch error:', err);
       }
+    }
+
+    // SEARCH & FILTER ENGINE
+    function handleCatalogSearch(query) {
+      currentSearchQuery = query.toLowerCase().trim();
+      const clearBtn = document.getElementById('search-clear-btn');
+      clearBtn.style.display = currentSearchQuery ? 'inline-block' : 'none';
+      applySearchAndFilter();
+    }
+
+    function clearCatalogSearch() {
+      currentSearchQuery = '';
+      const input = document.getElementById('catalog-search-input');
+      input.value = '';
+      document.getElementById('search-clear-btn').style.display = 'none';
+      applySearchAndFilter();
+    }
+
+    function setSearchFilter(cat) {
+      currentSearchCategory = cat;
+      ['all', 'singles', 'folk', 'pop', 'cds', 'nfc'].forEach(c => {
+        const chip = document.getElementById(`chip-${c}`);
+        if (chip) chip.classList.toggle('active', c === cat);
+      });
+      applySearchAndFilter();
+    }
+
+    function applySearchAndFilter() {
+      let filtered = catalogReleases.slice();
+
+      // Category filter
+      if (currentSearchCategory === 'singles') {
+        filtered = filtered.filter(r => r.type === 'single');
+      } else if (currentSearchCategory === 'folk') {
+        filtered = filtered.filter(r => (r.description + r.artist).toLowerCase().includes('folk') || (r.description + r.artist).toLowerCase().includes('coast'));
+      } else if (currentSearchCategory === 'pop') {
+        filtered = filtered.filter(r => (r.description + r.artist).toLowerCase().includes('pop') || (r.description + r.artist).toLowerCase().includes('youth'));
+      }
+
+      // Keyword query
+      if (currentSearchQuery) {
+        filtered = filtered.filter(r => {
+          const matchTitle = r.title.toLowerCase().includes(currentSearchQuery);
+          const matchArtist = r.artist.toLowerCase().includes(currentSearchQuery);
+          const matchDesc = r.description.toLowerCase().includes(currentSearchQuery);
+          const matchTracks = r.tracks.some(t => t.title.toLowerCase().includes(currentSearchQuery));
+          return matchTitle || matchArtist || matchDesc || matchTracks;
+        });
+      }
+
+      const tally = document.getElementById('search-results-tally');
+      tally.textContent = `${filtered.length} OF ${catalogReleases.length} WORKS MATCHED`;
+      document.getElementById('featured-counter').textContent = `${filtered.length} AVAILABLE`;
+
+      renderFeaturedReleases(filtered);
     }
 
     function renderFeaturedReleases(releases) {
       const grid = document.getElementById('featured-grid');
       if (!grid) return;
       grid.innerHTML = '';
+
+      if (releases.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem; background: var(--center-surface); border: 1px dashed var(--center-border); border-radius: 8px;">
+            <div style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text); margin-bottom: 0.35rem;">No catalog entries matched your search query.</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.85rem;">Try adjusting terms or clearing the search filter.</div>
+            <button onclick="clearCatalogSearch()" class="btn btn-mint" style="padding: 0.35rem 0.75rem; font-size: 0.72rem;">
+              Reset Search Filter
+            </button>
+          </div>
+        `;
+        return;
+      }
 
       releases.forEach(r => {
         const track = r.tracks[0];
@@ -1574,17 +1753,17 @@
             <td style="font-family: var(--font-mono); color: var(--text-muted);">${idx + 1}</td>
             <td>
               <div style="font-weight: 700; color: var(--text);">${escapeHtml(t.title)}</div>
-              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--mint);">ID: ${t.id}</div>
+              <div style="font-size: 0.66rem; font-family: var(--font-mono); color: var(--mint);">ID: ${t.id}</div>
             </td>
             <td style="color: var(--text-muted);">${escapeHtml(t.artist)}</td>
             <td style="font-family: var(--font-mono); color: var(--text-muted);">${mins}:${secs}</td>
             <td style="font-family: var(--font-mono); color: var(--mint); font-weight: 700;">$${(t.price_cents / 100).toFixed(2)}</td>
             <td>
               <div style="display: flex; gap: 0.35rem;">
-                <button class="btn btn-secondary" style="padding: 0.25rem 0.55rem; font-size: 0.7rem;" onclick="playPreview('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}')">
+                <button class="btn btn-secondary" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playPreview('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}')">
                   Play
                 </button>
-                <button class="btn btn-mint" style="padding: 0.25rem 0.55rem; font-size: 0.7rem;" onclick="addToQueue('${t.release_id}')">
+                <button class="btn btn-mint" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="addToQueue('${t.release_id}')">
                   + Press
                 </button>
               </div>
@@ -1664,12 +1843,6 @@
       addToQueue(releaseId);
     }
 
-    function filterCatalog(filter) {
-      if (filter === 'all') renderFeaturedReleases(catalogReleases);
-      else if (filter === 'single') renderFeaturedReleases(catalogReleases.filter(r => r.type === 'single'));
-      else if (filter === 'folk') renderFeaturedReleases(catalogReleases.filter(r => r.description.toLowerCase().includes('folk') || r.artist.toLowerCase().includes('samuel') || r.artist.toLowerCase().includes('cambell')));
-    }
-
     async function loadArtists() {
       try {
         const res = await fetch('/api/artists');
@@ -1697,13 +1870,13 @@
           <div class="artist-profile-row">
             <img src="${a.avatar_url}" class="artist-avatar-round" alt="${escapeHtml(a.name)}">
             <div style="padding-bottom: 0.2rem;">
-              <h3 style="font-size: 0.98rem; font-weight: 700; margin: 0;">${escapeHtml(a.name)}</h3>
-              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--coral);">${escapeHtml(a.genre)}</span>
+              <h3 style="font-size: 0.94rem; font-weight: 700; margin: 0;">${escapeHtml(a.name)}</h3>
+              <span style="font-family: var(--font-mono); font-size: 0.66rem; color: var(--coral);">${escapeHtml(a.genre)}</span>
             </div>
           </div>
-          <div class="card-content" style="padding-top: 0.65rem;">
+          <div class="card-content" style="padding-top: 0.6rem;">
             <p class="card-description-text">${escapeHtml(a.bio)}</p>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; font-family:var(--font-mono); font-size:0.72rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; font-family:var(--font-mono); font-size:0.7rem;">
               <span style="color:var(--mint);">$${(a.total_boost_cents / 100).toFixed(2)} CONTRIBUTIONS</span>
               <span style="color:var(--text-muted);">${a.boost_count} TIPS</span>
             </div>
@@ -1748,7 +1921,7 @@
               <td style="font-family: var(--font-mono); font-weight: 700;">#${entry.rank}</td>
               <td>
                 <div style="font-weight: 700;">${escapeHtml(entry.supporter_name)}</div>
-                <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);">${escapeHtml(entry.ahoy_id)}</div>
+                <div style="font-size: 0.66rem; color: var(--text-muted); font-family: var(--font-mono);">${escapeHtml(entry.ahoy_id)}</div>
               </td>
               <td style="color: var(--text-muted); font-family: var(--font-mono);">${entry.boost_count}</td>
               <td style="color: var(--mint); font-weight: 700; font-family: var(--font-mono);">$${(entry.total_cents / 100).toFixed(2)}</td>
@@ -1775,7 +1948,7 @@
 
         if (!tracks.length) {
           document.getElementById('library-content').innerHTML = `
-            <div style="text-align:center; padding:2rem; background:var(--surface-card); border:1px dashed var(--surface-border); border-radius:8px; color:var(--text-muted); font-size:0.8rem;">
+            <div style="text-align:center; padding:2rem; background:var(--center-surface); border:1px dashed var(--center-border); border-radius:8px; color:var(--text-muted); font-size:0.78rem;">
               No tracks entitled yet. Add a work to your pressing queue above.
             </div>
           `;
@@ -1803,16 +1976,16 @@
                 <div style="font-size:0.65rem; color:var(--mint); font-family:var(--font-mono);">LEDGER: ${t.id}</div>
               </td>
               <td style="color:var(--text-muted);">${escapeHtml(t.artist)}</td>
-              <td style="font-size:0.72rem; color:var(--text-muted); font-family:var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
+              <td style="font-size:0.7rem; color:var(--text-muted); font-family:var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
               <td>
                 <div style="display:flex; gap:0.35rem;">
-                  <button class="btn btn-mint" style="padding:0.25rem 0.5rem; font-size:0.7rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
+                  <button class="btn btn-mint" style="padding:0.22rem 0.45rem; font-size:0.68rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
                     Play
                   </button>
-                  <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(data.ahoy_id)}" class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.7rem; text-decoration:none;" download>
+                  <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(data.ahoy_id)}" class="btn btn-secondary" style="padding:0.22rem 0.45rem; font-size:0.68rem; text-decoration:none;" download>
                     WAV/MP3
                   </a>
-                  <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.7rem; text-decoration:none;">
+                  <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-secondary" style="padding:0.22rem 0.45rem; font-size:0.68rem; text-decoration:none;">
                     Player
                   </a>
                 </div>
@@ -1884,7 +2057,7 @@
 
       if (!queue.length) {
         box.innerHTML = `
-          <div style="text-align:center; padding:1.25rem; background:var(--surface); border:1px dashed var(--surface-border); border-radius:6px; font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+          <div style="text-align:center; padding:1.2rem; background:var(--right-bg); border:1px dashed var(--right-border); border-radius:6px; font-size:0.72rem; color:var(--text-muted); font-family:var(--font-mono);">
             Pressing queue is empty.<br>
             Click "+ Add to Pressing" on any release.
           </div>
