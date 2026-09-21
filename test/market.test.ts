@@ -218,4 +218,81 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(unentitledDlRes.statusCode).toBe(403);
     expect(unentitledDlRes.json().error).toBe('entitlement_required');
   });
+
+  it('allows purchasing and directly transferring entitlement to another AHOY ID', async () => {
+    const buyerId = 'ahoy_buyer_person';
+    const recipientId = 'ahoy_friend_recipient';
+
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: buyerId, name: 'Generous Buyer' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session');
+
+    // Buyer purchases for recipient
+    const buyRes = await app.inject({
+      method: 'POST',
+      url: '/api/checkout/purchase',
+      cookies: { ahoy_market_session: cookie!.value },
+      payload: {
+        release_id: 'rel_cambell_rice_1',
+        recipient_ahoy_id: recipientId,
+        payment_method: 'instant_sovereign',
+      },
+    });
+    expect(buyRes.statusCode).toBe(201);
+    const buyBody = buyRes.json();
+    expect(buyBody.success).toBe(true);
+    expect(buyBody.ahoy_id).toBe(buyerId);
+    expect(buyBody.granted_to).toBe(recipientId);
+    expect(buyBody.is_transfer).toBe(true);
+
+    // Verify recipient has the entitlement
+    const recEntRes = await app.inject({
+      method: 'GET',
+      url: `/api/entitlements?ahoy_id=${encodeURIComponent(recipientId)}`,
+    });
+    expect(recEntRes.statusCode).toBe(200);
+    const recEntBody = recEntRes.json();
+    expect(recEntBody.count).toBe(1);
+    expect(recEntBody.tracks[0].title).toBe('Sunflower');
+  });
+
+  it('handles physical AHOY NFC Card and custom Burned CD orders with shipping info', async () => {
+    const patronId = 'ahoy_patron_collector';
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: patronId, name: 'Collector Patron' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session');
+
+    // Purchase physical Burned CD edition
+    const cdOrderRes = await app.inject({
+      method: 'POST',
+      url: '/api/checkout/purchase',
+      cookies: { ahoy_market_session: cookie!.value },
+      payload: {
+        release_id: 'rel_samuel_witch_1',
+        amount_cents: 1500,
+        format: 'burned_cd',
+        shipping: {
+          name: 'Jane Doe',
+          address: '42 Harbor Lane',
+          city: 'Mystic',
+          state: 'CT',
+          zip: '06355',
+          country: 'US',
+          inscription_note: 'For Jane - with love from the shoreline.',
+        },
+      },
+    });
+    expect(cdOrderRes.statusCode).toBe(201);
+    const cdBody = cdOrderRes.json();
+    expect(cdBody.success).toBe(true);
+    expect(cdBody.format).toBe('burned_cd');
+    expect(cdBody.fulfillment_status).toBe('queued_for_crafting');
+    expect(cdBody.entitlement_count).toBe(1);
+  });
 });

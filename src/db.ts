@@ -205,6 +205,19 @@ export class MarketStore {
       CREATE INDEX IF NOT EXISTS ix_sessions_session_token ON sessions(session_token);
       CREATE INDEX IF NOT EXISTS ix_tracks_release_id ON tracks(release_id);
     `);
+
+    // Ensure physical order fulfillment columns exist in purchases table
+    const pragma = this.db.prepare("PRAGMA table_info(purchases)").all() as { name: string }[];
+    const cols = new Set(pragma.map(p => p.name));
+    if (!cols.has('format')) this.db.exec("ALTER TABLE purchases ADD COLUMN format TEXT DEFAULT 'digital_master'");
+    if (!cols.has('shipping_name')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_name TEXT");
+    if (!cols.has('shipping_address')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_address TEXT");
+    if (!cols.has('shipping_city')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_city TEXT");
+    if (!cols.has('shipping_state')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_state TEXT");
+    if (!cols.has('shipping_zip')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_zip TEXT");
+    if (!cols.has('shipping_country')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_country TEXT");
+    if (!cols.has('inscription_note')) this.db.exec("ALTER TABLE purchases ADD COLUMN inscription_note TEXT");
+    if (!cols.has('fulfillment_status')) this.db.exec("ALTER TABLE purchases ADD COLUMN fulfillment_status TEXT DEFAULT 'digital_unlocked'");
   }
 
   private seedDefaultCatalog() {
@@ -551,23 +564,42 @@ export class MarketStore {
 
   recordPurchase(data: {
     ahoy_id: string;
+    recipient_ahoy_id?: string | null;
     email?: string | null;
     release_id: string;
     track_id?: string | null;
     amount_cents: number;
     payment_method: string;
     payment_ref: string;
-  }): { purchaseId: string; entitlementCount: number } {
+    format?: 'digital_master' | 'nfc_card' | 'burned_cd';
+    shipping?: {
+      name?: string;
+      address?: string;
+      city?: string;
+      state?: string;
+      zip?: string;
+      country?: string;
+      inscription_note?: string;
+    } | null;
+  }): { purchaseId: string; entitlementCount: number; grantedTo: string; format: string; fulfillmentStatus: string } {
     const purchaseId = `pur_${randomBytes(12).toString('hex')}`;
     const now = new Date().toISOString();
+    const grantedTo = data.recipient_ahoy_id?.trim() || data.ahoy_id;
+    const format = data.format || 'digital_master';
+    const fulfillmentStatus = format === 'digital_master' ? 'digital_unlocked' : 'queued_for_crafting';
 
     const release = this.getRelease(data.release_id);
     if (!release) throw new Error('release_not_found');
 
     const tx = this.db.transaction(() => {
       this.db.prepare(`
-        INSERT INTO purchases (id, ahoy_id, email, release_id, track_id, amount_cents, currency, payment_method, payment_ref, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO purchases (
+          id, ahoy_id, email, release_id, track_id, amount_cents, currency,
+          payment_method, payment_ref, status, created_at,
+          format, shipping_name, shipping_address, shipping_city, shipping_state,
+          shipping_zip, shipping_country, inscription_note, fulfillment_status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         purchaseId,
         data.ahoy_id,
@@ -579,7 +611,16 @@ export class MarketStore {
         data.payment_method,
         data.payment_ref,
         'completed',
-        now
+        now,
+        format,
+        data.shipping?.name || null,
+        data.shipping?.address || null,
+        data.shipping?.city || null,
+        data.shipping?.state || null,
+        data.shipping?.zip || null,
+        data.shipping?.country || 'US',
+        data.shipping?.inscription_note || null,
+        fulfillmentStatus
       );
 
       const tracksToEntitle = data.track_id
@@ -593,14 +634,14 @@ export class MarketStore {
 
       for (const track of tracksToEntitle) {
         const entId = `ent_${randomBytes(12).toString('hex')}`;
-        insertEntitlement.run(entId, data.ahoy_id, track.id, release.id, now);
+        insertEntitlement.run(entId, grantedTo, track.id, release.id, now);
       }
 
       return tracksToEntitle.length;
     });
 
     const count = tx();
-    return { purchaseId, entitlementCount: count };
+    return { purchaseId, entitlementCount: count, grantedTo, format, fulfillmentStatus };
   }
 
   getEntitlements(ahoyId: string): Entitlement[] {

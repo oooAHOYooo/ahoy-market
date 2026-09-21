@@ -8,6 +8,17 @@ const purchaseInput = z.object({
   track_id: z.string().optional(),
   amount_cents: z.number().int().positive().optional(),
   payment_method: z.enum(['instant_sovereign', 'test_card', 'stripe']).default('instant_sovereign'),
+  recipient_ahoy_id: z.string().optional(),
+  format: z.enum(['digital_master', 'nfc_card', 'burned_cd']).default('digital_master'),
+  shipping: z.object({
+    name: z.string().min(1).optional(),
+    address: z.string().min(1).optional(),
+    city: z.string().min(1).optional(),
+    state: z.string().min(1).optional(),
+    zip: z.string().min(1).optional(),
+    country: z.string().default('US').optional(),
+    inscription_note: z.string().max(500).optional(),
+  }).optional(),
 });
 
 const boostInput = z.object({
@@ -173,28 +184,38 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
     const amountCents = parsed.data.amount_cents || release.price_cents;
     const paymentRef = `pay_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const recipientAhoyId = parsed.data.recipient_ahoy_id?.trim() || null;
 
-    const { purchaseId, entitlementCount } = store.recordPurchase({
+    const { purchaseId, entitlementCount, grantedTo, format, fulfillmentStatus } = store.recordPurchase({
       ahoy_id: auth.ahoy_id,
+      recipient_ahoy_id: recipientAhoyId,
       email: auth.email,
       release_id: release.id,
       track_id: parsed.data.track_id || null,
       amount_cents: amountCents,
       payment_method: parsed.data.payment_method,
       payment_ref: paymentRef,
+      format: parsed.data.format,
+      shipping: parsed.data.shipping,
     });
+
+    const isTransfer = Boolean(recipientAhoyId && recipientAhoyId !== auth.ahoy_id);
 
     return reply.code(201).send({
       success: true,
       purchase_id: purchaseId,
       ahoy_id: auth.ahoy_id,
+      granted_to: grantedTo,
+      is_transfer: isTransfer,
+      format,
+      fulfillment_status: fulfillmentStatus,
       release: {
         id: release.id,
         title: release.title,
         artist: release.artist,
       },
       entitlement_count: entitlementCount,
-      player_url: `${config.playerUrl}?ahoy_id=${encodeURIComponent(auth.ahoy_id)}`,
+      player_url: `${config.playerUrl}?ahoy_id=${encodeURIComponent(grantedTo)}`,
     });
   });
 

@@ -3,27 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AHOY Market — Own the Music. Boost the Artists.</title>
+  <title>AHOY Market — Sovereign Storefront & Custom Pressings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b1118;
-      --surface: #141e2a;
-      --surface-card: #192636;
-      --surface-card-hover: #1f3045;
-      --surface-border: #23354a;
-      --text: #f4ede4;
-      --text-muted: #9bb0c4;
-      --accent: #e07a5f;
-      --accent-hover: #f28a6f;
-      --accent-glow: rgba(224, 122, 95, 0.25);
-      --gold: #d4a373;
-      --teal: #2a9d8f;
-      --green: #4ade80;
+      /* Retro Poster Palette */
+      --bg: #0c1017;
+      --surface: #121822;
+      --surface-card: #17212e;
+      --surface-card-hover: #1e2c3d;
+      --surface-border: #223246;
+      --surface-border-strong: #2dd4bf;
+      --text: #fefbf6;
+      --text-muted: #8fa4bd;
+      
+      /* Vibrant Accents */
+      --mint: #2dd4bf;
+      --mint-hover: #3be2cd;
+      --mint-glow: rgba(45, 212, 191, 0.25);
+      
+      --coral: #ff6f91;
+      --coral-hover: #ff85a2;
+      --coral-glow: rgba(255, 111, 145, 0.3);
+      
+      --rose: #ffd3da;
+      --gold: #f6c860;
+      --cream: #fef8f0;
+
       --font-display: 'Cinzel', serif;
       --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,116 +44,66 @@
       color: var(--text);
       font-family: var(--font-body);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      line-height: 1.6;
+      line-height: 1.5;
+      overflow-x: hidden;
     }
 
-    /* Top Navigation */
-    header {
-      border-bottom: 1px solid var(--surface-border);
-      background: rgba(11, 17, 24, 0.85);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      color: var(--text);
-    }
-
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), var(--gold));
-      border-radius: 8px;
+    /* 3-COLUMN DASHBOARD GRID */
+    .dashboard-app {
       display: grid;
-      place-items: center;
-      font-weight: 700;
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      color: #0b1118;
-      box-shadow: 0 0 15px var(--accent-glow);
+      grid-template-columns: 260px 1fr 370px;
+      min-height: 100vh;
+      width: 100%;
     }
 
-    .brand-text {
-      display: flex;
-      flex-direction: column;
+    @media (max-width: 1240px) {
+      .dashboard-app {
+        grid-template-columns: 240px 1fr 340px;
+      }
     }
 
-    .brand-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      font-size: 1.15rem;
-      line-height: 1.1;
+    @media (max-width: 980px) {
+      .dashboard-app {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+      }
     }
 
-    .brand-sub {
-      font-size: 0.75rem;
-      color: var(--gold);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-    }
-
-    .nav-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.2s;
-      cursor: pointer;
-    }
-
-    .nav-link:hover, .nav-link.active {
-      color: var(--text);
-    }
-
+    /* BUTTONS */
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.6rem 1.2rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      padding: 0.55rem 1rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
       cursor: pointer;
       text-decoration: none;
       border: none;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       font-family: inherit;
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #0b1118;
+    .btn-mint {
+      background: var(--mint);
+      color: #0c1017;
     }
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      box-shadow: 0 0 20px var(--accent-glow);
+    .btn-mint:hover {
+      background: var(--mint-hover);
+      box-shadow: 0 0 16px var(--mint-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-coral {
+      background: var(--coral);
+      color: #0c1017;
+    }
+    .btn-coral:hover {
+      background: var(--coral-hover);
+      box-shadow: 0 0 16px var(--coral-glow);
       transform: translateY(-1px);
     }
 
@@ -152,714 +113,1261 @@
       border: 1px solid var(--surface-border);
     }
     .btn-secondary:hover {
-      background: var(--surface);
-      border-color: var(--text-muted);
+      background: var(--surface-card-hover);
+      border-color: var(--mint);
     }
 
-    .btn-boost {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #0b1118;
-      font-weight: 700;
-    }
-    .btn-boost:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .user-pill {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-    }
-
-    .sovereign-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
-    }
-
-    /* Hero */
-    .hero {
-      padding: 3.5rem 1.5rem 2rem;
-      text-align: center;
-      max-width: 840px;
-      margin: 0 auto;
-    }
-
-    .hero-eyebrow {
-      display: inline-block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--gold);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
-
-    .hero h1 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      line-height: 1.2;
-      margin-bottom: 1rem;
-      background: linear-gradient(180deg, #ffffff, #c7d2e0);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .hero-stats {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    /* Section Tabs */
-    .section-nav {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 2rem auto 3rem;
-      max-width: 600px;
-      background: var(--surface);
-      padding: 0.4rem;
-      border-radius: 12px;
-      border: 1px solid var(--surface-border);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      border: none;
+    .btn-ghost {
       background: transparent;
       color: var(--text-muted);
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      border: 1px dashed var(--surface-border);
+    }
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--mint);
     }
 
-    .tab-btn.active {
+    .pill-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .pill-mint {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--mint);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+    }
+
+    .pill-coral {
+      background: rgba(255, 111, 145, 0.12);
+      color: var(--coral);
+      border: 1px solid rgba(255, 111, 145, 0.3);
+    }
+
+    .pill-gold {
+      background: rgba(246, 200, 96, 0.12);
+      color: var(--gold);
+      border: 1px solid rgba(246, 200, 96, 0.3);
+    }
+
+    /* LEFT ITUNES STORE RAIL */
+    .dashboard-left {
+      background: var(--surface);
+      border-right: 1px solid var(--surface-border);
+      padding: 1.5rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 40;
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-logo-tile {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--mint), var(--coral));
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #0c1017;
+      box-shadow: 0 0 14px var(--coral-glow);
+    }
+
+    .brand-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--coral);
+    }
+
+    .user-profile-section {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ITUNES-STYLE NAV HEADERS */
+    .itunes-nav-header {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #6c8299;
+      font-weight: 800;
+      margin-top: 1rem;
+      margin-bottom: 0.35rem;
+      padding-left: 0.5rem;
+    }
+
+    .dash-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dash-nav-item button, .dash-nav-item a {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .dash-nav-item button:hover, .dash-nav-item a:hover {
       background: var(--surface-card);
       color: var(--text);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
-    /* Content Area */
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem 5rem;
-      width: 100%;
-      flex: 1;
+    .dash-nav-item button.active {
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--mint);
+      border: 1px solid rgba(45, 212, 191, 0.25);
     }
 
-    .section-title {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      margin-bottom: 1.5rem;
+    .eco-links-box {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--surface-border);
+    }
+
+    /* MIDDLE CONTENT FEED */
+    .dashboard-center {
+      padding: 1.75rem 2.25rem 6rem;
+      overflow-y: auto;
+      max-width: 100%;
+    }
+
+    @media (max-width: 980px) {
+      .dashboard-center {
+        padding: 1.25rem 1rem 6rem;
+      }
+    }
+
+    .center-top-bar {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.08), rgba(255, 111, 145, 0.06));
+      border: 1px solid var(--surface-border);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .hero-banner h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    .hero-banner p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.5;
+    }
+
+    .banner-tags {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.85rem;
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: var(--mint);
+      flex-wrap: wrap;
+    }
+
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--surface-border);
-      padding-bottom: 0.75rem;
     }
 
-    /* Grids */
-    .release-grid, .artist-grid {
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    /* RELEASES & ALBUM GRID */
+    .release-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 2rem;
-      margin-bottom: 4rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3rem;
     }
 
-    .release-card, .artist-card {
+    .release-card {
       background: var(--surface-card);
       border: 1px solid var(--surface-border);
       border-radius: 12px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      transition: all 0.2s ease;
+      position: relative;
     }
 
-    .release-card:hover, .artist-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
+    .release-card:hover {
+      border-color: var(--mint);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
-    .card-art-wrap {
+    .art-frame {
       position: relative;
       width: 100%;
-      padding-top: 60%;
-      overflow: hidden;
+      aspect-ratio: 16 / 10;
       background: #000;
+      overflow: hidden;
     }
 
-    .card-art-wrap img {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .art-frame img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transition: transform 0.3s ease;
     }
 
-    .release-card:hover .card-art-wrap img, .artist-card:hover .card-art-wrap img {
+    .release-card:hover .art-frame img {
       transform: scale(1.03);
     }
 
-    .preview-play-btn {
+    .art-badge-type {
       position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(11, 17, 24, 0.85);
-      border: 1px solid var(--surface-border);
-      color: var(--text);
-      display: grid;
-      place-items: center;
+      top: 0.65rem;
+      left: 0.65rem;
+      background: rgba(12, 16, 23, 0.9);
+      backdrop-filter: blur(4px);
+      color: var(--mint);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    .play-float-btn {
+      position: absolute;
+      bottom: 0.65rem;
+      right: 0.65rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 4px;
+      background: rgba(12, 16, 23, 0.9);
+      color: var(--mint);
+      border: 1px solid var(--mint);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
       cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
 
-    .preview-play-btn:hover {
-      background: var(--accent);
-      color: #0b1118;
-      transform: scale(1.1);
+    .play-float-btn:hover {
+      background: var(--mint);
+      color: #0c1017;
     }
 
-    .card-body {
-      padding: 1.5rem;
+    .card-content {
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       flex: 1;
     }
 
-    .card-meta {
+    .card-title-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.2rem;
+      gap: 0.5rem;
     }
 
-    .card-type {
-      font-size: 0.75rem;
+    .card-title-text {
+      font-size: 0.98rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--gold);
+      line-height: 1.3;
     }
 
-    .card-price {
-      font-size: 1.2rem;
+    .card-price-tag {
+      font-size: 0.92rem;
       font-weight: 700;
-      color: var(--green);
+      color: var(--mint);
+      font-family: var(--font-mono);
     }
 
-    .card-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .card-artist {
-      font-size: 0.95rem;
+    .card-artist-sub {
+      font-size: 0.78rem;
       color: var(--text-muted);
-      margin-bottom: 1rem;
+      margin-bottom: 0.65rem;
     }
 
-    .card-desc {
-      font-size: 0.85rem;
-      color: #8da4bb;
-      line-height: 1.5;
-      margin-bottom: 1.5rem;
+    .card-description-text {
+      font-size: 0.76rem;
+      color: #8fa4bd;
+      line-height: 1.45;
+      margin-bottom: 1rem;
       flex: 1;
     }
 
-    .card-actions {
+    .card-button-row {
       display: flex;
-      gap: 0.75rem;
-      align-items: center;
+      gap: 0.4rem;
       border-top: 1px solid var(--surface-border);
-      padding-top: 1rem;
+      padding-top: 0.75rem;
     }
 
-    /* Artist Card Specifics */
-    .artist-header-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .artist-avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--surface-border);
-    }
-
-    .artist-stats-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      background: rgba(212, 163, 115, 0.15);
-      color: var(--gold);
-      padding: 0.25rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    /* Leaderboard & Stats */
-    .patron-card {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 12px;
-      padding: 2rem;
-      margin-bottom: 3rem;
-    }
-
-    .patron-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .stat-box {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      text-align: center;
-    }
-
-    .stat-val {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--gold);
-      font-family: var(--font-display);
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .leaderboard-table, .library-table {
+    /* ITUNES TRACK TABLE */
+    .itunes-track-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      font-size: 0.82rem;
+      background: var(--surface-card);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--surface-border);
+      margin-bottom: 2.5rem;
     }
 
-    .leaderboard-table th, .library-table th {
+    .itunes-track-table th {
       text-align: left;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      padding: 0.75rem 0.85rem;
+      background: rgba(255, 255, 255, 0.02);
       color: var(--text-muted);
-      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
       border-bottom: 1px solid var(--surface-border);
     }
 
-    .leaderboard-table td, .library-table td {
-      padding: 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 0.9rem;
+    .itunes-track-table td {
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid var(--surface-border);
     }
 
-    .track-cell {
+    .itunes-track-table tr:hover td {
+      background: rgba(45, 212, 191, 0.03);
+    }
+
+    .itunes-track-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* ARTIST CARDS */
+    .artist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .artist-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      overflow: hidden;
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      transition: all 0.2s ease;
     }
 
-    .track-art-small {
-      width: 44px;
-      height: 44px;
-      border-radius: 6px;
+    .artist-card:hover {
+      border-color: var(--coral);
+      transform: translateY(-2px);
+    }
+
+    .artist-banner-wrap {
+      width: 100%;
+      height: 90px;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .artist-banner-wrap img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
     }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      display: grid;
-      place-items: center;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      padding: 1rem;
+    .artist-profile-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.75rem;
+      padding: 0 1rem;
+      margin-top: -26px;
     }
 
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: auto;
+    .artist-avatar-round {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--surface-card);
+      object-fit: cover;
     }
 
-    .modal {
-      background: var(--surface-card);
-      border: 1px solid var(--surface-border);
-      border-radius: 16px;
-      max-width: 480px;
-      width: 100%;
-      padding: 2rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    /* RIGHT PRODUCTION & FULFILLMENT RAIL */
+    .dashboard-right {
+      background: var(--surface);
+      border-left: 1px solid var(--surface-border);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 40;
     }
 
-    .modal-header {
+    .right-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--surface-border);
     }
 
-    .modal-title {
+    .right-title {
       font-family: var(--font-display);
-      font-size: 1.4rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
     }
 
-    .modal-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .receipt-box {
-      background: var(--bg);
-      border: 1px dashed var(--surface-border);
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem 0 1.5rem;
-      font-size: 0.9rem;
-    }
-
-    .boost-pill-row {
-      display: flex;
-      gap: 0.5rem;
-      margin: 1rem 0;
-    }
-
-    .boost-pill {
-      flex: 1;
-      padding: 0.6rem;
-      background: var(--surface);
+    /* FORMAT SELECTOR */
+    .format-selector-box {
+      background: var(--surface-card);
       border: 1px solid var(--surface-border);
-      color: var(--text);
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .boost-pill.active {
-      background: var(--gold);
-      color: #0b1118;
-      border-color: var(--gold);
-    }
-
-    .form-input, .form-textarea {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      color: var(--text);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
+      border-radius: 10px;
+      padding: 0.85rem;
       margin-bottom: 1rem;
     }
 
-    .form-input:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--accent);
+    .format-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
     }
 
-    /* Global Player Bar */
+    .format-btn {
+      padding: 0.5rem 0.25rem;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .format-btn span {
+      display: block;
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .format-btn.active {
+      background: var(--surface-card-hover);
+      color: var(--mint);
+      border-color: var(--mint);
+    }
+
+    .format-btn.active span {
+      color: var(--mint);
+    }
+
+    /* QUEUE ITEMS LIST */
+    .queue-items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .queue-item-card {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 0.55rem;
+    }
+
+    .queue-thumb {
+      width: 38px;
+      height: 38px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .queue-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .queue-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .queue-artist {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .queue-price {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--mint);
+      font-family: var(--font-mono);
+    }
+
+    .queue-remove-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.2rem;
+      font-family: var(--font-mono);
+    }
+    .queue-remove-btn:hover {
+      color: var(--coral);
+    }
+
+    /* TERMINALS & INPUTS */
+    .terminal-section {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .terminal-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--mint);
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+
+    .terminal-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.45rem 0.65rem;
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      margin-bottom: 0.4rem;
+    }
+    .terminal-input:focus {
+      outline: none;
+      border-color: var(--mint);
+    }
+
+    /* SUMMARY BOX */
+    .summary-box {
+      margin-top: auto;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .summary-line.total-line {
+      border-top: 1px solid var(--surface-border);
+      padding-top: 0.55rem;
+      margin-top: 0.55rem;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* TIP DRAWER */
+    .tip-panel {
+      background: var(--surface-card);
+      border: 1px solid var(--coral);
+      border-radius: 10px;
+      padding: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .tip-pill-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.35rem;
+      margin: 0.5rem 0;
+    }
+
+    .tip-pill {
+      padding: 0.35rem 0.1rem;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text);
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+
+    .tip-pill.active {
+      background: var(--coral);
+      color: #0c1017;
+      border-color: var(--coral);
+    }
+
+    /* SUPPORT / FAQ CARDS */
+    .support-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .support-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .support-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* AUDIO BAR */
     .audio-player-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(20, 30, 42, 0.95);
-      border-top: 1px solid var(--surface-border);
-      backdrop-filter: blur(12px);
-      padding: 0.75rem 1.5rem;
+      background: rgba(12, 16, 23, 0.95);
+      border-top: 1px solid var(--mint);
+      backdrop-filter: blur(16px);
+      padding: 0.6rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1.5rem;
-      z-index: 99;
+      z-index: 100;
       transform: translateY(100%);
-      transition: transform 0.3s ease;
+      transition: transform 0.25s ease;
     }
 
     .audio-player-bar.active {
       transform: translateY(0);
     }
 
-    .player-now-playing {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      min-width: 200px;
-    }
-
     .player-thumb {
-      width: 42px;
-      height: 42px;
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
       object-fit: cover;
-    }
-
-    footer {
-      border-top: 1px solid var(--surface-border);
-      padding: 2rem 1.5rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="nav-container">
-      <a href="/" class="brand">
-        <div class="brand-mark">⚓</div>
-        <div class="brand-text">
-          <span class="brand-title">AHOY MARKET</span>
-          <span class="brand-sub">Sovereign Storefront</span>
+  <div class="dashboard-app">
+
+    <!-- ========================================== -->
+    <!-- LEFT RAIL: ITUNES STORE STYLE SIDEBAR -->
+    <!-- ========================================== -->
+    <aside class="dashboard-left">
+      <a href="/" class="brand-header">
+        <div class="brand-logo-tile">A</div>
+        <div class="brand-titles">
+          <span class="brand-name">AHOY STORE</span>
+          <span class="brand-sub">Sovereign Pressing</span>
         </div>
       </a>
 
-      <nav class="nav-links">
-        <a href="https://app.ahoy.ooo" target="_blank" class="nav-link">Streamer (app.ahoy.ooo)</a>
-        <a href="https://player.ahoy.ooo" target="_blank" class="nav-link">Player (player.ahoy.ooo)</a>
-        <a onclick="switchTab('releases')" class="nav-link">Releases</a>
-        <a onclick="switchTab('artists')" class="nav-link">Artists & Boosts</a>
-        <a onclick="switchTab('patrons')" class="nav-link">Leaderboard</a>
-        <a onclick="switchTab('library')" class="nav-link" id="nav-library-link">My Library</a>
+      <!-- Identity Status -->
+      <div id="user-profile-box" class="user-profile-section">
+        <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">Connecting node...</div>
+      </div>
 
-        <div id="auth-container" class="auth-badge">
-          <!-- Injected via JavaScript -->
-          <a href="/api/auth/login" class="btn btn-primary">Sign in with AHOY ID</a>
+      <!-- ITUNES STORE GROUP: STORE -->
+      <div class="itunes-nav-header">Store</div>
+      <ul class="dash-nav-list">
+        <li class="dash-nav-item">
+          <button id="nav-featured" class="active" onclick="switchView('featured')">
+            <span>Featured</span>
+          </button>
+        </li>
+        <li class="dash-nav-item">
+          <button id="nav-albums" onclick="switchView('albums')">
+            <span>Albums</span>
+            <span class="pill-tag pill-mint" id="badge-albums-count">0</span>
+          </button>
+        </li>
+        <li class="dash-nav-item">
+          <button id="nav-tracks" onclick="switchView('tracks')">
+            <span>Tracks &amp; Singles</span>
+            <span class="pill-tag pill-mint" id="badge-tracks-count">0</span>
+          </button>
+        </li>
+        <li class="dash-nav-item">
+          <button id="nav-artists" onclick="switchView('artists')">
+            <span>Artists</span>
+            <span class="pill-tag pill-coral" id="badge-artists-count">0</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- ITUNES STORE GROUP: PHYSICAL PRESSINGS -->
+      <div class="itunes-nav-header">Physical Pressings</div>
+      <ul class="dash-nav-list">
+        <li class="dash-nav-item">
+          <button id="nav-cds" onclick="switchView('cds')">
+            <span>Burned Audio CDs</span>
+          </button>
+        </li>
+        <li class="dash-nav-item">
+          <button id="nav-cards" onclick="switchView('cards')">
+            <span>Archival NFC Cards</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- ITUNES STORE GROUP: MY MUSIC -->
+      <div class="itunes-nav-header">My Music</div>
+      <ul class="dash-nav-list">
+        <li class="dash-nav-item">
+          <button id="nav-library" onclick="switchView('library')">
+            <span>Purchased Library</span>
+            <span class="pill-tag pill-gold" id="badge-library-count">0</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- ITUNES STORE GROUP: COMMUNITY & SUPPORT -->
+      <div class="itunes-nav-header">Community &amp; Help</div>
+      <ul class="dash-nav-list">
+        <li class="dash-nav-item">
+          <button id="nav-patrons" onclick="switchView('patrons')">
+            <span>Patron Ledger</span>
+          </button>
+        </li>
+        <li class="dash-nav-item">
+          <button id="nav-support" onclick="switchView('support')">
+            <span>Support &amp; FAQ</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- ECOSYSTEM LINKS -->
+      <div class="eco-links-box">
+        <div class="itunes-nav-header" style="margin-top: 0; padding-left: 0;">AHOY Network</div>
+        <ul class="dash-nav-list" style="margin-bottom: 0.5rem;">
+          <li class="dash-nav-item">
+            <a href="https://player.ahoy.ooo" target="_blank" rel="noopener">
+              <span>Player</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">player.ahoy.ooo</span>
+            </a>
+          </li>
+          <li class="dash-nav-item">
+            <a href="https://app.ahoy.ooo" target="_blank" rel="noopener">
+              <span>The Streamer</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">app.ahoy.ooo</span>
+            </a>
+          </li>
+          <li class="dash-nav-item">
+            <a href="https://id.ahoy.ooo" target="_blank" rel="noopener">
+              <span>Sovereign ID</span>
+              <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);">id.ahoy.ooo</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- MIDDLE FEED: DYNAMIC STORE CONTENT -->
+    <!-- ========================================== -->
+    <main class="dashboard-center">
+      
+      <!-- Top breadcrumb bar -->
+      <div class="center-top-bar">
+        <div style="font-size: 0.76rem; font-family: var(--font-mono); color: var(--text-muted);">
+          AHOY STORE // <span id="current-view-title" style="color: var(--mint);">FEATURED</span>
         </div>
-      </nav>
-    </div>
-  </header>
-
-  <section class="hero">
-    <span class="hero-eyebrow">AHOY Sovereign Commerce</span>
-    <h1>Own the music. Boost the artists.</h1>
-    <p>Artist-approved music store and direct patronage. Purchases and boosts link directly to your Sovereign AHOY ID and unlock immediate playback in AHOY Player.</p>
-    <div class="hero-stats">
-      <span>✓ 100% Direct Artist Support</span>
-      <span>✓ Lossless & MP3 Downloads</span>
-      <span>✓ Instant Sovereign ID Ownership</span>
-      <span>✓ AHOY Player Sync</span>
-    </div>
-  </section>
-
-  <div class="section-nav">
-    <button id="tab-releases-btn" class="tab-btn active" onclick="switchTab('releases')">🎵 Releases</button>
-    <button id="tab-artists-btn" class="tab-btn" onclick="switchTab('artists')">⚡ Artists & Boosts</button>
-    <button id="tab-patrons-btn" class="tab-btn" onclick="switchTab('patrons')">🏆 Leaderboard</button>
-    <button id="tab-library-btn" class="tab-btn" onclick="switchTab('library')">📦 My Library</button>
-  </div>
-
-  <main>
-    <!-- Tab 1: Releases -->
-    <section id="tab-releases">
-      <div class="section-title">
-        <h2>Digital Releases</h2>
-        <span style="font-size: 0.85rem; color: var(--gold);">Direct Artist Audio</span>
+        <div style="display: flex; gap: 0.35rem;">
+          <button onclick="filterCatalog('all')" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">All Media</button>
+          <button onclick="filterCatalog('single')" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Singles</button>
+          <button onclick="filterCatalog('folk')" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Coast Folk</button>
+        </div>
       </div>
-      <div id="release-grid" class="release-grid">
-        <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading releases...</div>
-      </div>
-    </section>
 
-    <!-- Tab 2: Artists & Boosts -->
-    <section id="tab-artists" style="display: none;">
-      <div class="section-title">
-        <h2>Roster & Artist Tip Jars</h2>
-        <span style="font-size: 0.85rem; color: var(--gold);">Instant Sovereign Boosts</span>
-      </div>
-      <div id="artist-grid" class="artist-grid">
-        <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading artists...</div>
-      </div>
-    </section>
+      <!-- VIEW 1: FEATURED STOREFRONT -->
+      <section id="view-featured">
+        <div class="hero-banner">
+          <span class="pill-tag pill-mint" style="margin-bottom: 0.6rem; display: inline-block;">Sovereign Music Pressing</span>
+          <h1>Own the music. Build custom editions.</h1>
+          <p>
+            Acquire permanent digital masters, collect limited NFC cards, or assemble handcrafted audio CDs shipped directly to you or your friends.
+          </p>
+          <div class="banner-tags">
+            <span>// LOSSLESS WAV/MP3</span>
+            <span>// PHYSICAL NFC EDITIONS</span>
+            <span>// HAND-BURNED CDS</span>
+            <span>// 0% PLATFORM TAKE</span>
+          </div>
+        </div>
 
-    <!-- Tab 3: Leaderboard & Patron Stats -->
-    <section id="tab-patrons" style="display: none;">
-      <div class="patron-card" id="user-patron-card" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 0.75rem;">
+        <div class="section-header-row">
           <div>
-            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--gold); letter-spacing: 0.1em; font-weight: 700;">My Patron Level</span>
-            <h3 id="user-patron-level" style="font-family: var(--font-display); font-size: 1.4rem;">Deckhand Supporter</h3>
+            <h2 class="section-heading">Featured Releases</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Curated sovereign masters ready for digital unlock or physical pressing</span>
           </div>
-          <span class="user-pill"><span class="sovereign-dot"></span> <span id="user-patron-id"></span></span>
+          <span id="featured-counter" style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--mint);"></span>
         </div>
-        <div class="patron-stats-grid">
-          <div class="stat-box">
-            <div class="stat-val" id="user-total-boosted">$0.00</div>
-            <div class="stat-label">Total Boosted</div>
+        <div id="featured-grid" class="release-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 2: ALBUMS -->
+      <section id="view-albums" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Albums &amp; EPs</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Complete long-form releases with full artwork packages</span>
           </div>
-          <div class="stat-box">
-            <div class="stat-val" id="user-boost-count">0</div>
-            <div class="stat-label">Boosts Sent</div>
+        </div>
+        <div id="albums-grid" class="release-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: TRACKS & SINGLES (ITUNES TABULAR STYLE) -->
+      <section id="view-tracks" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Tracks &amp; Singles</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Individual masters available for immediate queueing or lossless streaming</span>
           </div>
-          <div class="stat-box">
-            <div class="stat-val" id="user-unique-artists">0</div>
-            <div class="stat-label">Artists Backed</div>
+          <span id="tracks-total-badge" class="pill-tag pill-mint">0 tracks</span>
+        </div>
+        <div id="tracks-table-wrap">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 4: ARTISTS -->
+      <section id="view-artists" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Artist Roster &amp; Tip Jars</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Direct patronage with 100% payout to creator</span>
           </div>
+          <span class="pill-tag pill-coral">Direct Transfer</span>
+        </div>
+        <div id="artist-grid" class="artist-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 5: BURNED AUDIO CDS (PHYSICAL SHOWCASE) -->
+      <section id="view-cds" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Hand-Burned Audio CD Editions</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Artisan physical CD-R pressings with customized liner notes</span>
+          </div>
+          <span class="pill-tag pill-mint">$15.00 Shipped</span>
+        </div>
+
+        <div class="support-card" style="border-color: var(--mint); margin-bottom: 1.5rem;">
+          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--mint); margin-bottom: 0.4rem;">HOW BURNED CD GIFTING WORKS</div>
+          <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Tangible music made to be gifted and preserved.</h3>
+          <p style="margin-bottom: 0.75rem;">
+            When you commission a Burned CD edition from AHOY Store, we burn your chosen catalog release or custom tracklist onto high-grade silver audio CD media, print a custom matte cardstock sleeve featuring your personalized liner inscription, and ship it directly via USPS.
+          </p>
+          <div class="banner-tags" style="margin-top: 0.5rem;">
+            <span>// 80-MIN RED BOOK AUDIO CD</span>
+            <span>// CUSTOM SLEEVE LINER DEDICATION</span>
+            <span>// INSCRIBES DIGITAL RIGHTS TO RECIPIENT</span>
+          </div>
+        </div>
+
+        <div class="section-header-row">
+          <h3 class="section-heading" style="font-size: 1rem;">Select a Work to Queue as a Burned CD</h3>
+        </div>
+        <div id="cds-releases-grid" class="release-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 6: ARCHIVAL NFC CARDS (PHYSICAL SHOWCASE) -->
+      <section id="view-cards" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Archival AHOY NFC Cards</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Limited-edition physical cards that unlock permanent streaming with a tap</span>
+          </div>
+          <span class="pill-tag pill-coral">$15.00 Shipped</span>
+        </div>
+
+        <div class="support-card" style="border-color: var(--coral); margin-bottom: 1.5rem;">
+          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--coral); margin-bottom: 0.4rem;">PHYSICAL NFC UNLOCK ARCHITECTURE</div>
+          <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">A physical artifact connected to your sovereign account.</h3>
+          <p style="margin-bottom: 0.75rem;">
+            AHOY Cards are limited physical collectible cards embedded with an NDEF NFC chip. Tap your smartphone to the card to instantly stream the master audio in AHOY Player and write a permanent entitlement to your Sovereign AHOY ID.
+          </p>
+          <div class="banner-tags" style="margin-top: 0.5rem;">
+            <span>// NFC CHIP NDEF HARDCODED</span>
+            <span>// INTEGRATED WITH CARDS.AHOY.OOO</span>
+            <span>// ARCHIVAL SLEEVE &amp; NUMBERED EDITION</span>
+          </div>
+        </div>
+
+        <div class="section-header-row">
+          <h3 class="section-heading" style="font-size: 1rem;">Available NFC Card Editions</h3>
+        </div>
+        <div id="cards-releases-grid" class="release-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 7: PATRON LEDGER -->
+      <section id="view-patrons" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Patron Ledger</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Top supporters backing independent music creators</span>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--gold);">VERIFIED LEDGER</span>
+        </div>
+        <div id="leaderboard-content" style="margin-bottom: 2rem;">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 8: SUPPORT & FAQ -->
+      <section id="view-support" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">Store Support &amp; FAQ</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Sovereign media, physical pressing fulfillment, and order help</span>
+          </div>
+          <span class="pill-tag pill-mint">24/7 Dispatch</span>
+        </div>
+
+        <div class="support-card">
+          <h3>What does "Sovereign Ownership" mean?</h3>
+          <p>
+            Unlike traditional subscription streaming services where your access expires when you stop paying, purchases on AHOY Market inscribe permanent ownership to your Sovereign AHOY ID. You can stream forever on AHOY Player, download raw lossless WAV/MP3 files, or transfer the entitlement directly to another listener.
+          </p>
+        </div>
+
+        <div class="support-card">
+          <h3>How does physical shipping work?</h3>
+          <p>
+            All physical products (Hand-Burned CDs and Archival NFC Cards) are crafted in-house. Physical orders are processed within 24 to 48 hours and shipped via USPS First-Class with tracking. We ship domestically and internationally.
+          </p>
+        </div>
+
+        <div class="support-card">
+          <h3>Can I send a physical edition as a gift?</h3>
+          <p>
+            Yes. In the Production Terminal on the right, select "Gift to Friend" to specify their shipping address, custom sleeve dedication (printed directly on the sleeve), and their AHOY ID so they receive both physical delivery and digital library access.
+          </p>
+        </div>
+
+        <div class="support-card">
+          <h3>Artist Revenue &amp; Platform Fees</h3>
+          <p>
+            AHOY operates on a 0% platform fee model for direct artist tips and boosts. 100% of your contributions go straight to the artist's payout balance.
+          </p>
+        </div>
+
+        <div class="support-card">
+          <h3>Need help with an order or entitlement?</h3>
+          <p>
+            Reach our operations team directly at <span style="font-family: var(--font-mono); color: var(--mint);">support@ahoy.ooo</span> or open an inquiry on the AHOY Network node. Please include your AHOY ID or purchase transaction ID.
+          </p>
+        </div>
+      </section>
+
+      <!-- VIEW 9: SOVEREIGN LIBRARY -->
+      <section id="view-library" style="display: none;">
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-heading">My Sovereign Library</h2>
+            <span style="font-size: 0.76rem; color: var(--text-muted);">Permanent cryptographic music entitlements</span>
+          </div>
+          <span id="library-count-badge" class="pill-tag pill-mint">0 tracks</span>
+        </div>
+        <div id="library-content">
+          <div style="text-align: center; padding: 2rem; background: var(--surface-card); border: 1px dashed var(--surface-border); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem;">
+            Sign in with your AHOY ID to stream and download high-resolution audio.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- RIGHT RAIL: PRODUCTION & FULFILLMENT -->
+    <!-- ========================================== -->
+    <aside class="dashboard-right">
+      <div class="right-header">
+        <span class="right-title">Production Terminal</span>
+        <button onclick="clearQueue()" class="btn-ghost" style="padding: 0.2rem 0.5rem; font-size: 0.68rem; font-family: var(--font-mono);">
+          Clear
+        </button>
+      </div>
+
+      <!-- ACTIVE ARTIST TIP DRAWER -->
+      <div id="active-tip-panel" class="tip-panel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+          <div>
+            <span class="pill-tag pill-coral">Direct Tip</span>
+            <div id="tip-target-name" style="font-weight: 700; font-size: 0.92rem; margin-top: 0.2rem;">Artist</div>
+          </div>
+          <button onclick="closeTipDrawer()" style="background:none; border:none; color:var(--text-muted); font-family:var(--font-mono); font-size:0.9rem; cursor:pointer;">&times;</button>
+        </div>
+        <p id="tip-target-bio" style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.4;"></p>
+
+        <div class="tip-pill-grid">
+          <button class="tip-pill" onclick="setTipPreset(100)">$1</button>
+          <button class="tip-pill active" onclick="setTipPreset(500)">$5</button>
+          <button class="tip-pill" onclick="setTipPreset(1000)">$10</button>
+          <button class="tip-pill" onclick="setTipPreset(2000)">$20</button>
+        </div>
+
+        <input type="number" id="tip-custom-input" class="terminal-input" placeholder="Custom Tip Amount ($)" min="0.5" step="0.5" oninput="onCustomTipChange(this.value)" />
+        <textarea id="tip-note-input" class="terminal-input" placeholder="Liner note / message for artist..." rows="2" style="resize: none;"></textarea>
+
+        <button id="send-tip-btn" onclick="executeTip()" class="btn btn-coral" style="width: 100%; justify-content: center;">
+          Send $5.00 Direct Tip
+        </button>
+      </div>
+
+      <!-- FORMAT SELECTION TERMINAL -->
+      <div class="format-selector-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="terminal-label" style="margin: 0;">Pressing Format</span>
+          <span id="active-format-tag" class="pill-tag pill-mint">Digital</span>
+        </div>
+        <div class="format-options-grid">
+          <button id="fmt-digital" class="format-btn active" onclick="selectFormat('digital_master')">
+            Digital Master
+            <span>$1.00</span>
+          </button>
+          <button id="fmt-nfc" class="format-btn" onclick="selectFormat('nfc_card')">
+            NFC Card
+            <span>$15.00</span>
+          </button>
+          <button id="fmt-cd" class="format-btn" onclick="selectFormat('burned_cd')">
+            Burned CD
+            <span>$15.00</span>
+          </button>
         </div>
       </div>
 
-      <div class="section-title">
-        <h2>Top Patrons & Boosters</h2>
-        <span style="font-size: 0.85rem; color: var(--gold);">Ecosystem Leaderboard</span>
+      <!-- QUEUED WORKS LIST -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+        <span class="terminal-label" style="margin: 0;">Queued Works</span>
+        <span id="queue-counter" style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">0 items</span>
       </div>
-      <div id="leaderboard-content">
-        <div style="text-align: center; padding: 2rem;">Loading leaderboard...</div>
+      <div id="queue-items-box" class="queue-items-container">
+        <!-- Rendered by JS -->
       </div>
-    </section>
 
-    <!-- Tab 4: Library -->
-    <section id="tab-library" style="display: none;">
-      <div class="section-title" style="margin-bottom: 0.5rem;">
-        <h2>My Sovereign Library</h2>
-        <span id="library-count" style="font-size: 0.85rem; color: var(--gold);">0 tracks owned</span>
-      </div>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Releases permanently unlocked on your Sovereign AHOY ID. Open in AHOY Player for immediate high-fidelity playback.
-      </p>
-      <div id="library-content">
-        <div class="library-empty">
-          Sign in with your AHOY ID to view and stream your purchased library.
+      <!-- SLEEVE INSCRIPTION TERMINAL -->
+      <div class="terminal-section">
+        <span class="terminal-label">Sleeve Inscription &amp; Recipient</span>
+        
+        <div style="display: flex; gap: 0.3rem; margin-bottom: 0.6rem;">
+          <button id="dest-self-btn" class="btn btn-mint" style="flex: 1; justify-content: center; padding: 0.35rem 0.5rem; font-size: 0.72rem;" onclick="setDestination('self')">
+            For Myself
+          </button>
+          <button id="dest-gift-btn" class="btn btn-secondary" style="flex: 1; justify-content: center; padding: 0.35rem 0.5rem; font-size: 0.72rem;" onclick="setDestination('gift')">
+            Gift to Friend
+          </button>
+        </div>
+
+        <div id="gift-id-input-wrap" style="display: none; margin-bottom: 0.5rem;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+            Friend's AHOY ID (for digital rights):
+          </label>
+          <input type="text" id="recipient-ahoy-id" class="terminal-input" placeholder="e.g. ahoy_alex" />
+        </div>
+
+        <div style="margin-bottom: 0.2rem;">
+          <label style="display: block; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+            Custom Sleeve Note / Dedication:
+          </label>
+          <input type="text" id="sleeve-note-input" class="terminal-input" placeholder="e.g. To Jane: Play track 1 loud." maxlength="200" />
         </div>
       </div>
-    </section>
-  </main>
 
-  <!-- Global Audio Player Bar -->
+      <!-- PHYSICAL SHIPPING TERMINAL (Active when NFC Card or CD chosen) -->
+      <div id="shipping-terminal" class="terminal-section" style="display: none;">
+        <span class="terminal-label" style="color: var(--coral);">Physical Delivery Address</span>
+        <input type="text" id="ship-name" class="terminal-input" placeholder="Full Recipient Name" />
+        <input type="text" id="ship-street" class="terminal-input" placeholder="Street Address (e.g. 42 Harbor Ln)" />
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.3rem;">
+          <input type="text" id="ship-city" class="terminal-input" placeholder="City" />
+          <input type="text" id="ship-state" class="terminal-input" placeholder="State" />
+          <input type="text" id="ship-zip" class="terminal-input" placeholder="ZIP" />
+        </div>
+      </div>
+
+      <!-- CHECKOUT SUMMARY & AUTHORIZE -->
+      <div class="summary-box">
+        <div class="summary-line">
+          <span>Selected Edition</span>
+          <span id="sum-format-name" style="font-family: var(--font-mono); color: var(--mint);">Digital Master</span>
+        </div>
+        <div class="summary-line">
+          <span>Queued Items</span>
+          <span id="sum-items-count" style="font-family: var(--font-mono);">0</span>
+        </div>
+        <div class="summary-line">
+          <span>Platform Fee</span>
+          <span style="font-family: var(--font-mono); color: var(--mint); font-weight: 700;">$0.00 (0%)</span>
+        </div>
+        <div class="summary-line total-line">
+          <span>Total</span>
+          <span id="sum-total-val" style="font-family: var(--font-mono); color: var(--mint);">$0.00</span>
+        </div>
+
+        <button id="main-authorize-btn" onclick="executeAuthorize()" class="btn btn-mint" style="width: 100%; justify-content: center; margin-top: 0.75rem;">
+          Authorize &amp; Inscribe ($0.00)
+        </button>
+
+        <div id="order-result-box" style="display: none; margin-top: 0.75rem; padding: 0.65rem; background: rgba(45, 212, 191, 0.08); border: 1px solid var(--mint); border-radius: 6px; font-size: 0.72rem;">
+          <div style="font-weight: 700; color: var(--mint); margin-bottom: 0.2rem;">Order Logged in Ledger</div>
+          <div id="order-result-text" style="color: var(--text-muted); line-height: 1.4; font-family: var(--font-mono);"></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- AUDIO PLAYER BAR -->
   <div id="audio-bar" class="audio-player-bar">
-    <div class="player-now-playing">
-      <img id="player-thumb" src="" class="player-thumb" alt="Artwork" />
+    <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 220px;">
+      <img id="player-thumb" src="" class="player-thumb" alt="Cover" />
       <div>
-        <div id="player-title" style="font-weight: 600; font-size: 0.9rem;"></div>
-        <div id="player-artist" style="font-size: 0.75rem; color: var(--text-muted);"></div>
+        <div id="player-title" style="font-weight: 700; font-size: 0.82rem; color: var(--text);"></div>
+        <div id="player-artist" style="font-size: 0.7rem; color: var(--mint); font-family: var(--font-mono);"></div>
       </div>
     </div>
-    <audio id="audio-element" controls style="flex: 1; max-width: 500px; height: 36px;"></audio>
-    <button id="player-close-btn" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Close</button>
+    <audio id="audio-element" controls style="flex: 1; max-width: 500px; height: 32px;"></audio>
+    <button id="player-close-btn" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.72rem;">Close</button>
   </div>
-
-  <!-- Purchase Modal -->
-  <div id="purchase-modal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">Complete Purchase</h3>
-        <button class="modal-close" onclick="closeModal('purchase-modal')">&times;</button>
-      </div>
-      <p style="color: var(--text-muted); font-size: 0.9rem;">
-        You are purchasing permanent digital ownership of this release.
-      </p>
-      <div class="receipt-box" id="modal-receipt"></div>
-      <div id="modal-auth-warning" style="display: none; color: var(--accent); font-size: 0.85rem; margin-bottom: 1rem;">
-        ⚠️ You need to sign in with your AHOY ID before completing your purchase.
-      </div>
-      <button id="confirm-buy-btn" class="btn btn-primary" style="width: 100%; justify-content: center;">
-        ⚡ Confirm & Unlock ($1.00)
-      </button>
-    </div>
-  </div>
-
-  <!-- Boost Modal -->
-  <div id="boost-modal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="boost-modal-title">Boost Artist</h3>
-        <button class="modal-close" onclick="closeModal('boost-modal')">&times;</button>
-      </div>
-      <p style="color: var(--text-muted); font-size: 0.85rem;" id="boost-modal-artist-bio"></p>
-
-      <div style="margin-top: 1rem;">
-        <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Select Tip / Boost Amount</label>
-        <div class="boost-pill-row">
-          <button class="boost-pill" onclick="selectBoostAmount(100)">$1</button>
-          <button class="boost-pill active" onclick="selectBoostAmount(500)">$5</button>
-          <button class="boost-pill" onclick="selectBoostAmount(1000)">$10</button>
-          <button class="boost-pill" onclick="selectBoostAmount(2000)">$20</button>
-        </div>
-      </div>
-
-      <div>
-        <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Custom Amount ($)</label>
-        <input type="number" id="boost-custom-amount" class="form-input" placeholder="e.g. 15.00" min="0.5" step="0.5" oninput="onCustomAmountInput(this.value)" />
-      </div>
-
-      <div>
-        <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Supporter Note / Message</label>
-        <textarea id="boost-message" class="form-textarea" rows="2" placeholder="Leave a message for the artist..."></textarea>
-      </div>
-
-      <div id="boost-auth-warning" style="display: none; color: var(--accent); font-size: 0.85rem; margin-bottom: 1rem;">
-        ⚠️ You need to sign in with your AHOY ID to record your patronage and badge.
-      </div>
-
-      <button id="confirm-boost-btn" class="btn btn-boost" style="width: 100%; justify-content: center;" onclick="confirmBoost()">
-        ⚡ Send $5.00 Boost
-      </button>
-    </div>
-  </div>
-
-  <footer>
-    <p>AHOY Market &copy; 2026 — Part of the AHOY Indie Media Ecosystem</p>
-  </footer>
 
   <script>
     let currentUser = null;
-    let selectedRelease = null;
-    let selectedArtist = null;
-    let currentBoostAmountCents = 500;
+    let catalogReleases = [];
+    let catalogArtists = [];
+    let allTracks = [];
+    let queue = [];
+    let selectedFormat = 'digital_master';
+    let destinationMode = 'self';
+    let currentTipCents = 500;
+    let activeTipArtist = null;
+
     const audioElement = document.getElementById('audio-element');
     const audioBar = document.getElementById('audio-bar');
 
@@ -869,157 +1377,345 @@
       await loadArtists();
       await loadLeaderboard();
 
-      // Check query parameters (e.g. ?boost=samuel-dylan-witch)
       const params = new URLSearchParams(window.location.search);
-      const boostArtist = params.get('boost') || params.get('artist');
-      if (boostArtist) {
-        switchTab('artists');
-        setTimeout(() => openBoostModal(boostArtist), 300);
+      const tipTarget = params.get('boost') || params.get('artist') || params.get('tip');
+      if (tipTarget) {
+        switchView('artists');
+        openTipDrawer(tipTarget);
       }
 
-      if (currentUser?.authenticated) {
-        await loadLibrary();
-        await loadUserBoostStats();
-      }
-    }
-
-    function switchTab(tab) {
-      ['releases', 'artists', 'patrons', 'library'].forEach(t => {
-        const sec = document.getElementById(`tab-${t}`);
-        const btn = document.getElementById(`tab-${t}-btn`);
-        if (sec) sec.style.display = (t === tab) ? 'block' : 'none';
-        if (btn) btn.classList.toggle('active', t === tab);
-      });
-      if (tab === 'library' && currentUser?.authenticated) {
-        loadLibrary();
-      }
-      if (tab === 'patrons') {
-        loadLeaderboard();
-        if (currentUser?.authenticated) loadUserBoostStats();
-      }
+      renderQueue();
     }
 
     async function checkAuth() {
       try {
         const res = await fetch('/api/auth/me');
         currentUser = await res.json();
-        renderAuth();
-      } catch (e) {
-        console.error('Auth check error:', e);
+        renderUserBox();
+      } catch (err) {
+        console.error('Auth verification error:', err);
       }
     }
 
-    function renderAuth() {
-      const container = document.getElementById('auth-container');
-      if (currentUser && currentUser.authenticated) {
-        container.innerHTML = `
-          <div class="user-pill">
-            <span class="sovereign-dot"></span>
-            <span>${currentUser.user.name || currentUser.user.email || currentUser.user.ahoy_id}</span>
+    function renderUserBox() {
+      const box = document.getElementById('user-profile-box');
+      if (currentUser?.authenticated) {
+        const name = currentUser.user.name || currentUser.user.email || currentUser.user.ahoy_id;
+        box.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:700; font-size:0.78rem;">${escapeHtml(name)}</span>
+            <span class="pill-tag pill-mint">ACTIVE</span>
           </div>
-          <button class="btn btn-secondary" onclick="logout()">Sign out</button>
+          <div style="font-size:0.65rem; font-family:var(--font-mono); color:var(--text-muted); margin-top:0.2rem;">
+            ${escapeHtml(currentUser.user.ahoy_id)}
+          </div>
         `;
       } else {
-        container.innerHTML = `
-          <a href="/api/auth/login" class="btn btn-primary">Sign in with AHOY ID</a>
+        box.innerHTML = `
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.4rem;">Anonymous Sovereign</div>
+          <a href="/api/auth/login" class="btn btn-mint" style="width:100%; justify-content:center; padding:0.35rem 0.5rem; font-size:0.72rem;">
+            Sign in with AHOY ID
+          </a>
         `;
       }
     }
 
-    async function logout() {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      currentUser = null;
-      renderAuth();
-      document.getElementById('user-patron-card').style.display = 'none';
-      document.getElementById('library-content').innerHTML = `
-        <div class="library-empty">
-          Sign in with your AHOY ID to view and stream your purchased library.
-        </div>
-      `;
+    function switchView(viewName) {
+      const views = ['featured', 'albums', 'tracks', 'artists', 'cds', 'cards', 'patrons', 'support', 'library'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        const btn = document.getElementById(`nav-${v}`);
+        if (el) el.style.display = (v === viewName) ? 'block' : 'none';
+        if (btn) btn.classList.toggle('active', v === viewName);
+      });
+
+      const titleEl = document.getElementById('current-view-title');
+      const titleMap = {
+        featured: 'FEATURED',
+        albums: 'ALBUMS & EPS',
+        tracks: 'TRACKS & SINGLES',
+        artists: 'ARTIST ROSTER',
+        cds: 'BURNED AUDIO CDS',
+        cards: 'ARCHIVAL NFC CARDS',
+        patrons: 'PATRON LEDGER',
+        support: 'SUPPORT & FAQ',
+        library: 'PURCHASED LIBRARY'
+      };
+      if (titleEl && titleMap[viewName]) {
+        titleEl.textContent = titleMap[viewName];
+      }
+
+      if (viewName === 'library') loadLibrary();
+      if (viewName === 'patrons') loadLeaderboard();
+      if (viewName === 'tracks') renderTracksTable();
+      if (viewName === 'albums') renderAlbumsView();
+      if (viewName === 'cds') renderCdsView();
+      if (viewName === 'cards') renderCardsView();
     }
 
     async function loadReleases() {
       try {
         const res = await fetch('/api/releases');
         const data = await res.json();
-        const grid = document.getElementById('release-grid');
-        grid.innerHTML = '';
+        catalogReleases = data.releases || [];
 
-        data.releases.forEach(r => {
-          const card = document.createElement('article');
-          card.className = 'release-card';
-          const track = r.tracks[0];
-          card.innerHTML = `
-            <div class="card-art-wrap">
-              <img src="${r.artwork_url}" alt="${r.title}">
-              <button class="preview-play-btn" onclick="playPreview('${r.id}', '${escapeHtml(r.title)}', '${escapeHtml(r.artist)}', '${r.artwork_url}', '${track.preview_url}')" title="Preview track">
-                ▶
+        // Flatten tracks
+        allTracks = [];
+        catalogReleases.forEach(r => {
+          r.tracks.forEach(t => {
+            allTracks.push({ ...t, release_slug: r.slug, artwork_url: r.artwork_url, price_cents: r.price_cents });
+          });
+        });
+
+        document.getElementById('featured-counter').textContent = `${catalogReleases.length} WORKS`;
+        document.getElementById('badge-albums-count').textContent = catalogReleases.length;
+        document.getElementById('badge-tracks-count').textContent = allTracks.length;
+        document.getElementById('tracks-total-badge').textContent = `${allTracks.length} tracks`;
+
+        renderFeaturedReleases(catalogReleases);
+      } catch (err) {
+        console.error('Catalog fetch error:', err);
+      }
+    }
+
+    function renderFeaturedReleases(releases) {
+      const grid = document.getElementById('featured-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      releases.forEach(r => {
+        const track = r.tracks[0];
+        const card = document.createElement('article');
+        card.className = 'release-card';
+        card.innerHTML = `
+          <div class="art-frame">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <span class="art-badge-type">${r.type}</span>
+            <button class="play-float-btn" onclick="playPreview('${r.id}', '${escapeHtml(r.title)}', '${escapeHtml(r.artist)}', '${r.artwork_url}', '${track.preview_url}')">
+              PREVIEW
+            </button>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h3 class="card-title-text">${escapeHtml(r.title)}</h3>
+              <span class="card-price-tag">$${(r.price_cents / 100).toFixed(2)}</span>
+            </div>
+            <div class="card-artist-sub">${escapeHtml(r.artist)}</div>
+            <p class="card-description-text">${escapeHtml(r.description)}</p>
+            <div class="card-button-row">
+              <button onclick="addToQueue('${r.id}')" class="btn btn-mint" style="flex:1; justify-content:center;">
+                + Add to Pressing
+              </button>
+              <button onclick="openTipDrawer('${r.artist_slug}')" class="btn btn-secondary" title="Direct Tip">
+                Tip
               </button>
             </div>
-            <div class="card-body">
-              <div class="card-meta">
-                <span class="card-type">${r.type}</span>
-                <span class="card-price">$${(r.price_cents / 100).toFixed(2)}</span>
-              </div>
-              <h3 class="card-title">${escapeHtml(r.title)}</h3>
-              <div class="card-artist">${escapeHtml(r.artist)}</div>
-              <p class="card-desc">${escapeHtml(r.description)}</p>
-              <div class="card-actions">
-                <button class="btn btn-primary buy-btn" style="flex:1; justify-content:center;" onclick="openBuyModal('${r.id}')">
-                  Buy for $${(r.price_cents / 100).toFixed(2)}
-                </button>
-                <button class="btn btn-boost" onclick="openBoostModal('${r.artist_slug}')" title="Boost this artist">
-                  ⚡ Boost
-                </button>
-              </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderAlbumsView() {
+      const grid = document.getElementById('albums-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      catalogReleases.forEach(r => {
+        const card = document.createElement('article');
+        card.className = 'release-card';
+        card.innerHTML = `
+          <div class="art-frame">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <span class="art-badge-type">${r.type}</span>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h3 class="card-title-text">${escapeHtml(r.title)}</h3>
+              <span class="card-price-tag">$${(r.price_cents / 100).toFixed(2)}</span>
             </div>
-          `;
-          grid.appendChild(card);
-        });
-      } catch (e) {
-        console.error('Error loading releases:', e);
-      }
+            <div class="card-artist-sub">${escapeHtml(r.artist)} &bull; ${r.tracks.length} track(s)</div>
+            <p class="card-description-text">${escapeHtml(r.description)}</p>
+            <div class="card-button-row">
+              <button onclick="addToQueue('${r.id}')" class="btn btn-mint" style="flex:1; justify-content:center;">
+                + Queue Entire Release
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderTracksTable() {
+      const wrap = document.getElementById('tracks-table-wrap');
+      if (!wrap) return;
+
+      let html = `
+        <table class="itunes-track-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Name</th>
+              <th>Artist</th>
+              <th>Time</th>
+              <th>Price</th>
+              <th>Operations</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      allTracks.forEach((t, idx) => {
+        const mins = Math.floor(t.duration_seconds / 60);
+        const secs = (t.duration_seconds % 60).toString().padStart(2, '0');
+        html += `
+          <tr>
+            <td style="font-family: var(--font-mono); color: var(--text-muted);">${idx + 1}</td>
+            <td>
+              <div style="font-weight: 700; color: var(--text);">${escapeHtml(t.title)}</div>
+              <div style="font-size: 0.68rem; font-family: var(--font-mono); color: var(--mint);">ID: ${t.id}</div>
+            </td>
+            <td style="color: var(--text-muted);">${escapeHtml(t.artist)}</td>
+            <td style="font-family: var(--font-mono); color: var(--text-muted);">${mins}:${secs}</td>
+            <td style="font-family: var(--font-mono); color: var(--mint); font-weight: 700;">$${(t.price_cents / 100).toFixed(2)}</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem;">
+                <button class="btn btn-secondary" style="padding: 0.25rem 0.55rem; font-size: 0.7rem;" onclick="playPreview('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}')">
+                  Play
+                </button>
+                <button class="btn btn-mint" style="padding: 0.25rem 0.55rem; font-size: 0.7rem;" onclick="addToQueue('${t.release_id}')">
+                  + Press
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table>`;
+      wrap.innerHTML = html;
+    }
+
+    function renderCdsView() {
+      const grid = document.getElementById('cds-releases-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      catalogReleases.forEach(r => {
+        const card = document.createElement('article');
+        card.className = 'release-card';
+        card.innerHTML = `
+          <div class="art-frame">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <span class="art-badge-type">AUDIO CD</span>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h3 class="card-title-text">${escapeHtml(r.title)}</h3>
+              <span class="card-price-tag">$15.00</span>
+            </div>
+            <div class="card-artist-sub">${escapeHtml(r.artist)} &bull; Hand-Burned CD Edition</div>
+            <p class="card-description-text">Includes custom printed cardstock sleeve, jewel case, and your personalized liner inscription.</p>
+            <div class="card-button-row">
+              <button onclick="queueAsFormat('${r.id}', 'burned_cd')" class="btn btn-mint" style="flex:1; justify-content:center;">
+                Queue Burned CD ($15.00)
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderCardsView() {
+      const grid = document.getElementById('cards-releases-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      catalogReleases.forEach(r => {
+        const card = document.createElement('article');
+        card.className = 'release-card';
+        card.innerHTML = `
+          <div class="art-frame">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <span class="art-badge-type" style="color: var(--coral); border-color: rgba(255, 111, 145, 0.4);">NFC CARD</span>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h3 class="card-title-text">${escapeHtml(r.title)}</h3>
+              <span class="card-price-tag" style="color: var(--coral);">$15.00</span>
+            </div>
+            <div class="card-artist-sub">${escapeHtml(r.artist)} &bull; Collectible Archival NFC Edition</div>
+            <p class="card-description-text">Encodes cryptographic unlock link directly to NFC chip. Tapping smartphone unlocks playback.</p>
+            <div class="card-button-row">
+              <button onclick="queueAsFormat('${r.id}', 'nfc_card')" class="btn btn-coral" style="flex:1; justify-content:center;">
+                Queue NFC Card ($15.00)
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function queueAsFormat(releaseId, fmt) {
+      selectFormat(fmt);
+      addToQueue(releaseId);
+    }
+
+    function filterCatalog(filter) {
+      if (filter === 'all') renderFeaturedReleases(catalogReleases);
+      else if (filter === 'single') renderFeaturedReleases(catalogReleases.filter(r => r.type === 'single'));
+      else if (filter === 'folk') renderFeaturedReleases(catalogReleases.filter(r => r.description.toLowerCase().includes('folk') || r.artist.toLowerCase().includes('samuel') || r.artist.toLowerCase().includes('cambell')));
     }
 
     async function loadArtists() {
       try {
         const res = await fetch('/api/artists');
         const data = await res.json();
-        const grid = document.getElementById('artist-grid');
-        grid.innerHTML = '';
-
-        data.artists.forEach(a => {
-          const card = document.createElement('article');
-          card.className = 'artist-card';
-          card.innerHTML = `
-            <div class="card-art-wrap" style="padding-top: 45%;">
-              <img src="${a.banner_url}" alt="${a.name}">
-            </div>
-            <div class="card-body">
-              <div class="artist-header-row">
-                <img src="${a.avatar_url}" class="artist-avatar" alt="${a.name}">
-                <div>
-                  <h3 class="card-title" style="margin: 0;">${escapeHtml(a.name)}</h3>
-                  <span class="card-type">${escapeHtml(a.genre)}</span>
-                </div>
-              </div>
-              <p class="card-desc">${escapeHtml(a.bio)}</p>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span class="artist-stats-badge">⚡ $${(a.total_boost_cents / 100).toFixed(2)} Total Boosted</span>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">${a.boost_count} Boosts</span>
-              </div>
-              <div class="card-actions">
-                <button class="btn btn-boost" style="flex: 1; justify-content: center;" onclick="openBoostModal('${a.slug}')">
-                  ⚡ Boost & Tip ${escapeHtml(a.name)}
-                </button>
-              </div>
-            </div>
-          `;
-          grid.appendChild(card);
-        });
-      } catch (e) {
-        console.error('Error loading artists:', e);
+        catalogArtists = data.artists || [];
+        document.getElementById('badge-artists-count').textContent = catalogArtists.length;
+        renderArtists(catalogArtists);
+      } catch (err) {
+        console.error('Artists fetch error:', err);
       }
+    }
+
+    function renderArtists(artists) {
+      const grid = document.getElementById('artist-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      artists.forEach(a => {
+        const card = document.createElement('article');
+        card.className = 'artist-card';
+        card.innerHTML = `
+          <div class="artist-banner-wrap">
+            <img src="${a.banner_url}" alt="${escapeHtml(a.name)}">
+          </div>
+          <div class="artist-profile-row">
+            <img src="${a.avatar_url}" class="artist-avatar-round" alt="${escapeHtml(a.name)}">
+            <div style="padding-bottom: 0.2rem;">
+              <h3 style="font-size: 0.98rem; font-weight: 700; margin: 0;">${escapeHtml(a.name)}</h3>
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--coral);">${escapeHtml(a.genre)}</span>
+            </div>
+          </div>
+          <div class="card-content" style="padding-top: 0.65rem;">
+            <p class="card-description-text">${escapeHtml(a.bio)}</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; font-family:var(--font-mono); font-size:0.72rem;">
+              <span style="color:var(--mint);">$${(a.total_boost_cents / 100).toFixed(2)} CONTRIBUTIONS</span>
+              <span style="color:var(--text-muted);">${a.boost_count} TIPS</span>
+            </div>
+            <div class="card-button-row">
+              <button onclick="openTipDrawer('${a.slug}')" class="btn btn-coral" style="width:100%; justify-content:center;">
+                Direct Artist Tip
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
     }
 
     async function loadLeaderboard() {
@@ -1028,70 +1724,393 @@
         const data = await res.json();
         const container = document.getElementById('leaderboard-content');
 
-        if (!data.leaderboard.length) {
-          container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No patron boosts recorded yet. Be the first to boost an artist!</div>`;
+        if (!data.leaderboard || !data.leaderboard.length) {
+          container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-muted); font-family:var(--font-mono); font-size:0.75rem;">No patronage recorded yet.</div>`;
           return;
         }
 
         let html = `
-          <table class="leaderboard-table">
+          <table class="itunes-track-table">
             <thead>
               <tr>
-                <th>Rank</th>
-                <th>Patron</th>
-                <th>Boosts</th>
+                <th style="width: 50px;">Rank</th>
+                <th>Patron ID</th>
+                <th>Contributions</th>
                 <th>Total Support</th>
               </tr>
             </thead>
             <tbody>
         `;
 
-        const rankBadges = ['🥇', '🥈', '🥉'];
         data.leaderboard.forEach(entry => {
-          const rankDisplay = rankBadges[entry.rank - 1] || `#${entry.rank}`;
           html += `
             <tr>
-              <td style="font-size: 1.1rem; font-weight: 700;">${rankDisplay}</td>
+              <td style="font-family: var(--font-mono); font-weight: 700;">#${entry.rank}</td>
               <td>
-                <div style="font-weight: 600;">${escapeHtml(entry.supporter_name)}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(entry.ahoy_id)}</div>
+                <div style="font-weight: 700;">${escapeHtml(entry.supporter_name)}</div>
+                <div style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);">${escapeHtml(entry.ahoy_id)}</div>
               </td>
-              <td style="color: var(--text-muted);">${entry.boost_count}</td>
-              <td style="font-weight: 700; color: var(--gold);">$${(entry.total_cents / 100).toFixed(2)}</td>
+              <td style="color: var(--text-muted); font-family: var(--font-mono);">${entry.boost_count}</td>
+              <td style="color: var(--mint); font-weight: 700; font-family: var(--font-mono);">$${(entry.total_cents / 100).toFixed(2)}</td>
             </tr>
           `;
         });
 
         html += `</tbody></table>`;
         container.innerHTML = html;
-      } catch (e) {
-        console.error('Error loading leaderboard:', e);
+      } catch (err) {
+        console.error('Leaderboard error:', err);
       }
     }
 
-    async function loadUserBoostStats() {
+    async function loadLibrary() {
       if (!currentUser?.authenticated) return;
       try {
-        const res = await fetch(`/api/me/boost-stats?ahoy_id=${encodeURIComponent(currentUser.user.ahoy_id)}`);
+        const res = await fetch('/api/me/library');
         if (!res.ok) return;
         const data = await res.json();
-        const card = document.getElementById('user-patron-card');
-        card.style.display = 'block';
+        const tracks = data.tracks || [];
+        document.getElementById('library-count-badge').textContent = `${tracks.length} tracks`;
+        document.getElementById('badge-library-count').textContent = tracks.length;
 
-        document.getElementById('user-patron-id').textContent = currentUser.user.name || currentUser.user.ahoy_id;
-        document.getElementById('user-patron-level').textContent = data.stats.patron_level;
-        document.getElementById('user-total-boosted').textContent = `$${(data.stats.total_cents / 100).toFixed(2)}`;
-        document.getElementById('user-boost-count').textContent = data.stats.boost_count;
-        document.getElementById('user-unique-artists').textContent = data.stats.unique_artists;
-      } catch (e) {
-        console.error('Error loading user boost stats:', e);
+        if (!tracks.length) {
+          document.getElementById('library-content').innerHTML = `
+            <div style="text-align:center; padding:2rem; background:var(--surface-card); border:1px dashed var(--surface-border); border-radius:8px; color:var(--text-muted); font-size:0.8rem;">
+              No tracks entitled yet. Add a work to your pressing queue above.
+            </div>
+          `;
+          return;
+        }
+
+        let html = `
+          <table class="itunes-track-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Inscribed Date</th>
+                <th>Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        tracks.forEach(t => {
+          html += `
+            <tr>
+              <td>
+                <div style="font-weight:700;">${escapeHtml(t.title)}</div>
+                <div style="font-size:0.65rem; color:var(--mint); font-family:var(--font-mono);">LEDGER: ${t.id}</div>
+              </td>
+              <td style="color:var(--text-muted);">${escapeHtml(t.artist)}</td>
+              <td style="font-size:0.72rem; color:var(--text-muted); font-family:var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
+              <td>
+                <div style="display:flex; gap:0.35rem;">
+                  <button class="btn btn-mint" style="padding:0.25rem 0.5rem; font-size:0.7rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
+                    Play
+                  </button>
+                  <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(data.ahoy_id)}" class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.7rem; text-decoration:none;" download>
+                    WAV/MP3
+                  </a>
+                  <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-secondary" style="padding:0.25rem 0.5rem; font-size:0.7rem; text-decoration:none;">
+                    Player
+                  </a>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        document.getElementById('library-content').innerHTML = html;
+      } catch (err) {
+        console.error('Library error:', err);
       }
     }
 
+    // QUEUE & PRESSING FORMAT
+    function selectFormat(fmt) {
+      selectedFormat = fmt;
+      document.getElementById('fmt-digital').classList.toggle('active', fmt === 'digital_master');
+      document.getElementById('fmt-nfc').classList.toggle('active', fmt === 'nfc_card');
+      document.getElementById('fmt-cd').classList.toggle('active', fmt === 'burned_cd');
+
+      const isPhysical = fmt === 'nfc_card' || fmt === 'burned_cd';
+      document.getElementById('shipping-terminal').style.display = isPhysical ? 'block' : 'none';
+
+      const tagMap = {
+        digital_master: 'Digital Master',
+        nfc_card: 'Archival NFC Card',
+        burned_cd: 'Burned CD Edition'
+      };
+      document.getElementById('active-format-tag').textContent = tagMap[fmt];
+      document.getElementById('sum-format-name').textContent = tagMap[fmt];
+      updateTotals();
+    }
+
+    function setDestination(dest) {
+      destinationMode = dest;
+      document.getElementById('dest-self-btn').className = dest === 'self' ? 'btn btn-mint' : 'btn btn-secondary';
+      document.getElementById('dest-gift-btn').className = dest === 'gift' ? 'btn btn-mint' : 'btn btn-secondary';
+      document.getElementById('gift-id-input-wrap').style.display = dest === 'gift' ? 'block' : 'none';
+    }
+
+    function addToQueue(releaseId) {
+      const rel = catalogReleases.find(r => r.id === releaseId);
+      if (!rel) return;
+      if (!queue.some(i => i.id === rel.id)) {
+        queue.push(rel);
+      }
+      renderQueue();
+    }
+
+    function removeFromQueue(releaseId) {
+      queue = queue.filter(i => i.id !== releaseId);
+      renderQueue();
+    }
+
+    function clearQueue() {
+      queue = [];
+      renderQueue();
+    }
+
+    function renderQueue() {
+      const box = document.getElementById('queue-items-box');
+      const counter = document.getElementById('queue-counter');
+      const sumCount = document.getElementById('sum-items-count');
+
+      counter.textContent = `${queue.length} items`;
+      sumCount.textContent = queue.length;
+
+      if (!queue.length) {
+        box.innerHTML = `
+          <div style="text-align:center; padding:1.25rem; background:var(--surface); border:1px dashed var(--surface-border); border-radius:6px; font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+            Pressing queue is empty.<br>
+            Click "+ Add to Pressing" on any release.
+          </div>
+        `;
+      } else {
+        box.innerHTML = '';
+        queue.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'queue-item-card';
+          div.innerHTML = `
+            <img src="${item.artwork_url}" class="queue-thumb" alt="${escapeHtml(item.title)}">
+            <div class="queue-details">
+              <div class="queue-title">${escapeHtml(item.title)}</div>
+              <div class="queue-artist">${escapeHtml(item.artist)}</div>
+            </div>
+            <div class="queue-price">$${(item.price_cents / 100).toFixed(2)}</div>
+            <button class="queue-remove-btn" onclick="removeFromQueue('${item.id}')" title="Remove">&times;</button>
+          `;
+          box.appendChild(div);
+        });
+      }
+
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const totalSpan = document.getElementById('sum-total-val');
+      const authBtn = document.getElementById('main-authorize-btn');
+
+      let unitPrice = 100;
+      if (selectedFormat === 'nfc_card') unitPrice = 1500;
+      if (selectedFormat === 'burned_cd') unitPrice = 1500;
+
+      let totalCents = queue.length > 0 ? (selectedFormat === 'digital_master' ? queue.reduce((a, b) => a + b.price_cents, 0) : unitPrice * queue.length) : 0;
+      totalSpan.textContent = `$${(totalCents / 100).toFixed(2)}`;
+
+      if (!currentUser?.authenticated) {
+        authBtn.textContent = 'Sign in with AHOY ID';
+        authBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
+      } else {
+        authBtn.textContent = `Authorize & Inscribe ($${(totalCents / 100).toFixed(2)})`;
+        authBtn.onclick = executeAuthorize;
+      }
+    }
+
+    async function executeAuthorize() {
+      if (!queue.length) {
+        alert('Please queue at least one work for pressing.');
+        return;
+      }
+      if (!currentUser?.authenticated) {
+        window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
+        return;
+      }
+
+      const isPhysical = selectedFormat === 'nfc_card' || selectedFormat === 'burned_cd';
+      let shipping = null;
+      if (isPhysical) {
+        const name = document.getElementById('ship-name').value.trim();
+        const street = document.getElementById('ship-street').value.trim();
+        const city = document.getElementById('ship-city').value.trim();
+        const state = document.getElementById('ship-state').value.trim();
+        const zip = document.getElementById('ship-zip').value.trim();
+        const note = document.getElementById('sleeve-note-input').value.trim();
+
+        if (!name || !street || !city || !state || !zip) {
+          alert('Please fill out the physical delivery address.');
+          return;
+        }
+        shipping = { name, address: street, city, state, zip, country: 'US', inscription_note: note || undefined };
+      } else {
+        const note = document.getElementById('sleeve-note-input').value.trim();
+        if (note) shipping = { inscription_note: note };
+      }
+
+      let recipientId = null;
+      if (destinationMode === 'gift') {
+        recipientId = document.getElementById('recipient-ahoy-id').value.trim();
+        if (!recipientId) {
+          alert("Please specify your friend's AHOY ID for the digital entitlement transfer.");
+          return;
+        }
+      }
+
+      const btn = document.getElementById('main-authorize-btn');
+      btn.disabled = true;
+      btn.textContent = 'Inscribing Ledger...';
+
+      let amountCents = selectedFormat === 'digital_master' ? undefined : 1500;
+
+      try {
+        let successCount = 0;
+        let lastResult = null;
+
+        for (const item of queue) {
+          const res = await fetch('/api/checkout/purchase', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              release_id: item.id,
+              recipient_ahoy_id: recipientId || undefined,
+              amount_cents: amountCents,
+              format: selectedFormat,
+              shipping: shipping || undefined,
+              payment_method: 'instant_sovereign',
+            }),
+          });
+          if (res.ok) {
+            successCount++;
+            lastResult = await res.json();
+          }
+        }
+
+        if (successCount > 0) {
+          const resBox = document.getElementById('order-result-box');
+          const resText = document.getElementById('order-result-text');
+          const target = recipientId || currentUser.user.ahoy_id;
+
+          resText.textContent = `Order ${lastResult.purchase_id} completed. Format: ${lastResult.format}. Granted to: ${target}. Status: ${lastResult.fulfillment_status}.`;
+          resBox.style.display = 'block';
+
+          queue = [];
+          renderQueue();
+          await loadLibrary();
+        } else {
+          alert('Error during authorization. Please verify balance or session.');
+        }
+      } catch (err) {
+        console.error('Authorization error:', err);
+        alert('Network communication error.');
+      } finally {
+        btn.disabled = false;
+        updateTotals();
+      }
+    }
+
+    // DIRECT TIP JAR
+    function openTipDrawer(artistSlug) {
+      const a = catalogArtists.find(x => x.slug === artistSlug);
+      if (!a) return;
+      activeTipArtist = a;
+      document.getElementById('tip-target-name').textContent = a.name;
+      document.getElementById('tip-target-bio').textContent = a.bio;
+      document.getElementById('active-tip-panel').style.display = 'block';
+      setTipPreset(500);
+      document.querySelector('.dashboard-right').scrollTop = 0;
+    }
+
+    function closeTipDrawer() {
+      document.getElementById('active-tip-panel').style.display = 'none';
+      activeTipArtist = null;
+    }
+
+    function setTipPreset(cents) {
+      currentTipCents = cents;
+      document.querySelectorAll('.tip-pill').forEach(p => {
+        p.classList.toggle('active', p.textContent === `$${cents / 100}`);
+      });
+      document.getElementById('tip-custom-input').value = '';
+      document.getElementById('send-tip-btn').textContent = `Send $${(cents / 100).toFixed(2)} Direct Tip`;
+    }
+
+    function onCustomTipChange(val) {
+      const num = parseFloat(val);
+      if (num && num > 0) {
+        currentTipCents = Math.round(num * 100);
+        document.querySelectorAll('.tip-pill').forEach(p => p.classList.remove('active'));
+        document.getElementById('send-tip-btn').textContent = `Send $${(currentTipCents / 100).toFixed(2)} Direct Tip`;
+      }
+    }
+
+    async function executeTip() {
+      if (!activeTipArtist) return;
+      if (!currentUser?.authenticated) {
+        window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname + '?tip=' + activeTipArtist.slug)}`;
+        return;
+      }
+
+      const btn = document.getElementById('send-tip-btn');
+      btn.disabled = true;
+      btn.textContent = 'Transmitting...';
+      const msg = document.getElementById('tip-note-input').value.trim();
+
+      try {
+        const res = await fetch('/api/boost', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            artist_slug: activeTipArtist.slug,
+            amount_cents: currentTipCents,
+            message: msg || undefined,
+            payment_method: 'instant_sovereign',
+          }),
+        });
+
+        if (res.ok) {
+          alert(`Direct tip of $${(currentTipCents / 100).toFixed(2)} transmitted to ${activeTipArtist.name}.`);
+          closeTipDrawer();
+          await loadArtists();
+          await loadLeaderboard();
+        } else {
+          alert('Tip transmission failed.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network transmission error.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = `Send $${(currentTipCents / 100).toFixed(2)} Direct Tip`;
+      }
+    }
+
+    // AUDIO PLAYBACK
     function playPreview(id, title, artist, art, url) {
       document.getElementById('player-thumb').src = art;
       document.getElementById('player-title').textContent = title;
-      document.getElementById('player-artist').textContent = artist + ' (Preview)';
+      document.getElementById('player-artist').textContent = artist + ' // PREVIEW MASTER';
+      audioElement.src = url;
+      audioBar.classList.add('active');
+      audioElement.play();
+    }
+
+    function playTrack(title, artist, art, url) {
+      document.getElementById('player-thumb').src = art;
+      document.getElementById('player-title').textContent = title;
+      document.getElementById('player-artist').textContent = artist + ' // FULL LOSSLESS';
       audioElement.src = url;
       audioBar.classList.add('active');
       audioElement.play();
@@ -1101,245 +2120,6 @@
       audioElement.pause();
       audioBar.classList.remove('active');
     });
-
-    async function openBuyModal(releaseId) {
-      const res = await fetch(`/api/releases/${releaseId}`);
-      const data = await res.json();
-      selectedRelease = data.release;
-
-      const receipt = document.getElementById('modal-receipt');
-      receipt.innerHTML = `
-        <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 0.5rem;">
-          <span>${escapeHtml(selectedRelease.title)}</span>
-          <span>$${(selectedRelease.price_cents / 100).toFixed(2)}</span>
-        </div>
-        <div style="color: var(--text-muted); font-size: 0.8rem;">
-          Artist: ${escapeHtml(selectedRelease.artist)}<br>
-          Format: Full Lossless Audio + MP3<br>
-          Entitlement: Sovereign AHOY ID
-        </div>
-      `;
-
-      const warning = document.getElementById('modal-auth-warning');
-      const confirmBtn = document.getElementById('confirm-buy-btn');
-
-      if (!currentUser?.authenticated) {
-        warning.style.display = 'block';
-        confirmBtn.textContent = 'Sign in with AHOY ID to Buy';
-        confirmBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
-      } else {
-        warning.style.display = 'none';
-        confirmBtn.textContent = `⚡ Confirm Purchase ($${(selectedRelease.price_cents / 100).toFixed(2)})`;
-        confirmBtn.onclick = confirmPurchase;
-      }
-
-      document.getElementById('purchase-modal').classList.add('open');
-    }
-
-    async function openBoostModal(artistSlugOrId) {
-      const res = await fetch(`/api/artists/${artistSlugOrId}`);
-      const data = await res.json();
-      if (!data.artist) return;
-      selectedArtist = data.artist;
-
-      document.getElementById('boost-modal-title').textContent = `Boost ${selectedArtist.name}`;
-      document.getElementById('boost-modal-artist-bio').textContent = selectedArtist.bio;
-
-      const warning = document.getElementById('boost-auth-warning');
-      const confirmBtn = document.getElementById('confirm-boost-btn');
-
-      selectBoostAmount(500);
-
-      if (!currentUser?.authenticated) {
-        warning.style.display = 'block';
-        confirmBtn.textContent = 'Sign in with AHOY ID to Boost';
-        confirmBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname + '?boost=' + selectedArtist.slug)}`;
-      } else {
-        warning.style.display = 'none';
-        confirmBtn.onclick = confirmBoost;
-      }
-
-      document.getElementById('boost-modal').classList.add('open');
-    }
-
-    function selectBoostAmount(cents) {
-      currentBoostAmountCents = cents;
-      document.querySelectorAll('.boost-pill').forEach(pill => {
-        pill.classList.toggle('active', pill.textContent === `$${cents / 100}`);
-      });
-      document.getElementById('boost-custom-amount').value = '';
-      updateBoostButtonText();
-    }
-
-    function onCustomAmountInput(val) {
-      const num = parseFloat(val);
-      if (num && num > 0) {
-        currentBoostAmountCents = Math.round(num * 100);
-        document.querySelectorAll('.boost-pill').forEach(pill => pill.classList.remove('active'));
-      }
-      updateBoostButtonText();
-    }
-
-    function updateBoostButtonText() {
-      if (currentUser?.authenticated) {
-        document.getElementById('confirm-boost-btn').textContent = `⚡ Send $${(currentBoostAmountCents / 100).toFixed(2)} Boost`;
-      }
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
-
-    async function confirmPurchase() {
-      if (!selectedRelease) return;
-      const btn = document.getElementById('confirm-buy-btn');
-      btn.disabled = true;
-      btn.textContent = 'Processing Sovereign Purchase...';
-
-      try {
-        const res = await fetch('/api/checkout/purchase', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            release_id: selectedRelease.id,
-            payment_method: 'instant_sovereign',
-          }),
-        });
-
-        const result = await res.json();
-        if (res.ok) {
-          alert(`🎉 Success! "${selectedRelease.title}" is now unlocked on your AHOY ID (${result.ahoy_id}).`);
-          closeModal('purchase-modal');
-          await loadLibrary();
-        } else {
-          alert(`Purchase error: ${result.message || result.error}`);
-        }
-      } catch (e) {
-        console.error(e);
-        alert('Network error during purchase.');
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    async function confirmBoost() {
-      if (!selectedArtist) return;
-      const btn = document.getElementById('confirm-boost-btn');
-      btn.disabled = true;
-      btn.textContent = 'Sending Sovereign Boost...';
-
-      const message = document.getElementById('boost-message').value;
-
-      try {
-        const res = await fetch('/api/boost', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artist_slug: selectedArtist.slug,
-            amount_cents: currentBoostAmountCents,
-            message: message || undefined,
-            payment_method: 'instant_sovereign',
-          }),
-        });
-
-        const result = await res.json();
-        if (res.ok) {
-          alert(`⚡ Boost Sent! Thank you for supporting ${selectedArtist.name}. Your new rank: ${result.user_stats.patron_level}!`);
-          closeModal('boost-modal');
-          document.getElementById('boost-message').value = '';
-          await loadArtists();
-          await loadLeaderboard();
-          await loadUserBoostStats();
-        } else {
-          alert(`Boost error: ${result.message || result.error}`);
-        }
-      } catch (e) {
-        console.error(e);
-        alert('Network error while boosting.');
-      } finally {
-        btn.disabled = false;
-        updateBoostButtonText();
-      }
-    }
-
-    async function loadLibrary() {
-      try {
-        const res = await fetch('/api/me/library');
-        if (!res.ok) return;
-        const data = await res.json();
-        const content = document.getElementById('library-content');
-        const countSpan = document.getElementById('library-count');
-
-        countSpan.textContent = `${data.tracks.length} tracks owned`;
-
-        if (!data.tracks.length) {
-          content.innerHTML = `
-            <div class="library-empty">
-              You have not purchased any releases yet. Support an artist above to start your library!
-            </div>
-          `;
-          return;
-        }
-
-        let html = `
-          <table class="library-table">
-            <thead>
-              <tr>
-                <th>Track</th>
-                <th>Artist</th>
-                <th>Purchased</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        data.tracks.forEach(t => {
-          html += `
-            <tr>
-              <td>
-                <div class="track-cell">
-                  <img src="${t.artwork_url}" class="track-art-small" alt="${escapeHtml(t.title)}">
-                  <div>
-                    <div style="font-weight: 600;">${escapeHtml(t.title)}</div>
-                    <div style="font-size: 0.75rem; color: #4ade80;">✓ Entitled (${t.id})</div>
-                  </div>
-                </div>
-              </td>
-              <td>${escapeHtml(t.artist)}</td>
-              <td style="color: var(--text-muted); font-size: 0.8rem;">${new Date(t.granted_at).toLocaleDateString()}</td>
-              <td>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                  <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
-                    ▶ Play
-                  </button>
-                  <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(data.ahoy_id)}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; text-decoration: none;" download>
-                    ⬇ Download MP3
-                  </a>
-                  <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
-                    Open in Player
-                  </a>
-                </div>
-              </td>
-            </tr>
-          `;
-        });
-
-        html += `</tbody></table>`;
-        content.innerHTML = html;
-      } catch (e) {
-        console.error('Error loading library:', e);
-      }
-    }
-
-    function playTrack(title, artist, art, url) {
-      document.getElementById('player-thumb').src = art;
-      document.getElementById('player-title').textContent = title;
-      document.getElementById('player-artist').textContent = artist + ' (Full Audio)';
-      audioElement.src = url;
-      audioBar.classList.add('active');
-      audioElement.play();
-    }
 
     function escapeHtml(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
