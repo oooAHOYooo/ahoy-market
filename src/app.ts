@@ -34,12 +34,14 @@ export function buildApp(storeOption?: MarketStore): FastifyInstance {
   });
 
   // Health check
-  app.get('/health', async () => ({
+  const healthHandler = async () => ({
     status: 'ok',
     service: 'ahoy-market',
     version: '0.1.0',
     ahoy_id_service: config.ahoyIdUrl,
-  }));
+  });
+  app.get('/health', healthHandler);
+  app.get('/ops/selftest', healthHandler);
 
   // Register API routes
   app.register(authRoutes(store));
