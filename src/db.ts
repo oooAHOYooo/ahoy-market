@@ -218,6 +218,9 @@ export class MarketStore {
     if (!cols.has('shipping_country')) this.db.exec("ALTER TABLE purchases ADD COLUMN shipping_country TEXT");
     if (!cols.has('inscription_note')) this.db.exec("ALTER TABLE purchases ADD COLUMN inscription_note TEXT");
     if (!cols.has('fulfillment_status')) this.db.exec("ALTER TABLE purchases ADD COLUMN fulfillment_status TEXT DEFAULT 'digital_unlocked'");
+    if (!cols.has('cd_title')) this.db.exec("ALTER TABLE purchases ADD COLUMN cd_title TEXT");
+    if (!cols.has('track_ids')) this.db.exec("ALTER TABLE purchases ADD COLUMN track_ids TEXT");
+    if (!cols.has('burn_fee_cents')) this.db.exec("ALTER TABLE purchases ADD COLUMN burn_fee_cents INTEGER DEFAULT 500");
   }
 
   private seedDefaultCatalog() {
@@ -550,6 +553,24 @@ export class MarketStore {
     return this.db.prepare('SELECT * FROM releases ORDER BY created_at DESC').all() as Release[];
   }
 
+  getReleasesWithTracks(): (Release & { tracks: Track[] })[] {
+    const releases = this.db.prepare('SELECT * FROM releases ORDER BY created_at DESC').all() as Release[];
+    const tracks = this.db.prepare('SELECT * FROM tracks ORDER BY release_id, track_number ASC').all() as Track[];
+    const tracksByRelease = new Map<string, Track[]>();
+    for (const track of tracks) {
+      let list = tracksByRelease.get(track.release_id);
+      if (!list) {
+        list = [];
+        tracksByRelease.set(track.release_id, list);
+      }
+      list.push(track);
+    }
+    return releases.map(r => ({
+      ...r,
+      tracks: tracksByRelease.get(r.id) || [],
+    }));
+  }
+
   getRelease(slugOrId: string): (Release & { tracks: Track[] }) | null {
     const release = this.db.prepare('SELECT * FROM releases WHERE id = ? OR slug = ?').get(slugOrId, slugOrId) as Release | undefined;
     if (!release) return null;
@@ -561,6 +582,191 @@ export class MarketStore {
     const track = this.db.prepare('SELECT * FROM tracks WHERE id = ?').get(trackId) as Track | undefined;
     return track || null;
   }
+
+  getTrackWithRelease(trackId: string): (Track & { release_title: string; artwork_url: string; price_cents: number; artist_slug: string }) | null {
+    const row = this.db.prepare(`
+      SELECT t.*, r.title as release_title, r.artwork_url, r.price_cents, r.artist_slug
+      FROM tracks t
+      JOIN releases r ON r.id = t.release_id
+      WHERE t.id = ?
+    `).get(trackId) as (Track & { release_title: string; artwork_url: string; price_cents: number; artist_slug: string }) | undefined;
+    return row || null;
+  }
+
+  recordBurnedCdOrder(data: {
+    ahoy_id: string;
+    recipient_ahoy_id?: string | null;
+    email?: string | null;
+    cd_title?: string | null;
+    track_ids: string[];
+    payment_method?: string;
+    payment_ref?: string;
+    marker_color?: string | null;
+    shipping: {
+      name?: string | null;
+      address?: string | null;
+      city?: string | null;
+      state?: string | null;
+      zip?: string | null;
+      country?: string | null;
+      inscription_note?: string | null;
+    };
+  }): {
+    purchaseId: string;
+    cdTitle: string;
+    trackCount: number;
+    tracks: Track[];
+    musicCents: number;
+    burnFeeCents: number;
+    totalAmountCents: number;
+    grantedTo: string;
+    fulfillmentStatus: string;
+    artistAttributions: { artist_slug: string; track_count: number; music_cents: number; fee_cents: number; total_cents: number }[];
+  } {
+    if (!data.track_ids || data.track_ids.length === 0) {
+      throw new Error('no_tracks_selected');
+    }
+
+    const tracksWithRelease: (Track & { release_title: string; artwork_url: string; price_cents: number; artist_slug: string })[] = [];
+    for (const tid of data.track_ids) {
+      const trk = this.getTrackWithRelease(tid);
+      if (!trk) {
+        throw new Error(`track_not_found: ${tid}`);
+      }
+      tracksWithRelease.push(trk);
+    }
+
+    const burnFeeCents = 500; // $5 flat fee on top of music
+    const musicCents = tracksWithRelease.reduce((sum, t) => sum + (t.price_cents || 100), 0);
+    const totalAmountCents = musicCents + burnFeeCents;
+
+    const purchaseId = `pur_${randomBytes(12).toString('hex')}`;
+    const now = new Date().toISOString();
+    const grantedTo = data.recipient_ahoy_id?.trim() || data.ahoy_id;
+    const cdTitle = data.cd_title?.trim() || 'Custom Burned CD';
+    const paymentMethod = data.payment_method || 'instant_sovereign';
+    const paymentRef = data.payment_ref || `pay_cd_${Date.now()}_${randomBytes(4).toString('hex')}`;
+    const fulfillmentStatus = 'queued_for_crafting';
+    const primaryReleaseId = tracksWithRelease[0].release_id;
+
+    // Build inscription note with marker color if provided
+    let finalInscription = data.shipping?.inscription_note || '';
+    if (data.marker_color) {
+      finalInscription = `[Marker: ${data.marker_color}] ${finalInscription}`.trim();
+    }
+
+    // Distribute revenue to the artists: music prices + $5 flat fee
+    const artistGroups: Record<string, { artist_slug: string; count: number; music_cents: number }> = {};
+    for (const t of tracksWithRelease) {
+      if (!artistGroups[t.artist_slug]) {
+        artistGroups[t.artist_slug] = { artist_slug: t.artist_slug, count: 0, music_cents: 0 };
+      }
+      artistGroups[t.artist_slug].count += 1;
+      artistGroups[t.artist_slug].music_cents += (t.price_cents || 100);
+    }
+
+    const artistSlugs = Object.keys(artistGroups);
+    const splitFee = Math.floor(burnFeeCents / artistSlugs.length);
+    const remainderFee = burnFeeCents - (splitFee * artistSlugs.length);
+
+    const artistAttributions = artistSlugs.map((slug, idx) => {
+      const g = artistGroups[slug];
+      const feeCents = splitFee + (idx === 0 ? remainderFee : 0);
+      return {
+        artist_slug: slug,
+        track_count: g.count,
+        music_cents: g.music_cents,
+        fee_cents: feeCents,
+        total_cents: g.music_cents + feeCents,
+      };
+    });
+
+    const tx = this.db.transaction(() => {
+      this.db.prepare(`
+        INSERT INTO purchases (
+          id, ahoy_id, email, release_id, track_id, amount_cents, currency,
+          payment_method, payment_ref, status, created_at,
+          format, shipping_name, shipping_address, shipping_city, shipping_state,
+          shipping_zip, shipping_country, inscription_note, fulfillment_status,
+          cd_title, track_ids, burn_fee_cents
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        purchaseId,
+        data.ahoy_id,
+        data.email || null,
+        primaryReleaseId,
+        null,
+        totalAmountCents,
+        'USD',
+        paymentMethod,
+        paymentRef,
+        'completed',
+        now,
+        'burned_cd',
+        data.shipping?.name || null,
+        data.shipping?.address || null,
+        data.shipping?.city || null,
+        data.shipping?.state || null,
+        data.shipping?.zip || null,
+        data.shipping?.country || 'US',
+        finalInscription || null,
+        fulfillmentStatus,
+        cdTitle,
+        JSON.stringify(data.track_ids),
+        burnFeeCents
+      );
+
+      // Insert entitlements for every track on the custom CD
+      const insertEntitlement = this.db.prepare(`
+        INSERT OR IGNORE INTO entitlements (id, ahoy_id, track_id, release_id, granted_at, status)
+        VALUES (?, ?, ?, ?, ?, 'active')
+      `);
+
+      for (const t of tracksWithRelease) {
+        const entId = `ent_${randomBytes(12).toString('hex')}`;
+        insertEntitlement.run(entId, grantedTo, t.id, t.release_id, now);
+      }
+
+      // Record artist boost attribution for the music + $5 crafting fee
+      for (const attr of artistAttributions) {
+        this.recordBoost({
+          ahoy_id: data.ahoy_id,
+          artist_slug: attr.artist_slug,
+          amount_cents: attr.total_cents,
+          supporter_name: data.shipping?.name || data.ahoy_id,
+          message: `Burned CD "${cdTitle}": ${attr.track_count} track(s) ($${(attr.music_cents / 100).toFixed(2)}) + Crafting Fee ($${(attr.fee_cents / 100).toFixed(2)})`,
+          payment_method: paymentMethod,
+          payment_ref: paymentRef,
+        });
+      }
+    });
+
+    tx();
+
+    return {
+      purchaseId,
+      cdTitle,
+      trackCount: tracksWithRelease.length,
+      tracks: tracksWithRelease.map(t => ({
+        id: t.id,
+        release_id: t.release_id,
+        track_number: t.track_number,
+        title: t.title,
+        artist: t.artist,
+        duration_seconds: t.duration_seconds,
+        preview_url: t.preview_url,
+        full_audio_url: t.full_audio_url,
+      })),
+      musicCents,
+      burnFeeCents,
+      totalAmountCents,
+      grantedTo,
+      fulfillmentStatus,
+      artistAttributions,
+    };
+  }
+
 
   recordPurchase(data: {
     ahoy_id: string;

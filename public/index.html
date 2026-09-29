@@ -1350,6 +1350,425 @@
     .audio-player-bar.active {
       transform: translateY(0);
     }
+
+    /* ========================================== */
+    /* INTERACTIVE BURNED CD WIZARD MODAL STYLES */
+    /* ========================================== */
+    .burned-cd-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    .burned-cd-modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .burned-cd-modal {
+      background: var(--center-surface);
+      border: 1px solid var(--center-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 980px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      animation: cdModalIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes cdModalIn {
+      from { transform: scale(0.96) translateY(12px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .cd-wizard-header {
+      padding: 1.25rem 1.6rem 1rem;
+      border-bottom: 1px solid var(--center-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: var(--page-bg);
+    }
+
+    .cd-wizard-steps-tabs {
+      display: flex;
+      gap: 0.4rem;
+      background: var(--center-surface);
+      padding: 0.3rem;
+      border-radius: 9999px;
+      border: 1px solid var(--center-border);
+    }
+    .cd-step-tab {
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.16s ease;
+    }
+    .cd-step-tab.active {
+      background: var(--coral);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px var(--coral-glow);
+    }
+
+    .cd-wizard-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 1.6rem;
+    }
+
+    /* STEP 1: DUAL COLUMN LAYOUT */
+    .cd-curate-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 780px) {
+      .cd-curate-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* CATALOG TRACK SOURCE LIST */
+    .cd-pool-container {
+      background: var(--page-bg);
+      border: 1px solid var(--center-border);
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      max-height: 480px;
+    }
+    .cd-pool-list {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      padding-right: 0.25rem;
+      margin-top: 0.75rem;
+    }
+
+    .cd-track-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.65rem;
+      background: var(--center-surface);
+      border: 1px solid var(--center-card-border);
+      border-radius: 9px;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.14s ease;
+    }
+    .cd-track-item:hover {
+      border-color: var(--coral);
+      transform: translateX(2px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+    .cd-track-item:active {
+      cursor: grabbing;
+    }
+    .cd-track-item.dragging {
+      opacity: 0.45;
+      border-color: var(--coral);
+      transform: scale(0.98);
+    }
+    .cd-track-item.already-added {
+      opacity: 0.6;
+      border-style: dashed;
+    }
+
+    .track-drag-handle {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      cursor: grab;
+      padding: 0 0.15rem;
+    }
+
+    /* CD DISC GRAPHIC & DROP ZONE */
+    .cd-disc-station {
+      background: var(--page-bg);
+      border: 1px solid var(--center-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .cd-visual-container {
+      position: relative;
+      width: 190px;
+      height: 190px;
+      margin-bottom: 1rem;
+    }
+
+    .cd-disc {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle at 50% 50%, 
+        #d1d5db 0%, 
+        #9ca3af 14%, 
+        #cbd5e1 15%, 
+        #f1f5f9 22%, 
+        #94a3b8 35%, 
+        #e2e8f0 55%, 
+        #64748b 85%, 
+        #94a3b8 100%
+      );
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22), inset 0 0 12px rgba(255, 255, 255, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+      overflow: hidden;
+    }
+    .cd-disc::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 45deg,
+        rgba(255, 122, 89, 0.25),
+        rgba(2, 132, 199, 0.25),
+        rgba(13, 148, 136, 0.25),
+        rgba(246, 200, 96, 0.25),
+        rgba(255, 122, 89, 0.25)
+      );
+      pointer-events: none;
+    }
+    .cd-disc.spinning {
+      animation: cdSpin 8s linear infinite;
+    }
+    @keyframes cdSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .cd-inner-ring {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255, 255, 255, 0.55);
+      pointer-events: none;
+    }
+
+    .cd-spindle-hole {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--page-bg);
+      border: 4px solid #cbd5e1;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25);
+      z-index: 2;
+    }
+
+    .cd-disc-sharpie-text {
+      position: absolute;
+      top: 24px;
+      left: 14px;
+      right: 14px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transform: rotate(-7deg);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      z-index: 3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #1E293B;
+      transition: color 0.16s ease;
+    }
+
+    /* CAPACITY PROGRESS BAR */
+    .cd-capacity-box {
+      width: 100%;
+      margin-bottom: 0.9rem;
+      text-align: left;
+    }
+    .cd-capacity-meter-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--center-border);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 0.35rem;
+    }
+    .cd-capacity-meter-fill {
+      height: 100%;
+      background: var(--mint);
+      border-radius: 9999px;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    /* DROP TARGET ZONE */
+    .cd-drop-zone {
+      width: 100%;
+      min-height: 130px;
+      max-height: 240px;
+      overflow-y: auto;
+      border: 2px dashed var(--center-border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+      background: var(--center-surface);
+    }
+    .cd-drop-zone.dragover {
+      border-color: var(--coral);
+      background: var(--coral-soft);
+      box-shadow: 0 0 16px var(--coral-glow);
+      transform: scale(1.01);
+    }
+    .cd-drop-zone-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 110px;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      gap: 0.3rem;
+      pointer-events: none;
+    }
+
+    .burned-track-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      background: var(--page-bg);
+      border: 1px solid var(--center-border);
+      border-radius: 8px;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.74rem;
+      animation: trackAddIn 0.18s ease;
+    }
+    @keyframes trackAddIn {
+      from { transform: translateY(6px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .track-num-badge {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--coral);
+      font-size: 0.7rem;
+      min-width: 20px;
+    }
+
+    /* FINANCIAL / ARTIST SUMMARY CARD */
+    .cd-pricing-summary {
+      width: 100%;
+      background: var(--center-surface);
+      border: 1px solid var(--center-border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      margin-top: 0.9rem;
+      text-align: left;
+    }
+    .cd-price-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    .cd-price-row.total {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      border-top: 1px solid var(--center-border);
+      padding-top: 0.45rem;
+      margin-top: 0.45rem;
+      margin-bottom: 0;
+    }
+
+    .cd-artist-guarantee-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.65rem;
+      padding: 0.45rem 0.7rem;
+      background: rgba(13, 148, 136, 0.08);
+      border: 1px solid var(--mint-soft);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      color: var(--mint);
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    [data-theme="dark"] .cd-artist-guarantee-badge {
+      background: rgba(45, 212, 191, 0.1);
+      border-color: rgba(45, 212, 191, 0.25);
+    }
+
+    /* COLOR PICKER PILLS */
+    .marker-color-pill {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .marker-color-pill:hover {
+      transform: scale(1.15);
+    }
+    .marker-color-pill.active {
+      border-color: var(--text);
+      transform: scale(1.12);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .cd-wizard-footer {
+      padding: 1rem 1.6rem;
+      border-top: 1px solid var(--center-border);
+      background: var(--page-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -1399,9 +1818,9 @@
       <div class="nav-section-title">Physical Editions</div>
       <ul class="nav-list">
         <li>
-          <button id="nav-cds" onclick="switchView('cds')">
+          <button id="nav-cds" onclick="openBurnedCdWizard()">
             <span>Burned Audio CDs</span>
-            <span class="pill-tag pill-mint">$15</span>
+            <span class="pill-tag pill-mint">$5 Craft Fee</span>
           </button>
         </li>
         <li>
@@ -1513,10 +1932,24 @@
       <section id="view-cds" style="display: none;">
         <div class="section-header-row">
           <h2 class="section-title">Hand-Burned Audio CD Editions</h2>
-          <span class="pill-tag pill-mint">$15.00 Shipped</span>
+          <span class="pill-tag pill-mint">$5.00 Craft Fee + Music</span>
         </div>
+
+        <!-- HERO STUDIO CALLOUT -->
+        <div style="background: linear-gradient(135deg, rgba(255, 122, 89, 0.08), rgba(13, 148, 136, 0.08)); border: 1px dashed var(--coral-border); border-radius: 14px; padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          <div>
+            <div style="font-weight: 800; font-size: 1.05rem; color: var(--text); margin-bottom: 0.25rem;">Interactive Burned CD Mixtape Studio 💿</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); max-width: 520px; line-height: 1.45;">
+              Drag and drop songs from any artist in the catalog onto your blank CD. $5 flat crafting fee on top of selected tracks — 100% of proceeds go directly to the artists.
+            </div>
+          </div>
+          <button class="btn btn-coral" onclick="openBurnedCdWizard()" style="padding: 0.65rem 1.25rem; font-size: 0.82rem; box-shadow: 0 4px 14px var(--coral-glow);">
+            Launch CD Burner Studio 💿
+          </button>
+        </div>
+
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.2rem;">
-          Burned on-demand to high-grade audio CD media with custom printed matte cardstock sleeve, jewel case, and your personalized liner dedication. Includes digital download.
+          Burned on-demand to high-grade audio CD media with custom printed matte cardstock sleeve, jewel case, and your personalized liner dedication. Includes digital streaming entitlements.
         </p>
         <div id="cds-grid" class="release-grid">
           <!-- Rendered by JS -->
@@ -1744,12 +2177,12 @@
           </div>
 
           <!-- Option B: Hand-Burned CD -->
-          <div id="tile-cd" class="option-tile" onclick="setPurchaseFormat('burned_cd')">
+          <div id="tile-cd" class="option-tile" onclick="openBurnedCdWizard(inspectingRelease ? inspectingRelease.id : null)">
             <div class="tile-left">
-              <span class="tile-name">Hand-Burned Audio CD</span>
-              <span class="tile-desc">Artisan CD in jewel case + custom sleeve</span>
+              <span class="tile-name">Hand-Burned Audio CD 💿</span>
+              <span class="tile-desc">Interactive CD Studio • $5 fee + tracks</span>
             </div>
-            <span class="tile-price">$15.00</span>
+            <span class="tile-price">$5.00+</span>
           </div>
 
           <!-- Option C: Archival NFC Card -->
@@ -1842,6 +2275,316 @@
 
     </aside>
 
+  <!-- ========================================== -->
+  <!-- INTERACTIVE BURNED CD MIXTAPE WIZARD MODAL -->
+  <!-- ========================================== -->
+  <div id="burned-cd-modal-backdrop" class="burned-cd-modal-backdrop" onclick="handleCdBackdropClick(event)">
+    <div class="burned-cd-modal" onclick="event.stopPropagation()">
+      
+      <!-- WIZARD HEADER -->
+      <div class="cd-wizard-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h2 style="font-weight: 800; font-size: 1.15rem; color: var(--text);">Hand-Burned Audio CD Studio 💿</h2>
+            <span class="pill-tag pill-mint">$5 Craft Fee</span>
+          </div>
+          <div style="font-size: 0.73rem; color: var(--text-muted); margin-top: 0.15rem;">
+            Drag &amp; drop songs from the catalog onto your physical CD. $5 flat fee on top of music goes directly to the artists.
+          </div>
+        </div>
+
+        <!-- STEP NAVIGATION TABS -->
+        <div class="cd-wizard-steps-tabs">
+          <button id="cd-tab-btn-1" class="cd-step-tab active" onclick="setWizardStep(1)">
+            <span>1</span> Curate Tracks
+          </button>
+          <button id="cd-tab-btn-2" class="cd-step-tab" onclick="setWizardStep(2)">
+            <span>2</span> Disc &amp; Sleeve
+          </button>
+          <button id="cd-tab-btn-3" class="cd-step-tab" onclick="setWizardStep(3)">
+            <span>3</span> Delivery &amp; Buy
+          </button>
+        </div>
+
+        <button onclick="closeBurnedCdWizard()" class="btn-ghost" style="font-size: 1.1rem; padding: 0.2rem 0.5rem; color: var(--text-muted); cursor: pointer;" title="Close Wizard (Esc)">&times;</button>
+      </div>
+
+      <!-- WIZARD BODY -->
+      <div class="cd-wizard-body">
+
+        <!-- ======================================== -->
+        <!-- STEP 1: DRAG & DROP CURATION STUDIO -->
+        <!-- ======================================== -->
+        <div id="cd-step-1" class="cd-step-panel">
+          <div class="cd-curate-grid">
+            
+            <!-- LEFT COLUMN: CATALOG TRACKS POOL -->
+            <div class="cd-pool-container">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-weight: 700; font-size: 0.8rem; color: var(--text);">Music Catalog Pool</span>
+                <span id="cd-pool-count" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted);">0 tracks</span>
+              </div>
+              <input 
+                type="text" 
+                id="cd-track-search" 
+                class="clean-input" 
+                placeholder="Search tracks or artists to add..." 
+                oninput="filterCdCatalogTracks(this.value)"
+                style="margin-bottom: 0.5rem;"
+              />
+              <div style="font-size: 0.68rem; color: var(--text-dim); margin-bottom: 0.25rem;">
+                💡 Drag any song onto the CD disc on the right, or click "+ Add"
+              </div>
+              <div id="cd-pool-list" class="cd-pool-list">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: THE BURNED CD & DROP ZONE -->
+            <div class="cd-disc-station">
+              
+              <!-- INTERACTIVE VISUAL CD -->
+              <div class="cd-visual-container">
+                <div id="cd-disc-element" class="cd-disc">
+                  <div class="cd-inner-ring"></div>
+                  <div class="cd-spindle-hole"></div>
+                  <div id="cd-sharpie-label" class="cd-disc-sharpie-text">MY AHOY MIXTAPE</div>
+                </div>
+              </div>
+
+              <!-- CD CAPACITY PROGRESS BAR -->
+              <div class="cd-capacity-box">
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem;">
+                  <span style="font-weight: 700; color: var(--text);">Audio CD Capacity (80 Min Max)</span>
+                  <span id="cd-capacity-text" style="font-family: var(--font-mono); color: var(--mint);">0:00 / 80:00 (0%)</span>
+                </div>
+                <div class="cd-capacity-meter-bar">
+                  <div id="cd-capacity-fill" class="cd-capacity-meter-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+
+              <!-- DROP ZONE FOR TRACKS -->
+              <div 
+                id="cd-drop-zone" 
+                class="cd-drop-zone"
+                ondragover="handleCdDragOver(event)"
+                ondragleave="handleCdDragLeave(event)"
+                ondrop="handleCdDrop(event)"
+              >
+                <!-- If empty, empty placeholder -->
+                <div id="cd-drop-empty" class="cd-drop-zone-empty">
+                  <span style="font-size: 1.4rem;">💿</span>
+                  <span style="font-weight: 600;">Drag music tracks here to burn</span>
+                  <span style="font-size: 0.68rem;">or click "+ Add" on songs in the pool</span>
+                </div>
+                <div id="cd-burned-tracklist" style="display: flex; flex-direction: column; gap: 0.35rem; width: 100%;">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+
+              <!-- LIVE PRICING BREAKDOWN -->
+              <div class="cd-pricing-summary">
+                <div class="cd-price-row">
+                  <span id="cd-summary-tracks-label">Music Tracks (0):</span>
+                  <span id="cd-summary-music-price" style="font-family: var(--font-mono); font-weight: 600;">$0.00</span>
+                </div>
+                <div class="cd-price-row">
+                  <span>Physical CD Crafting &amp; Media Fee:</span>
+                  <span style="font-family: var(--font-mono); font-weight: 600; color: var(--coral);">+$5.00</span>
+                </div>
+                <div class="cd-price-row">
+                  <span>USPS First-Class Delivery:</span>
+                  <span style="font-family: var(--font-mono); font-weight: 600; color: var(--mint);">FREE</span>
+                </div>
+                <div class="cd-price-row total">
+                  <span>Order Total:</span>
+                  <span id="cd-summary-total-price" style="font-family: var(--font-mono); color: var(--mint);">$5.00</span>
+                </div>
+
+                <div class="cd-artist-guarantee-badge">
+                  <span>🎨</span>
+                  <span><strong>100% Artist Revenue:</strong> Both the music price and the $5 crafting fee flow directly to the independent artists.</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ======================================== -->
+        <!-- STEP 2: DISC & SLEEVE CUSTOMIZATION -->
+        <!-- ======================================== -->
+        <div id="cd-step-2" class="cd-step-panel" style="display: none;">
+          <div style="display: grid; grid-template-columns: 240px 1fr; gap: 1.5rem; align-items: start;">
+            
+            <div style="display: flex; flex-direction: column; align-items: center; background: var(--page-bg); border: 1px solid var(--center-border); border-radius: 14px; padding: 1.25rem;">
+              <div class="cd-visual-container" style="margin-bottom: 0.5rem;">
+                <div id="cd-disc-element-step2" class="cd-disc">
+                  <div class="cd-inner-ring"></div>
+                  <div class="cd-spindle-hole"></div>
+                  <div id="cd-sharpie-label-step2" class="cd-disc-sharpie-text">MY AHOY MIXTAPE</div>
+                </div>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);" id="cd-step2-trackcount-label">
+                0 tracks selected
+              </div>
+            </div>
+
+            <div style="background: var(--page-bg); border: 1px solid var(--center-border); border-radius: 14px; padding: 1.25rem;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text); margin-bottom: 0.25rem;">Physical CD Inscriptions &amp; Craft Details</div>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Every CD is hand-burned on archival audio discs, handwritten with artist ink, and packed in a slimline jewel case with personalized liner notes.
+              </p>
+
+              <!-- Disc Title Input -->
+              <label class="drawer-label" for="cd-custom-title-input">Handwritten Sharpie Disc Title</label>
+              <input 
+                type="text" 
+                id="cd-custom-title-input" 
+                class="clean-input" 
+                placeholder="e.g. COASTAL CRUISE 2026" 
+                maxlength="40" 
+                value="MY AHOY MIXTAPE"
+                oninput="handleCdTitleChange(this.value)"
+              />
+
+              <!-- Marker Ink Color -->
+              <label class="drawer-label" style="margin-top: 0.85rem;">Sharpie Marker Ink Color</label>
+              <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 1rem;">
+                <div class="marker-color-pill active" style="background: #1E293B;" onclick="setMarkerColor('black', '#1E293B')" title="Classic Sharpie Black"></div>
+                <div class="marker-color-pill" style="background: #FF7A59;" onclick="setMarkerColor('coral', '#FF7A59')" title="Coastal Coral"></div>
+                <div class="marker-color-pill" style="background: #0284C7;" onclick="setMarkerColor('sky', '#0284C7')" title="Ocean Sky"></div>
+                <div class="marker-color-pill" style="background: #0D9488;" onclick="setMarkerColor('mint', '#0D9488')" title="Neon Mint"></div>
+                <div class="marker-color-pill" style="background: #94A3B8;" onclick="setMarkerColor('silver', '#94A3B8')" title="Silver Marker"></div>
+                <span id="marker-color-name" style="font-size: 0.72rem; font-family: var(--font-mono); color: var(--text-muted); margin-left: 0.25rem;">Classic Black</span>
+              </div>
+
+              <!-- Sleeve Liner Dedication Note -->
+              <label class="drawer-label" for="cd-inscription-input">Custom Sleeve Dedication / Liner Note</label>
+              <textarea 
+                id="cd-inscription-input" 
+                class="clean-input" 
+                rows="3" 
+                maxlength="160"
+                placeholder="Personal dedication printed on the cardstock sleeve insert (e.g. 'For Jane — soundtrack to our seaside drives.')"
+                style="resize: none;"
+              ></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ======================================== -->
+        <!-- STEP 3: SHIPPING & SOVEREIGN CHECKOUT -->
+        <!-- ======================================== -->
+        <div id="cd-step-3" class="cd-step-panel" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+            
+            <!-- Shipping Form -->
+            <div style="background: var(--page-bg); border: 1px solid var(--center-border); border-radius: 14px; padding: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span class="drawer-label" style="margin: 0;">Recipient</span>
+                <div style="display: flex; gap: 0.25rem;">
+                  <button id="cd-dest-self-btn" class="filter-pill active" onclick="setCdDestinationMode('self')">For Myself</button>
+                  <button id="cd-dest-gift-btn" class="filter-pill" onclick="setCdDestinationMode('gift')">Gift to Friend</button>
+                </div>
+              </div>
+
+              <div id="cd-gift-id-group" style="display: none; margin-bottom: 0.75rem;">
+                <label class="drawer-label" for="cd-gift-recipient-id">Friend's Sovereign AHOY ID</label>
+                <input type="text" id="cd-gift-recipient-id" class="clean-input" placeholder="e.g. ahoy_alex" />
+                <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.2rem;">They will receive instant digital streaming entitlements in their AHOY Player!</div>
+              </div>
+
+              <span class="drawer-label" style="color: var(--coral);">USPS Shipping Address</span>
+              <input type="text" id="cd-ship-name" class="clean-input" placeholder="Full Recipient Name" />
+              <input type="text" id="cd-ship-street" class="clean-input" placeholder="Street Address" />
+              <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.35rem;">
+                <input type="text" id="cd-ship-city" class="clean-input" placeholder="City" />
+                <input type="text" id="cd-ship-state" class="clean-input" placeholder="State" />
+                <input type="text" id="cd-ship-zip" class="clean-input" placeholder="ZIP" />
+              </div>
+            </div>
+
+            <!-- Review & Order Summary -->
+            <div style="background: var(--page-bg); border: 1px solid var(--center-border); border-radius: 14px; padding: 1.25rem;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text); margin-bottom: 0.65rem;">Order Review &amp; Sovereign Split</div>
+              
+              <div style="background: var(--center-surface); border: 1px solid var(--center-border); border-radius: 10px; padding: 0.85rem; margin-bottom: 0.9rem;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text);" id="cd-review-title">MY AHOY MIXTAPE</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 0.15rem;" id="cd-review-meta">0 tracks • 0:00 total time</div>
+                <div style="margin-top: 0.6rem; border-top: 1px dashed var(--center-border); padding-top: 0.6rem;">
+                  <div style="font-size: 0.7rem; font-weight: 700; color: var(--mint); margin-bottom: 0.3rem;">ARTIST PAYOUT ALLOCATION (100%)</div>
+                  <div id="cd-review-artist-splits" style="font-size: 0.72rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem;">
+                    <!-- Rendered by JS -->
+                  </div>
+                </div>
+              </div>
+
+              <div class="cd-pricing-summary" style="margin-top: 0;">
+                <div class="cd-price-row">
+                  <span id="cd-review-music-label">Music Tracks:</span>
+                  <span id="cd-review-music-price" style="font-family: var(--font-mono); font-weight: 600;">$0.00</span>
+                </div>
+                <div class="cd-price-row">
+                  <span>CD Crafting &amp; Media Fee:</span>
+                  <span style="font-family: var(--font-mono); font-weight: 600; color: var(--coral);">+$5.00</span>
+                </div>
+                <div class="cd-price-row total">
+                  <span>Total Due:</span>
+                  <span id="cd-review-total-price" style="font-family: var(--font-mono); color: var(--mint);">$5.00</span>
+                </div>
+              </div>
+
+              <button id="cd-wizard-checkout-btn" class="primary-buy-button" style="margin-top: 1rem;" onclick="submitBurnedCdOrder()">
+                Authorize Burned CD ($5.00)
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ======================================== -->
+        <!-- STEP SUCCESS: ORDER CONFIRMED SCREEN -->
+        <!-- ======================================== -->
+        <div id="cd-step-success" class="cd-step-panel" style="display: none; text-align: center; padding: 2rem 1rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem; animation: pulse 2s infinite;">💿✨</div>
+          <h3 style="font-weight: 800; font-size: 1.3rem; color: var(--mint); margin-bottom: 0.35rem;">CD Order Inscribed &amp; Queued for Burning!</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 1.25rem; line-height: 1.5;" id="cd-success-description">
+            Your custom CD is entering the burn queue. All tracks have been immediately unlocked in your digital sovereign library!
+          </p>
+          <div style="display: inline-flex; flex-direction: column; gap: 0.4rem; background: var(--page-bg); border: 1px solid var(--center-border); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; text-align: left; font-family: var(--font-mono); font-size: 0.74rem;">
+            <div>Order ID: <span id="cd-success-order-id" style="font-weight: 700; color: var(--coral);"></span></div>
+            <div>Status: <span style="color: var(--mint); font-weight: 700;">queued_for_crafting</span></div>
+            <div>Shipping: <span id="cd-success-address" style="color: var(--text);"></span></div>
+          </div>
+          <div style="display: flex; justify-content: center; gap: 0.8rem;">
+            <a id="cd-success-player-link" href="https://player.ahoy.ooo" target="_blank" class="btn btn-mint" style="padding: 0.6rem 1.2rem;">
+              Open in AHOY Player 🎧
+            </a>
+            <button onclick="closeBurnedCdWizard()" class="btn btn-secondary" style="padding: 0.6rem 1.2rem;">
+              Back to Catalog
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- WIZARD FOOTER NAVIGATION -->
+      <div id="cd-wizard-footer" class="cd-wizard-footer">
+        <button id="cd-prev-btn" class="btn btn-secondary" onclick="navigateWizard(-1)" style="display: none;">
+          ← Back
+        </button>
+        <div id="cd-footer-status" style="font-size: 0.74rem; font-family: var(--font-mono); color: var(--text-muted);">
+          0 tracks • $5.00 total
+        </div>
+        <button id="cd-next-btn" class="btn btn-coral" onclick="navigateWizard(1)">
+          Next: Customize Disc →
+        </button>
+      </div>
+
+    </div>
   </div>
 
   <!-- AUDIO PLAYER BAR -->
@@ -1877,12 +2620,34 @@
     const audioElement = document.getElementById('audio-element');
     const audioBar = document.getElementById('audio-bar');
 
+    // UNIFIED API CLIENT
+    const api = {
+      async get(url) {
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || errData.error || `HTTP ${res.status}`);
+        }
+        return res.json();
+      },
+      async post(url, body) {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.message || data.error || `HTTP ${res.status}`);
+        }
+        return data;
+      },
+    };
+
     async function init() {
       initTheme();
-      await checkAuth();
-      await loadReleases();
-      await loadArtists();
-      await loadLeaderboard();
+      // Fetch latest market snapshot in 1 single round trip
+      await fetchLatest();
 
       // Keyboard shortcut '/' focuses search, 'Escape' clears
       document.addEventListener('keydown', (e) => {
@@ -1892,9 +2657,23 @@
           inp.focus();
           inp.select();
         } else if (e.key === 'Escape') {
+          closeBurnedCdWizard();
           clearSearch();
         }
       });
+
+      // Synchronize CD spinning animation with audio preview playback
+      if (audioElement) {
+        audioElement.addEventListener('play', () => {
+          document.querySelectorAll('.cd-disc').forEach(el => el.classList.add('spinning'));
+        });
+        audioElement.addEventListener('pause', () => {
+          document.querySelectorAll('.cd-disc').forEach(el => el.classList.remove('spinning'));
+        });
+        audioElement.addEventListener('ended', () => {
+          document.querySelectorAll('.cd-disc').forEach(el => el.classList.remove('spinning'));
+        });
+      }
 
       const params = new URLSearchParams(window.location.search);
       const tipTarget = params.get('boost') || params.get('artist') || params.get('tip');
@@ -1935,10 +2714,44 @@
       applyTheme(isDark ? 'light' : 'dark');
     }
 
+    // UNIFIED LATEST MARKET STATE FETCHER
+    async function fetchLatest() {
+      try {
+        const data = await api.get('/api/market/latest');
+        if (data.user) {
+          currentUser = data.user;
+          renderUserBox();
+        }
+        if (data.releases) {
+          applyReleasesData(data.releases);
+        }
+        if (data.artists) {
+          catalogArtists = data.artists;
+          const badgeArtists = document.getElementById('badge-artists-count');
+          if (badgeArtists) badgeArtists.textContent = catalogArtists.length;
+          renderArtists(catalogArtists);
+        }
+        if (data.leaderboard) {
+          renderLeaderboardData(data.leaderboard);
+        }
+        if (data.library && currentUser?.authenticated) {
+          renderLibraryData(data.library, currentUser.user.ahoy_id);
+        }
+        return data;
+      } catch (err) {
+        console.error('fetchLatest error, falling back to parallel fetch:', err);
+        await Promise.all([
+          checkAuth(),
+          loadReleases(),
+          loadArtists(),
+          loadLeaderboard(),
+        ]);
+      }
+    }
+
     async function checkAuth() {
       try {
-        const res = await fetch('/api/auth/me');
-        currentUser = await res.json();
+        currentUser = await api.get('/api/auth/me');
         renderUserBox();
       } catch (err) {
         console.error('Auth verification error:', err);
@@ -1982,37 +2795,46 @@
       if (viewName === 'patrons') loadLeaderboard();
       if (viewName === 'tracks') renderTracksTable();
       if (viewName === 'albums') renderAlbumsView();
-      if (viewName === 'cds') renderCdsView();
+      if (viewName === 'cds') {
+        renderCdsView();
+        openBurnedCdWizard();
+      }
       if (viewName === 'cards') renderCardsView();
+    }
+
+    function applyReleasesData(releases) {
+      catalogReleases = releases || [];
+
+      // Flatten tracks
+      allTracks = [];
+      catalogReleases.forEach(r => {
+        (r.tracks || []).forEach(t => {
+          allTracks.push({ ...t, release_slug: r.slug, artwork_url: r.artwork_url, price_cents: r.price_cents });
+        });
+      });
+
+      const badgeAlbums = document.getElementById('badge-albums-count');
+      if (badgeAlbums) badgeAlbums.textContent = catalogReleases.length;
+      const badgeTracks = document.getElementById('badge-tracks-count');
+      if (badgeTracks) badgeTracks.textContent = allTracks.length;
+      const totalBadge = document.getElementById('tracks-total-badge');
+      if (totalBadge) totalBadge.textContent = `${allTracks.length} tracks`;
+      
+      const summaryCount = document.getElementById('summary-release-count');
+      if (summaryCount) summaryCount.textContent = catalogReleases.length;
+
+      // Select first release for inspector if none selected yet
+      if (catalogReleases.length > 0 && !inspectingRelease) {
+        inspectRelease(catalogReleases[0].id);
+      }
+
+      applySearchAndFilter();
     }
 
     async function loadReleases() {
       try {
-        const res = await fetch('/api/releases');
-        const data = await res.json();
-        catalogReleases = data.releases || [];
-
-        // Flatten tracks
-        allTracks = [];
-        catalogReleases.forEach(r => {
-          r.tracks.forEach(t => {
-            allTracks.push({ ...t, release_slug: r.slug, artwork_url: r.artwork_url, price_cents: r.price_cents });
-          });
-        });
-
-        document.getElementById('badge-albums-count').textContent = catalogReleases.length;
-        document.getElementById('badge-tracks-count').textContent = allTracks.length;
-        document.getElementById('tracks-total-badge').textContent = `${allTracks.length} tracks`;
-        
-        const summaryCount = document.getElementById('summary-release-count');
-        if (summaryCount) summaryCount.textContent = catalogReleases.length;
-
-        // Select first release for inspector
-        if (catalogReleases.length > 0) {
-          inspectRelease(catalogReleases[0].id);
-        }
-
-        applySearchAndFilter();
+        const data = await api.get('/api/releases');
+        applyReleasesData(data.releases || []);
       } catch (err) {
         console.error('Catalog fetch error:', err);
       }
@@ -2201,8 +3023,7 @@
         const card = document.createElement('article');
         card.className = 'release-card';
         card.onclick = () => {
-          inspectRelease(r.id);
-          setPurchaseFormat('burned_cd');
+          openBurnedCdWizard(r.id);
         };
         card.innerHTML = `
           <div class="card-art-box">
@@ -2212,12 +3033,12 @@
           <div class="card-meta">
             <div class="card-meta-top">
               <h3 class="card-title">${escapeHtml(r.title)}</h3>
-              <span class="card-price">$15.00</span>
+              <span class="card-price">$5.00+</span>
             </div>
             <div class="card-artist">${escapeHtml(r.artist)}</div>
             <div class="card-actions-row">
-              <button class="btn btn-coral" style="flex: 1; justify-content: center; font-size: 0.74rem; padding: 0.42rem 0.6rem;">
-                Craft Burned CD ($15)
+              <button class="btn btn-coral" style="flex: 1; justify-content: center; font-size: 0.74rem; padding: 0.42rem 0.6rem;" onclick="event.stopPropagation(); openBurnedCdWizard('${r.id}')">
+                Burn to CD ($5 + Songs) 💿
               </button>
             </div>
           </div>
@@ -2378,44 +3199,35 @@
       let amountCents = purchaseFormat === 'digital_master' ? inspectingRelease.price_cents : 1500;
 
       try {
-        const res = await fetch('/api/checkout/purchase', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            release_id: inspectingRelease.id,
-            recipient_ahoy_id: recipientId || undefined,
-            amount_cents: amountCents,
-            format: purchaseFormat,
-            shipping: shipping || undefined,
-            payment_method: 'instant_sovereign',
-          }),
+        const result = await api.post('/api/checkout/purchase', {
+          release_id: inspectingRelease.id,
+          recipient_ahoy_id: recipientId || undefined,
+          amount_cents: amountCents,
+          format: purchaseFormat,
+          shipping: shipping || undefined,
+          payment_method: 'instant_sovereign',
         });
 
-        if (res.ok) {
-          const result = await res.json();
-          const target = recipientId || currentUser.user.ahoy_id;
-          const box = document.getElementById('purchase-success-box');
-          const msg = document.getElementById('purchase-success-msg');
-          msg.textContent = `Order #${result.purchase_id} minted! Format: ${result.format}. Inscribed to ${target}. Status: ${result.fulfillment_status}.`;
-          box.style.display = 'block';
+        const target = recipientId || currentUser.user.ahoy_id;
+        const box = document.getElementById('purchase-success-box');
+        const msg = document.getElementById('purchase-success-msg');
+        msg.textContent = `Order #${result.purchase_id} minted! Format: ${result.format}. Inscribed to ${target}. Status: ${result.fulfillment_status}.`;
+        box.style.display = 'block';
 
-          // Clear form fields
-          document.getElementById('sleeve-inscription-input').value = '';
-          if (isPhysical) {
-            document.getElementById('ship-name').value = '';
-            document.getElementById('ship-street').value = '';
-            document.getElementById('ship-city').value = '';
-            document.getElementById('ship-state').value = '';
-            document.getElementById('ship-zip').value = '';
-          }
-
-          await loadLibrary();
-        } else {
-          alert('Order authorization could not be completed.');
+        // Clear form fields
+        document.getElementById('sleeve-inscription-input').value = '';
+        if (isPhysical) {
+          document.getElementById('ship-name').value = '';
+          document.getElementById('ship-street').value = '';
+          document.getElementById('ship-city').value = '';
+          document.getElementById('ship-state').value = '';
+          document.getElementById('ship-zip').value = '';
         }
+
+        await fetchLatest();
       } catch (err) {
         console.error('Purchase error:', err);
-        alert('Network communication failure.');
+        alert(`Order authorization could not be completed: ${err.message || 'Network error'}`);
       } finally {
         btn.disabled = false;
         updateBuyButton();
@@ -2508,27 +3320,24 @@
         let successCount = 0;
         for (const item of queue) {
           const amountCents = item.selected_format === 'digital_master' ? undefined : 1500;
-          const res = await fetch('/api/checkout/purchase', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              release_id: item.id,
-              amount_cents: amountCents,
-              format: item.selected_format,
-              payment_method: 'instant_sovereign',
-            }),
+          await api.post('/api/checkout/purchase', {
+            release_id: item.id,
+            amount_cents: amountCents,
+            format: item.selected_format,
+            payment_method: 'instant_sovereign',
           });
-          if (res.ok) successCount++;
+          successCount++;
         }
 
         if (successCount > 0) {
           alert(`Successfully authorized and inscribed ${successCount} release(s) to your Sovereign ID.`);
           queue = [];
           renderQueue();
-          await loadLibrary();
+          await fetchLatest();
         }
       } catch (err) {
         console.error('Queue checkout error:', err);
+        alert(`Queue checkout interrupted: ${err.message || 'Network error'}`);
       } finally {
         btn.disabled = false;
         renderQueue();
@@ -2538,10 +3347,10 @@
     // ARTISTS & TIP JARS
     async function loadArtists() {
       try {
-        const res = await fetch('/api/artists');
-        const data = await res.json();
+        const data = await api.get('/api/artists');
         catalogArtists = data.artists || [];
-        document.getElementById('badge-artists-count').textContent = catalogArtists.length;
+        const badge = document.getElementById('badge-artists-count');
+        if (badge) badge.textContent = catalogArtists.length;
         renderArtists(catalogArtists);
       } catch (err) {
         console.error('Artists fetch error:', err);
@@ -2634,27 +3443,19 @@
       const msg = document.getElementById('tip-note-input').value.trim();
 
       try {
-        const res = await fetch('/api/boost', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            artist_slug: activeTipArtist.slug,
-            amount_cents: currentTipCents,
-            message: msg || undefined,
-            payment_method: 'instant_sovereign',
-          }),
+        await api.post('/api/boost', {
+          artist_slug: activeTipArtist.slug,
+          amount_cents: currentTipCents,
+          message: msg || undefined,
+          payment_method: 'instant_sovereign',
         });
 
-        if (res.ok) {
-          alert(`Direct tip of $${(currentTipCents / 100).toFixed(2)} sent to ${activeTipArtist.name}.`);
-          closeTipDrawer();
-          await loadArtists();
-          await loadLeaderboard();
-        } else {
-          alert('Tip transmission failed.');
-        }
+        alert(`Direct tip of $${(currentTipCents / 100).toFixed(2)} sent to ${activeTipArtist.name}.`);
+        closeTipDrawer();
+        await fetchLatest();
       } catch (err) {
-        console.error(err);
+        console.error('Tip error:', err);
+        alert(`Tip transmission failed: ${err.message || 'Network error'}`);
       } finally {
         btn.disabled = false;
         btn.textContent = `Send $${(currentTipCents / 100).toFixed(2)} Direct Tip`;
@@ -2662,112 +3463,122 @@
     }
 
     // PATRON LEDGER
+    function renderLeaderboardData(leaderboard) {
+      const container = document.getElementById('leaderboard-content');
+      if (!container) return;
+
+      if (!leaderboard || !leaderboard.length) {
+        container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-mono);">No patronage recorded yet.</div>`;
+        return;
+      }
+
+      let html = `
+        <table class="track-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Rank</th>
+              <th>Patron</th>
+              <th>Contributions</th>
+              <th>Total Given</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      leaderboard.forEach(entry => {
+        html += `
+          <tr>
+            <td style="font-family: var(--font-mono); font-weight: 700;">#${entry.rank}</td>
+            <td>
+              <div style="font-weight: 700;">${escapeHtml(entry.supporter_name)}</div>
+              <div style="font-size: 0.65rem; color: var(--text-dim); font-family: var(--font-mono);">${escapeHtml(entry.ahoy_id)}</div>
+            </td>
+            <td style="font-family: var(--font-mono); color: var(--text-muted);">${entry.boost_count}</td>
+            <td style="font-family: var(--font-mono); color: var(--coral); font-weight: 700;">$${(entry.total_cents / 100).toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+    }
+
     async function loadLeaderboard() {
       try {
-        const res = await fetch('/api/leaderboard/boosters');
-        const data = await res.json();
-        const container = document.getElementById('leaderboard-content');
-
-        if (!data.leaderboard || !data.leaderboard.length) {
-          container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-mono);">No patronage recorded yet.</div>`;
-          return;
-        }
-
-        let html = `
-          <table class="track-table">
-            <thead>
-              <tr>
-                <th style="width: 50px;">Rank</th>
-                <th>Patron</th>
-                <th>Contributions</th>
-                <th>Total Given</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        data.leaderboard.forEach(entry => {
-          html += `
-            <tr>
-              <td style="font-family: var(--font-mono); font-weight: 700;">#${entry.rank}</td>
-              <td>
-                <div style="font-weight: 700;">${escapeHtml(entry.supporter_name)}</div>
-                <div style="font-size: 0.65rem; color: var(--text-dim); font-family: var(--font-mono);">${escapeHtml(entry.ahoy_id)}</div>
-              </td>
-              <td style="font-family: var(--font-mono); color: var(--text-muted);">${entry.boost_count}</td>
-              <td style="font-family: var(--font-mono); color: var(--coral); font-weight: 700;">$${(entry.total_cents / 100).toFixed(2)}</td>
-            </tr>
-          `;
-        });
-
-        html += `</tbody></table>`;
-        container.innerHTML = html;
+        const data = await api.get('/api/leaderboard/boosters');
+        renderLeaderboardData(data.leaderboard || []);
       } catch (err) {
         console.error('Leaderboard error:', err);
       }
     }
 
     // PURCHASED LIBRARY
+    function renderLibraryData(tracks, ahoyId) {
+      const libraryCountBadge = document.getElementById('library-count-badge');
+      if (libraryCountBadge) libraryCountBadge.textContent = `${tracks.length} tracks`;
+      const badgeLibraryCount = document.getElementById('badge-library-count');
+      if (badgeLibraryCount) badgeLibraryCount.textContent = tracks.length;
+
+      const container = document.getElementById('library-content');
+      if (!container) return;
+
+      if (!tracks.length) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem; background: var(--center-surface); border: 1px dashed var(--center-border); border-radius: 8px; color: var(--text-muted); font-size: 0.78rem;">
+            No tracks entitled yet. Purchase a master or craft an edition above.
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <table class="track-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Artist</th>
+              <th>Inscribed Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      tracks.forEach(t => {
+        html += `
+          <tr>
+            <td>
+              <div style="font-weight: 700;">${escapeHtml(t.title)}</div>
+              <div style="font-size: 0.65rem; color: var(--coral); font-family: var(--font-mono);">LEDGER: ${t.id}</div>
+            </td>
+            <td style="color: var(--text-muted);">${escapeHtml(t.artist)}</td>
+            <td style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
+            <td>
+              <div style="display: flex; gap: 0.35rem;">
+                <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
+                  Play
+                </button>
+                <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
+                  WAV/MP3
+                </a>
+                <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" target="_blank" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;">
+                  Player
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+    }
+
     async function loadLibrary() {
       if (!currentUser?.authenticated) return;
       try {
-        const res = await fetch('/api/me/library');
-        if (!res.ok) return;
-        const data = await res.json();
-        const tracks = data.tracks || [];
-        document.getElementById('library-count-badge').textContent = `${tracks.length} tracks`;
-        document.getElementById('badge-library-count').textContent = tracks.length;
-
-        if (!tracks.length) {
-          document.getElementById('library-content').innerHTML = `
-            <div style="text-align: center; padding: 2rem; background: var(--center-surface); border: 1px dashed var(--center-border); border-radius: 8px; color: var(--text-muted); font-size: 0.78rem;">
-              No tracks entitled yet. Purchase a master or craft an edition above.
-            </div>
-          `;
-          return;
-        }
-
-        let html = `
-          <table class="track-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Artist</th>
-                <th>Inscribed Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-
-        tracks.forEach(t => {
-          html += `
-            <tr>
-              <td>
-                <div style="font-weight: 700;">${escapeHtml(t.title)}</div>
-                <div style="font-size: 0.65rem; color: var(--coral); font-family: var(--font-mono);">LEDGER: ${t.id}</div>
-              </td>
-              <td style="color: var(--text-muted);">${escapeHtml(t.artist)}</td>
-              <td style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
-              <td>
-                <div style="display: flex; gap: 0.35rem;">
-                  <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}')">
-                    Play
-                  </button>
-                  <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(data.ahoy_id)}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
-                    WAV/MP3
-                  </a>
-                  <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(data.ahoy_id)}" target="_blank" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;">
-                    Player
-                  </a>
-                </div>
-              </td>
-            </tr>
-          `;
-        });
-
-        html += `</tbody></table>`;
-        document.getElementById('library-content').innerHTML = html;
+        const data = await api.get('/api/me/library');
+        renderLibraryData(data.tracks || [], data.ahoy_id);
       } catch (err) {
         console.error('Library fetch error:', err);
       }
@@ -2805,6 +3616,489 @@
 
     function escapeHtml(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ==========================================
+    // INTERACTIVE BURNED CD WIZARD CONTROLLER
+    // ==========================================
+    let cdWizardStep = 1;
+    let burnedCdTracks = [];
+    let cdTitle = 'MY AHOY MIXTAPE';
+    let cdMarkerColor = 'black';
+    let cdMarkerColorHex = '#1E293B';
+    let cdDestinationMode = 'self';
+    let draggedTrackId = null;
+
+    function openBurnedCdWizard(initialReleaseOrTrackId = null) {
+      const modal = document.getElementById('burned-cd-modal-backdrop');
+      if (!modal) return;
+
+      if (initialReleaseOrTrackId) {
+        const rel = catalogReleases.find(r => r.id === initialReleaseOrTrackId || r.slug === initialReleaseOrTrackId);
+        if (rel && rel.tracks && rel.tracks.length > 0) {
+          rel.tracks.forEach(t => {
+            if (!burnedCdTracks.some(bt => bt.id === t.id)) {
+              burnedCdTracks.push({
+                ...t,
+                release_slug: rel.slug,
+                artwork_url: rel.artwork_url,
+                price_cents: rel.price_cents || 100,
+              });
+            }
+          });
+          cdTitle = `${rel.title.toUpperCase()} MIX`;
+        } else {
+          const trk = allTracks.find(t => t.id === initialReleaseOrTrackId);
+          if (trk && !burnedCdTracks.some(bt => bt.id === trk.id)) {
+            burnedCdTracks.push(trk);
+          }
+        }
+      }
+
+      if (burnedCdTracks.length === 0 && allTracks.length > 0) {
+        burnedCdTracks.push(allTracks[0]);
+      }
+
+      const titleInp = document.getElementById('cd-custom-title-input');
+      if (titleInp) titleInp.value = cdTitle;
+      
+      handleCdTitleChange(cdTitle);
+      updateCdDiscAndCapacity();
+      renderCdPoolTracks('');
+      setWizardStep(1);
+
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeBurnedCdWizard() {
+      const modal = document.getElementById('burned-cd-modal-backdrop');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function handleCdBackdropClick(e) {
+      if (e.target.id === 'burned-cd-modal-backdrop') {
+        closeBurnedCdWizard();
+      }
+    }
+
+    function setWizardStep(step) {
+      cdWizardStep = step;
+      document.getElementById('cd-step-1').style.display = (step === 1) ? 'block' : 'none';
+      document.getElementById('cd-step-2').style.display = (step === 2) ? 'block' : 'none';
+      document.getElementById('cd-step-3').style.display = (step === 3) ? 'block' : 'none';
+      document.getElementById('cd-step-success').style.display = (step === 'success') ? 'block' : 'none';
+
+      document.getElementById('cd-tab-btn-1').classList.toggle('active', step === 1);
+      document.getElementById('cd-tab-btn-2').classList.toggle('active', step === 2);
+      document.getElementById('cd-tab-btn-3').classList.toggle('active', step === 3);
+
+      const footer = document.getElementById('cd-wizard-footer');
+      const prevBtn = document.getElementById('cd-prev-btn');
+      const nextBtn = document.getElementById('cd-next-btn');
+
+      if (step === 'success') {
+        footer.style.display = 'none';
+        return;
+      }
+
+      footer.style.display = 'flex';
+      prevBtn.style.display = (step > 1) ? 'inline-flex' : 'none';
+
+      if (step === 1) {
+        nextBtn.textContent = 'Next: Customize Disc →';
+        nextBtn.onclick = () => navigateWizard(1);
+        nextBtn.disabled = burnedCdTracks.length === 0;
+      } else if (step === 2) {
+        nextBtn.textContent = 'Next: Shipping & Checkout →';
+        nextBtn.onclick = () => navigateWizard(1);
+        nextBtn.disabled = false;
+        updateStep2Display();
+      } else if (step === 3) {
+        nextBtn.style.display = 'none';
+        updateStep3Display();
+      }
+      if (step !== 3) nextBtn.style.display = 'inline-flex';
+    }
+
+    function navigateWizard(direction) {
+      const newStep = cdWizardStep + direction;
+      if (newStep >= 1 && newStep <= 3) {
+        setWizardStep(newStep);
+      }
+    }
+
+    // TRACK POOL & SEARCH
+    function filterCdCatalogTracks(query) {
+      renderCdPoolTracks(query.toLowerCase().trim());
+    }
+
+    function renderCdPoolTracks(query = '') {
+      const container = document.getElementById('cd-pool-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = allTracks;
+      if (query) {
+        list = list.filter(t => 
+          t.title.toLowerCase().includes(query) || 
+          t.artist.toLowerCase().includes(query)
+        );
+      }
+
+      const countBadge = document.getElementById('cd-pool-count');
+      if (countBadge) countBadge.textContent = `${list.length} available`;
+
+      list.forEach(t => {
+        const isAdded = burnedCdTracks.some(bt => bt.id === t.id);
+        const card = document.createElement('div');
+        card.className = `cd-track-item ${isAdded ? 'already-added' : ''}`;
+        card.draggable = true;
+        card.id = `pool-track-${t.id}`;
+
+        card.ondragstart = (e) => handleTrackDragStart(e, t.id);
+        card.ondragend = (e) => handleTrackDragEnd(e);
+
+        const durationMin = `${Math.floor(t.duration_seconds / 60)}:${(t.duration_seconds % 60).toString().padStart(2, '0')}`;
+
+        card.innerHTML = `
+          <span class="track-drag-handle" title="Drag onto CD">⋮⋮</span>
+          <img src="${t.artwork_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=80&q=80'}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;" alt="">
+          <div style="flex: 1; min-width: 0; text-align: left;">
+            <div style="font-weight: 700; font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(t.title)}</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">${escapeHtml(t.artist)} • ${durationMin}</div>
+          </div>
+          <button class="btn btn-secondary" style="padding: 0.18rem 0.45rem; font-size: 0.65rem;" onclick="playPreview('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}')" title="Play Preview">
+            ▶
+          </button>
+          <button class="btn ${isAdded ? 'btn-secondary' : 'btn-coral'}" style="padding: 0.2rem 0.55rem; font-size: 0.65rem;" onclick="toggleTrackOnCd('${t.id}')">
+            ${isAdded ? '✓ Added' : '+ Add'}
+          </button>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function toggleTrackOnCd(trackId) {
+      if (burnedCdTracks.some(t => t.id === trackId)) {
+        removeTrackFromCd(trackId);
+      } else {
+        addTrackToCd(trackId);
+      }
+    }
+
+    function addTrackToCd(trackId) {
+      const trk = allTracks.find(t => t.id === trackId);
+      if (!trk) return;
+      if (burnedCdTracks.some(t => t.id === trackId)) return;
+
+      const currentTotalSeconds = burnedCdTracks.reduce((s, t) => s + t.duration_seconds, 0);
+      if (currentTotalSeconds + trk.duration_seconds > 4800) {
+        alert("Standard Audio CD capacity is 80 minutes. Adding this song would exceed disc capacity!");
+        return;
+      }
+
+      burnedCdTracks.push(trk);
+      updateCdDiscAndCapacity();
+      renderCdPoolTracks(document.getElementById('cd-track-search')?.value || '');
+    }
+
+    function removeTrackFromCd(trackId) {
+      burnedCdTracks = burnedCdTracks.filter(t => t.id !== trackId);
+      updateCdDiscAndCapacity();
+      renderCdPoolTracks(document.getElementById('cd-track-search')?.value || '');
+    }
+
+    function reorderCdTrack(fromIdx, toIdx) {
+      if (toIdx < 0 || toIdx >= burnedCdTracks.length) return;
+      const moved = burnedCdTracks.splice(fromIdx, 1)[0];
+      burnedCdTracks.splice(toIdx, 0, moved);
+      updateCdDiscAndCapacity();
+    }
+
+    // DRAG AND DROP HANDLERS
+    function handleTrackDragStart(e, trackId) {
+      draggedTrackId = trackId;
+      e.dataTransfer.setData('text/plain', trackId);
+      e.dataTransfer.effectAllowed = 'copyMove';
+      const el = document.getElementById(`pool-track-${trackId}`);
+      if (el) el.classList.add('dragging');
+    }
+
+    function handleTrackDragEnd(e) {
+      draggedTrackId = null;
+      document.querySelectorAll('.cd-track-item').forEach(el => el.classList.remove('dragging'));
+      document.getElementById('cd-drop-zone')?.classList.remove('dragover');
+    }
+
+    function handleCdDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      document.getElementById('cd-drop-zone')?.classList.add('dragover');
+    }
+
+    function handleCdDragLeave(e) {
+      document.getElementById('cd-drop-zone')?.classList.remove('dragover');
+    }
+
+    function handleCdDrop(e) {
+      e.preventDefault();
+      document.getElementById('cd-drop-zone')?.classList.remove('dragover');
+      const trackId = e.dataTransfer.getData('text/plain') || draggedTrackId;
+      if (trackId) {
+        addTrackToCd(trackId);
+      }
+    }
+
+    // DISC & CAPACITY UPDATE
+    function updateCdDiscAndCapacity() {
+      const totalSeconds = burnedCdTracks.reduce((s, t) => s + t.duration_seconds, 0);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const timeFormatted = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      const percent = Math.min(100, Math.round((totalSeconds / 4800) * 100));
+
+      const capText = document.getElementById('cd-capacity-text');
+      const capFill = document.getElementById('cd-capacity-fill');
+      if (capText && capFill) {
+        capText.textContent = `${timeFormatted} / 80:00 (${percent}%)`;
+        capFill.style.width = `${percent}%`;
+        if (percent > 90) capFill.style.background = 'var(--coral)';
+        else if (percent > 70) capFill.style.background = 'var(--gold)';
+        else capFill.style.background = 'var(--mint)';
+      }
+
+      // Render Drop Zone List
+      const tracklistEl = document.getElementById('cd-burned-tracklist');
+      const emptyEl = document.getElementById('cd-drop-empty');
+      if (tracklistEl && emptyEl) {
+        emptyEl.style.display = (burnedCdTracks.length === 0) ? 'flex' : 'none';
+        tracklistEl.innerHTML = '';
+
+        burnedCdTracks.forEach((t, idx) => {
+          const row = document.createElement('div');
+          row.className = 'burned-track-row';
+          const dur = `${Math.floor(t.duration_seconds / 60)}:${(t.duration_seconds % 60).toString().padStart(2, '0')}`;
+          row.innerHTML = `
+            <span class="track-num-badge">${(idx + 1).toString().padStart(2, '0')}</span>
+            <div style="flex: 1; min-width: 0; text-align: left;">
+              <span style="font-weight: 700; color: var(--text);">${escapeHtml(t.title)}</span>
+              <span style="color: var(--text-muted); font-size: 0.68rem; margin-left: 0.3rem;">${escapeHtml(t.artist)} • ${dur}</span>
+            </div>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--mint); font-size: 0.72rem;">$1.00</span>
+            <div style="display: flex; gap: 0.15rem;">
+              <button onclick="reorderCdTrack(${idx}, ${idx - 1})" class="btn-ghost" style="padding: 0.1rem 0.25rem; font-size: 0.65rem;" title="Move Up" ${idx === 0 ? 'disabled' : ''}>▲</button>
+              <button onclick="reorderCdTrack(${idx}, ${idx + 1})" class="btn-ghost" style="padding: 0.1rem 0.25rem; font-size: 0.65rem;" title="Move Down" ${idx === burnedCdTracks.length - 1 ? 'disabled' : ''}>▼</button>
+              <button onclick="removeTrackFromCd('${t.id}')" class="btn-ghost" style="padding: 0.1rem 0.3rem; font-size: 0.75rem; color: var(--coral);" title="Remove">✕</button>
+            </div>
+          `;
+          tracklistEl.appendChild(row);
+        });
+      }
+
+      // Financials: Music tracks + $5.00 flat crafting fee
+      const musicCents = burnedCdTracks.reduce((sum, t) => sum + (t.price_cents || 100), 0);
+      const flatFeeCents = 500;
+      const totalCents = musicCents + flatFeeCents;
+
+      const musicPriceStr = `$${(musicCents / 100).toFixed(2)}`;
+      const totalPriceStr = `$${(totalCents / 100).toFixed(2)}`;
+
+      const musicPriceEl = document.getElementById('cd-summary-music-price');
+      const tracksLabelEl = document.getElementById('cd-summary-tracks-label');
+      const totalPriceEl = document.getElementById('cd-summary-total-price');
+      if (musicPriceEl) musicPriceEl.textContent = musicPriceStr;
+      if (tracksLabelEl) tracksLabelEl.textContent = `Music Tracks (${burnedCdTracks.length}):`;
+      if (totalPriceEl) totalPriceEl.textContent = totalPriceStr;
+
+      const footerStatus = document.getElementById('cd-footer-status');
+      if (footerStatus) {
+        footerStatus.textContent = `${burnedCdTracks.length} track(s) • ${musicPriceStr} + $5 fee = ${totalPriceStr}`;
+      }
+
+      const nextBtn = document.getElementById('cd-next-btn');
+      if (nextBtn && cdWizardStep === 1) {
+        nextBtn.disabled = burnedCdTracks.length === 0;
+      }
+    }
+
+    function handleCdTitleChange(val) {
+      cdTitle = val.trim() || 'MY AHOY MIXTAPE';
+      const label1 = document.getElementById('cd-sharpie-label');
+      const label2 = document.getElementById('cd-sharpie-label-step2');
+      if (label1) label1.textContent = cdTitle;
+      if (label2) label2.textContent = cdTitle;
+    }
+
+    function setMarkerColor(name, hex) {
+      cdMarkerColor = name;
+      cdMarkerColorHex = hex;
+      document.querySelectorAll('.marker-color-pill').forEach(p => {
+        p.classList.toggle('active', p.title.toLowerCase().includes(name));
+      });
+      const nameMap = {
+        black: 'Classic Sharpie Black',
+        coral: 'Coastal Coral',
+        sky: 'Ocean Sky',
+        mint: 'Neon Mint',
+        silver: 'Silver Marker',
+      };
+      const nameEl = document.getElementById('marker-color-name');
+      if (nameEl) nameEl.textContent = nameMap[name] || name;
+
+      const label1 = document.getElementById('cd-sharpie-label');
+      const label2 = document.getElementById('cd-sharpie-label-step2');
+      if (label1) label1.style.color = hex;
+      if (label2) label2.style.color = hex;
+    }
+
+    function updateStep2Display() {
+      const capText = document.getElementById('cd-capacity-text')?.textContent || '';
+      const step2Count = document.getElementById('cd-step2-trackcount-label');
+      if (step2Count) step2Count.textContent = `${burnedCdTracks.length} track(s) • ${capText}`;
+      
+      const label2 = document.getElementById('cd-sharpie-label-step2');
+      if (label2) {
+        label2.textContent = cdTitle;
+        label2.style.color = cdMarkerColorHex;
+      }
+    }
+
+    function setCdDestinationMode(mode) {
+      cdDestinationMode = mode;
+      document.getElementById('cd-dest-self-btn').classList.toggle('active', mode === 'self');
+      document.getElementById('cd-dest-gift-btn').classList.toggle('active', mode === 'gift');
+      document.getElementById('cd-gift-id-group').style.display = (mode === 'gift') ? 'block' : 'none';
+    }
+
+    function updateStep3Display() {
+      const revTitle = document.getElementById('cd-review-title');
+      if (revTitle) revTitle.textContent = cdTitle;
+
+      const totalSeconds = burnedCdTracks.reduce((s, t) => s + t.duration_seconds, 0);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const revMeta = document.getElementById('cd-review-meta');
+      if (revMeta) revMeta.textContent = `${burnedCdTracks.length} track(s) • ${minutes}:${seconds.toString().padStart(2, '0')} runtime`;
+
+      // Artist breakdown
+      const artistMap = {};
+      burnedCdTracks.forEach(t => {
+        artistMap[t.artist] = (artistMap[t.artist] || 0) + 1;
+      });
+
+      const artists = Object.keys(artistMap);
+      const flatFeePerArtist = 5 / (artists.length || 1);
+      const splitContainer = document.getElementById('cd-review-artist-splits');
+      if (splitContainer) {
+        splitContainer.innerHTML = '';
+        artists.forEach(a => {
+          const count = artistMap[a];
+          const trackCost = count * 1.00;
+          const artistTotal = trackCost + flatFeePerArtist;
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.justifyContent = 'space-between';
+          row.innerHTML = `
+            <span>${escapeHtml(a)} (${count} track${count > 1 ? 's' : ''})</span>
+            <span style="font-family: var(--font-mono); color: var(--mint);">$${artistTotal.toFixed(2)} direct</span>
+          `;
+          splitContainer.appendChild(row);
+        });
+      }
+
+      const musicCents = burnedCdTracks.reduce((sum, t) => sum + (t.price_cents || 100), 0);
+      const totalCents = musicCents + 500;
+      const revMusicLabel = document.getElementById('cd-review-music-label');
+      const revMusicPrice = document.getElementById('cd-review-music-price');
+      const revTotalPrice = document.getElementById('cd-review-total-price');
+
+      if (revMusicLabel) revMusicLabel.textContent = `Music Tracks (${burnedCdTracks.length}):`;
+      if (revMusicPrice) revMusicPrice.textContent = `$${(musicCents / 100).toFixed(2)}`;
+      if (revTotalPrice) revTotalPrice.textContent = `$${(totalCents / 100).toFixed(2)}`;
+
+      const buyBtn = document.getElementById('cd-wizard-checkout-btn');
+      if (buyBtn) {
+        if (!currentUser?.authenticated) {
+          buyBtn.textContent = `Sign in with AHOY ID to Complete Order ($${(totalCents / 100).toFixed(2)})`;
+          buyBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
+        } else {
+          buyBtn.textContent = `Authorize Hand-Burned CD ($${(totalCents / 100).toFixed(2)})`;
+          buyBtn.onclick = submitBurnedCdOrder;
+        }
+      }
+    }
+
+    // CHECKOUT SUBMISSION
+    async function submitBurnedCdOrder() {
+      if (burnedCdTracks.length === 0) {
+        alert("Please add at least 1 track to your CD!");
+        setWizardStep(1);
+        return;
+      }
+
+      if (!currentUser?.authenticated) {
+        window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
+        return;
+      }
+
+      const name = document.getElementById('cd-ship-name').value.trim();
+      const street = document.getElementById('cd-ship-street').value.trim();
+      const city = document.getElementById('cd-ship-city').value.trim();
+      const state = document.getElementById('cd-ship-state').value.trim();
+      const zip = document.getElementById('cd-ship-zip').value.trim();
+
+      if (!name || !street || !city || !state || !zip) {
+        alert("Please provide complete USPS shipping address details.");
+        return;
+      }
+
+      let recipientAhoyId = null;
+      if (cdDestinationMode === 'gift') {
+        recipientAhoyId = document.getElementById('cd-gift-recipient-id').value.trim();
+        if (!recipientAhoyId) {
+          alert("Please enter your friend's AHOY ID for gift transfer.");
+          return;
+        }
+      }
+
+      const inscription = document.getElementById('cd-inscription-input').value.trim();
+      const btn = document.getElementById('cd-wizard-checkout-btn');
+      btn.disabled = true;
+      btn.textContent = 'Crafting & Burning... 💿';
+
+      try {
+        const data = await api.post('/api/checkout/burned-cd', {
+          cd_title: cdTitle,
+          track_ids: burnedCdTracks.map(t => t.id),
+          marker_color: cdMarkerColor,
+          recipient_ahoy_id: recipientAhoyId || undefined,
+          shipping: {
+            name,
+            address: street,
+            city,
+            state,
+            zip,
+            country: 'US',
+            inscription_note: inscription || undefined,
+          },
+        });
+
+        // Success screen
+        document.getElementById('cd-success-order-id').textContent = data.purchase_id;
+        document.getElementById('cd-success-address').textContent = `${name}, ${street}, ${city} ${state} ${zip}`;
+        document.getElementById('cd-success-player-link').href = data.player_url || 'https://player.ahoy.ooo';
+
+        setWizardStep('success');
+        await fetchLatest();
+      } catch (err) {
+        console.error('Burned CD order error:', err);
+        alert(`Order failed: ${err.message || 'An unexpected error occurred while placing your order.'}`);
+        btn.disabled = false;
+        btn.textContent = 'Authorize Hand-Burned CD';
+      }
     }
 
     init();

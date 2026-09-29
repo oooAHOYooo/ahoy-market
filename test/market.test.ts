@@ -33,6 +33,43 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(body.releases[0].title).toBe('Seen Better Days');
   });
 
+  it('serves combined market state from /api/market/latest in 1 round trip', async () => {
+    // 1. Unauthenticated request
+    const anonRes = await app.inject({ method: 'GET', url: '/api/market/latest' });
+    expect(anonRes.statusCode).toBe(200);
+    const anonBody = anonRes.json();
+    expect(anonBody.user.authenticated).toBe(false);
+    expect(anonBody.releases.length).toBeGreaterThan(0);
+    expect(anonBody.releases[0].tracks.length).toBeGreaterThan(0);
+    expect(anonBody.artists.length).toBe(5);
+    expect(Array.isArray(anonBody.leaderboard)).toBe(true);
+    expect(anonBody.library).toEqual([]);
+    expect(anonBody.boost_stats).toBeNull();
+
+    // 2. Authenticated request with session
+    const patronId = 'ahoy_latest_tester';
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: patronId, name: 'Latest Tester' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session')!;
+
+    const authRes = await app.inject({
+      method: 'GET',
+      url: '/api/market/latest',
+      cookies: { ahoy_market_session: cookie.value },
+    });
+    expect(authRes.statusCode).toBe(200);
+    const authBody = authRes.json();
+    expect(authBody.user.authenticated).toBe(true);
+    expect(authBody.user.user.ahoy_id).toBe(patronId);
+    expect(authBody.releases.length).toBeGreaterThan(0);
+    expect(Array.isArray(authBody.library)).toBe(true);
+    expect(authBody.boost_stats).toBeDefined();
+    expect(authBody.boost_stats.ahoy_id).toBe(patronId);
+  });
+
   it('lists artists and retrieves individual artist details', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/artists' });
     expect(res.statusCode).toBe(200);
@@ -294,5 +331,112 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(cdBody.format).toBe('burned_cd');
     expect(cdBody.fulfillment_status).toBe('queued_for_crafting');
     expect(cdBody.entitlement_count).toBe(1);
+  });
+
+  it('handles interactive Burned CD wizard order with $5 flat fee on top of selected music going to artists', async () => {
+    const patronId = 'ahoy_dj_mixtape_curator';
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: patronId, name: 'Mixtape DJ' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session');
+
+    // 1. Submit custom Burned CD with 3 songs from different artists
+    // tracks: 'trk_seen_better_days' (100c), 'trk_sunflower' (100c), 'trk_summer_bummer' (100c)
+    // total = 300 cents music + 500 cents flat craft fee = 800 cents ($8.00)
+    const wizardRes = await app.inject({
+      method: 'POST',
+      url: '/api/checkout/burned-cd',
+      cookies: { ahoy_market_session: cookie!.value },
+      payload: {
+        cd_title: 'Mystic Summer Coast Mix',
+        marker_color: 'coral',
+        track_ids: ['trk_seen_better_days', 'trk_sunflower', 'trk_summer_bummer'],
+        shipping: {
+          name: 'Marina Shore',
+          address: '88 Lighthouse Pt',
+          city: 'Mystic',
+          state: 'CT',
+          zip: '06355',
+          country: 'US',
+          inscription_note: 'Hand-burned for road trips down Route 1.',
+        },
+      },
+    });
+
+    expect(wizardRes.statusCode).toBe(201);
+    const body = wizardRes.json();
+    expect(body.success).toBe(true);
+    expect(body.cd_title).toBe('Mystic Summer Coast Mix');
+    expect(body.track_count).toBe(3);
+    expect(body.music_cents).toBe(300); // 3 tracks * $1.00
+    expect(body.burn_fee_cents).toBe(500); // $5 flat fee
+    expect(body.amount_cents).toBe(800); // $8.00 total
+    expect(body.format).toBe('burned_cd');
+    expect(body.fulfillment_status).toBe('queued_for_crafting');
+    expect(body.artist_attributions.length).toBe(3); // 3 distinct artists receiving splits
+
+    // 2. Verify sovereign entitlements were granted for all 3 tracks to the curator
+    const entRes = await app.inject({
+      method: 'GET',
+      url: `/api/entitlements?ahoy_id=${encodeURIComponent(patronId)}`,
+    });
+    expect(entRes.statusCode).toBe(200);
+    const entBody = entRes.json();
+    expect(entBody.count).toBe(3);
+    const titles = entBody.tracks.map((t: any) => t.title);
+    expect(titles).toContain('Seen Better Days');
+    expect(titles).toContain('Sunflower');
+    expect(titles).toContain('Summer Bummer');
+  });
+
+  it('handles gifting custom Burned CD to a friend and grants friend the entitlements', async () => {
+    const patronId = 'ahoy_gifter_patron';
+    const recipientId = 'ahoy_lucky_bestie';
+
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: patronId, name: 'Gift Giver' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session');
+
+    const giftRes = await app.inject({
+      method: 'POST',
+      url: '/api/checkout/burned-cd',
+      cookies: { ahoy_market_session: cookie!.value },
+      payload: {
+        cd_title: 'Birthday Folk Compilation',
+        recipient_ahoy_id: recipientId,
+        track_ids: ['trk_seen_better_days', 'trk_beneath_the_willow_tree'],
+        shipping: {
+          name: 'Lucky Bestie',
+          address: '100 Ocean Ave',
+          city: 'New London',
+          state: 'CT',
+          zip: '06320',
+          country: 'US',
+          inscription_note: 'Happy 25th Birthday! Love your tunes.',
+        },
+      },
+    });
+
+    expect(giftRes.statusCode).toBe(201);
+    const giftBody = giftRes.json();
+    expect(giftBody.success).toBe(true);
+    expect(giftBody.is_transfer).toBe(true);
+    expect(giftBody.granted_to).toBe(recipientId);
+    expect(giftBody.music_cents).toBe(200); // 2 tracks * $1.00
+    expect(giftBody.burn_fee_cents).toBe(500); // $5 flat fee
+    expect(giftBody.amount_cents).toBe(700); // $7.00 total
+
+    // Verify recipient received entitlements
+    const friendEnt = await app.inject({
+      method: 'GET',
+      url: `/api/entitlements?ahoy_id=${encodeURIComponent(recipientId)}`,
+    });
+    expect(friendEnt.statusCode).toBe(200);
+    expect(friendEnt.json().count).toBe(2);
   });
 });

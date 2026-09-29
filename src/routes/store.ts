@@ -16,9 +16,25 @@ const purchaseInput = z.object({
     city: z.string().min(1).optional(),
     state: z.string().min(1).optional(),
     zip: z.string().min(1).optional(),
-    country: z.string().default('US').optional(),
     inscription_note: z.string().max(500).optional(),
   }).optional(),
+});
+
+const burnedCdInput = z.object({
+  cd_title: z.string().max(100).optional(),
+  track_ids: z.array(z.string().min(1)).min(1, 'Burned CD must contain at least 1 track'),
+  marker_color: z.string().max(50).optional(),
+  payment_method: z.enum(['instant_sovereign', 'test_card', 'stripe']).default('instant_sovereign'),
+  recipient_ahoy_id: z.string().optional(),
+  shipping: z.object({
+    name: z.string().min(1, 'Recipient name is required'),
+    address: z.string().min(1, 'Street address is required'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zip: z.string().min(1, 'ZIP is required'),
+    country: z.string().default('US').optional(),
+    inscription_note: z.string().max(500).optional(),
+  }),
 });
 
 const boostInput = z.object({
@@ -55,12 +71,29 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     return null;
   };
 
+  // GET /api/market/latest -> Combined initial/latest market state in 1 round trip
+  app.get('/api/market/latest', async (request: FastifyRequest) => {
+    const auth = getAuthUser(request);
+    const releases = store.getReleasesWithTracks();
+    const artists = store.getArtists();
+    const leaderboard = store.getGlobalBoostersLeaderboard(10);
+    const library = auth ? store.getEntitlements(auth.ahoy_id) : [];
+    const boostStats = auth ? store.getUserBoostStats(auth.ahoy_id) : null;
+
+    return {
+      user: auth ? { authenticated: true, user: auth } : { authenticated: false },
+      releases,
+      artists,
+      leaderboard,
+      library,
+      boost_stats: boostStats,
+    };
+  });
+
   // GET /api/releases -> List all available releases in store
   app.get('/api/releases', async () => {
-    const releases = store.getReleases();
-    return {
-      releases: releases.map(r => store.getRelease(r.id)),
-    };
+    const releases = store.getReleasesWithTracks();
+    return { releases };
   });
 
   // GET /api/releases/:idOrSlug -> Get single release
@@ -217,6 +250,64 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
       entitlement_count: entitlementCount,
       player_url: `${config.playerUrl}?ahoy_id=${encodeURIComponent(grantedTo)}`,
     });
+  });
+
+  // POST /api/checkout/burned-cd -> Custom Mixtape Burned CD Wizard order
+  app.post('/api/checkout/burned-cd', async (request: FastifyRequest, reply: FastifyReply) => {
+    const auth = getAuthUser(request);
+    if (!auth) {
+      return reply.code(401).send({
+        error: 'authentication_required',
+        message: 'You must sign in with your AHOY ID to craft and purchase a Burned CD.',
+        login_url: `${config.publicBaseUrl}/api/auth/login`,
+      });
+    }
+
+    const parsed = burnedCdInput.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: 'invalid_burned_cd_payload', details: parsed.error.format() });
+    }
+
+    try {
+      const order = store.recordBurnedCdOrder({
+        ahoy_id: auth.ahoy_id,
+        recipient_ahoy_id: parsed.data.recipient_ahoy_id,
+        email: auth.email,
+        cd_title: parsed.data.cd_title,
+        track_ids: parsed.data.track_ids,
+        marker_color: parsed.data.marker_color,
+        payment_method: parsed.data.payment_method,
+        shipping: parsed.data.shipping,
+      });
+
+      const isTransfer = Boolean(parsed.data.recipient_ahoy_id && parsed.data.recipient_ahoy_id.trim() !== auth.ahoy_id);
+
+      return reply.code(201).send({
+        success: true,
+        purchase_id: order.purchaseId,
+        ahoy_id: auth.ahoy_id,
+        granted_to: order.grantedTo,
+        is_transfer: isTransfer,
+        cd_title: order.cdTitle,
+        track_count: order.trackCount,
+        tracks: order.tracks,
+        music_cents: order.musicCents,
+        burn_fee_cents: order.burnFeeCents,
+        amount_cents: order.totalAmountCents,
+        format: 'burned_cd',
+        fulfillment_status: order.fulfillmentStatus,
+        artist_attributions: order.artistAttributions,
+        player_url: `${config.playerUrl}?ahoy_id=${encodeURIComponent(order.grantedTo)}`,
+      });
+    } catch (err: any) {
+      if (err.message && err.message.startsWith('track_not_found')) {
+        return reply.code(404).send({ error: 'track_not_found', message: err.message });
+      }
+      if (err.message === 'no_tracks_selected') {
+        return reply.code(400).send({ error: 'no_tracks_selected', message: 'You must select at least one track to burn.' });
+      }
+      throw err;
+    }
   });
 
   // GET /api/me/library -> Get user's purchased songs
