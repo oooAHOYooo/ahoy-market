@@ -2825,6 +2825,7 @@
     let previewStopTimer = null;
     let previewTickTimer = null;
     let activePreview = null;
+    let activeTrackButton = null;
 
     // UNIFIED API CLIENT
     const api = {
@@ -3974,7 +3975,14 @@
         activePreview.sourceElement.setAttribute('aria-label', 'Hold to hear a 3 second preview of ' + (activePreview.title || titleForPreview(activePreview.id)));
       }
       activePreview = null;
+      resetActiveTrackButton();
+      audioElement.onended = null;
       audioElement.pause();
+    }
+
+    function resetActiveTrackButton() {
+      if (activeTrackButton) activeTrackButton.textContent = 'Play';
+      activeTrackButton = null;
     }
 
     function endPreviewHold(sourceElement) {
@@ -3996,15 +4004,17 @@
     function playTrack(title, artist, art, url, sourceElement) {
       if (audioElement.src === url && !audioElement.paused) {
         audioElement.pause();
-        sourceElement.textContent = 'Play';
+        resetActiveTrackButton();
         return;
       }
       stopPreviewRound();
       audioElement.src = url;
+      activeTrackButton = sourceElement;
       audioElement.play().then(() => { sourceElement.textContent = 'Pause'; }).catch(() => {
         sourceElement.textContent = 'Unavailable';
+        activeTrackButton = null;
       });
-      audioElement.onended = () => { sourceElement.textContent = 'Play'; };
+      audioElement.onended = resetActiveTrackButton;
     }
 
     function escapeHtml(str) {
