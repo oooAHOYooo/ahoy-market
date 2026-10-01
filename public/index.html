@@ -310,6 +310,16 @@
       flex-shrink: 0;
     }
 
+    .brand-wordmark {
+      display: block;
+      width: 156px;
+      height: auto;
+      flex: 0 0 auto;
+      filter: invert(1);
+    }
+
+    [data-theme="dark"] .brand-wordmark { filter: none; }
+
     .brand-name {
       font-family: var(--font-display);
       font-weight: 800;
@@ -1016,10 +1026,10 @@
 
     .artist-header-row {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 0.75rem;
       padding: 0 1rem;
-      margin-top: -26px;
+      min-height: 52px;
     }
 
     .artist-avatar {
@@ -1029,7 +1039,11 @@
       border: 3px solid var(--center-surface);
       object-fit: cover;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-top: -26px;
+      flex: 0 0 auto;
     }
+
+    .artist-header-row > div { min-width: 0; padding: 0.4rem 0; }
 
     .artist-info {
       padding: 0.85rem 1rem 1rem 1rem;
@@ -1811,9 +1825,7 @@
         box-shadow: 0 2px 12px rgba(30, 41, 59, .05);
       }
       .mobile-header .brand-header { margin: 0; padding: 0; border: 0; }
-      .mobile-header .brand-logo-tile { width: 32px; height: 32px; font-size: 1rem; }
-      .mobile-header .brand-name { font-size: .82rem; }
-      .mobile-header .brand-sub { font-size: .55rem; }
+      .mobile-header .brand-wordmark { width: 112px; }
       .mobile-account {
         border: 1px solid var(--coral-border);
         border-radius: 999px;
@@ -1907,7 +1919,7 @@
     .filter-pill { min-height: 40px; padding: .4rem .75rem; }
     .section-header-row { border: 0; padding: 0; }
     .section-title { font-size: .9rem; font-weight: 600; }
-    .release-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 1.5rem; }
+    .release-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr)); gap: 2rem 1.5rem; }
     .release-card { border: 1px solid var(--center-card-border); border-radius: 12px; background: var(--center-surface); box-shadow: 0 2px 5px rgba(30,41,59,.025); }
     .release-card:hover, .release-card.selected { border-color: var(--coral-border); box-shadow: 0 5px 18px rgba(30,41,59,.06); transform: none; }
     .card-art-box { border-radius: 0; }
@@ -1978,8 +1990,7 @@
 
     <header class="mobile-header">
       <a href="/" class="brand-header" aria-label="AHOY Store home">
-        <div class="brand-logo-tile">A</div>
-        <div><span class="brand-name">AHOY STORE</span><span class="brand-sub">Independent music</span></div>
+        <img class="brand-wordmark" src="/ahoy-wordmark.png" alt="AHOY">
       </a>
       <button id="mobile-account-btn" class="mobile-account" onclick="openMobileAccount()">AHOY ID</button>
     </header>
@@ -1988,12 +1999,8 @@
     <!-- WINDOW 1: LEFT NAVIGATION (DEEP OBSIDIAN) -->
     <!-- ========================================== -->
     <aside class="dashboard-left">
-      <a href="/" class="brand-header">
-        <div class="brand-logo-tile">A</div>
-        <div>
-          <span class="brand-name">AHOY STORE</span>
-          <span class="brand-sub">Independent music</span>
-        </div>
+      <a href="/" class="brand-header" aria-label="AHOY Store home">
+        <img class="brand-wordmark" src="/ahoy-wordmark.png" alt="AHOY">
       </a>
 
       <!-- Identity Node Badge -->
@@ -2173,8 +2180,11 @@
       <section id="view-artists" style="display: none;">
         <div class="section-header-row">
           <h2 class="section-title">Artist Roster &amp; Patronage</h2>
-          <span class="pill-tag pill-coral">Direct Transfer</span>
+          <span class="pill-tag pill-coral">Artist tips</span>
         </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+          Explore the artists behind the catalog. Choose an artist to see their support options.
+        </p>
         <div id="artist-grid" class="artist-grid">
           <!-- Rendered by JS -->
         </div>
@@ -3169,7 +3179,7 @@
             <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy">
             <span class="card-format-tag">${r.type}</span>
             <button class="card-quick-play" onclick="playPreview('${r.id}', '${escapeHtml(r.title)}', '${escapeHtml(r.artist)}', '${r.artwork_url}', '${track.preview_url}')">
-              PREVIEW
+              3 SEC PREVIEW
             </button>
           </div>
           <div class="card-meta">
