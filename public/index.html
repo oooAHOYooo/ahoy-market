@@ -160,12 +160,9 @@
       }
     }
 
-    @media (max-width: 960px) {
-      .dashboard-app {
-        display: flex;
-        flex-direction: column;
-      }
-    }
+    body.wireframe-preview #view-library a,
+    body.wireframe-preview #view-library button,
+    body.wireframe-preview .card-quick-play { pointer-events: none; opacity: .55; }
 
     /* BUTTONS */
     .btn {
@@ -454,8 +451,34 @@
 
     .center-footer {
       margin-top: auto;
-      padding-top: 2.5rem;
+      padding-top: 1.5rem;
       border-top: 1px solid var(--center-border);
+    }
+
+    .minimal-trust-footer {
+      padding: 1.25rem 0 1rem;
+    }
+
+    .minimal-trust-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .trust-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .trust-dot {
+      color: var(--text-dim);
+      font-size: 0.75rem;
     }
 
     /* TOP FEATURE PILLS (TASKIE STYLE) */
@@ -1769,11 +1792,197 @@
       justify-content: space-between;
       gap: 1rem;
     }
+    /* Compact storefront layout: the catalog is the first thing on screen. */
+    .mobile-header, .mobile-nav { display: none; }
+    @media (max-width: 960px) {
+      .dashboard-app { display: block; min-height: 0; }
+      .dashboard-left { display: none; }
+      .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        position: sticky;
+        top: 0;
+        z-index: 70;
+        padding: .65rem 1rem;
+        background: var(--left-bg);
+        border-bottom: 1px solid var(--left-border);
+        box-shadow: 0 2px 12px rgba(30, 41, 59, .05);
+      }
+      .mobile-header .brand-header { margin: 0; padding: 0; border: 0; }
+      .mobile-header .brand-logo-tile { width: 32px; height: 32px; font-size: 1rem; }
+      .mobile-header .brand-name { font-size: .82rem; }
+      .mobile-header .brand-sub { font-size: .55rem; }
+      .mobile-account {
+        border: 1px solid var(--coral-border);
+        border-radius: 999px;
+        padding: .45rem .7rem;
+        background: var(--coral-soft);
+        color: var(--text);
+        font: 700 .7rem var(--font-body);
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .mobile-nav {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 80;
+        padding: .4rem .55rem calc(.4rem + env(safe-area-inset-bottom));
+        background: var(--left-bg);
+        border-top: 1px solid var(--left-border);
+        box-shadow: 0 -4px 18px rgba(30, 41, 59, .08);
+      }
+      .mobile-nav button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .15rem;
+        min-height: 3.25rem;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-muted);
+        font: 700 .65rem var(--font-body);
+        cursor: pointer;
+      }
+      .mobile-nav button.active { background: var(--coral-soft); color: var(--coral); }
+      .mobile-nav .mobile-nav-icon { font-size: 1.2rem; line-height: 1; }
+      .dashboard-center { min-height: 0; padding: 1rem 1rem 6rem; }
+      .dashboard-right {
+        position: static;
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        border-left: 0;
+        border-top: 1px solid var(--right-border);
+        padding: 1rem 1rem 6rem;
+      }
+      .wireframe-tabs { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: .15rem; }
+      .wireframe-tabs button { flex: 0 0 auto; }
+      .spotlight-search-box { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .5rem; }
+      .spotlight-input { min-width: 0; }
+      .search-filter-pills { grid-column: 1 / -1; overflow-x: auto; white-space: nowrap; }
+      .filter-pill { flex: 0 0 auto; }
+      .section-header-row { flex-wrap: wrap; }
+      .track-table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+    @media (max-width: 640px) {
+      .release-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+      .card-meta { padding: .7rem; }
+      .card-title { font-size: .8rem; }
+      .card-actions-row .btn { font-size: .68rem !important; }
+      .minimal-trust-bar { justify-content: flex-start; }
+    }
+    @media (max-width: 360px) {
+      .release-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Focused storefront with the original AHOY color system. */
+    .dashboard-app { grid-template-columns: 210px minmax(0, 1fr); }
+    .dashboard-left { padding: 2rem 1.2rem; }
+    .brand-logo-tile { background: var(--coral); color: #fff; box-shadow: none; border-radius: 10px; }
+    .brand-sub { color: var(--text-muted); font-family: var(--font-body); letter-spacing: 0; }
+    .brand-header { border: 0; margin-bottom: 2rem; }
+    .nav-section-title, .nav-list .pill-tag, .card-format-tag { display: none; }
+    .nav-list button { min-height: 46px; border-radius: 6px; padding: .65rem .8rem; }
+    .user-profile-section { order: 3; margin: auto 0 0; padding: 1rem 0 0; border: 0; background: none; }
+    .theme-toggle-wrap { order: 4; margin-top: 0; }
+    .nav-footer-links { order: 5; line-height: 2; }
+    .theme-toggle-btn { background: none; border: 0; font-weight: 500; }
+    .dashboard-center { padding: 2.5rem clamp(1.5rem, 4vw, 5rem); width: 100%; max-width: 1500px; margin: 0 auto; }
+    .store-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+    .store-heading h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 2.8vw, 2.15rem); font-weight: 800; letter-spacing: -.04em; line-height: 1.15; }
+    .store-heading p { color: var(--text-muted); font-size: .86rem; margin-top: .65rem; }
+    .spotlight-search-box { background: var(--center-surface); box-shadow: none; border: 1px solid var(--center-border); border-radius: 10px; padding: .5rem .8rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .spotlight-search-box:focus-within { box-shadow: none; }
+    .spotlight-label { display: none; }
+    .spotlight-input { flex-basis: 240px; min-height: 40px; font-size: .9rem; }
+    .search-filter-pills { gap: .2rem; }
+    .filter-pill { min-height: 40px; padding: .4rem .75rem; }
+    .section-header-row { border: 0; padding: 0; }
+    .section-title { font-size: .9rem; font-weight: 600; }
+    .release-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 1.5rem; }
+    .release-card { border: 1px solid var(--center-card-border); border-radius: 12px; background: var(--center-surface); box-shadow: 0 2px 5px rgba(30,41,59,.025); }
+    .release-card:hover, .release-card.selected { border-color: var(--coral-border); box-shadow: 0 5px 18px rgba(30,41,59,.06); transform: none; }
+    .card-art-box { border-radius: 0; }
+    .card-meta { padding: 1rem; }
+    .card-title { font-size: .9rem; }
+    .card-meta-top { align-items: flex-start; gap: .5rem; }
+    .card-price { color: var(--text); font-family: var(--font-body); font-weight: 700; }
+    .card-actions-row .btn { background: var(--coral-soft); color: var(--text); border: 1px solid var(--coral-border); border-radius: 7px; min-height: 40px; box-shadow: none; }
+    .card-actions-row .btn:hover { background: var(--coral-pill-bg); transform: none; }
+    .card-quick-play { border: 0; color: #252824; border-radius: 4px; min-height: 36px; }
+    .minimal-trust-bar { font-family: var(--font-body); justify-content: flex-start; font-size: .75rem; }
+    .burned-cd-modal-backdrop:not(.active) { visibility: hidden; }
+    .primary-buy-button { background: var(--coral); box-shadow: none; }
+    .primary-buy-button:hover { background: var(--coral-hover); box-shadow: none; transform: none; }
+    .card-quick-play { opacity: 1; transform: none; }
+    .purchase-dialog { inset: 0 0 0 auto; margin: 0; width: min(440px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; border: 0; padding: 0; background: var(--right-bg); color: var(--text); }
+    .purchase-dialog::backdrop { background: rgba(20, 29, 23, .35); }
+    body:has(.purchase-dialog[open]) { overflow: hidden; }
+    .purchase-dialog .dashboard-right { position: relative; height: auto; min-height: 100%; padding: 1.5rem; border: 0; }
+    .purchase-close { align-self: flex-end; margin-bottom: 1rem; min-height: 44px; }
+    .btn, .primary-buy-button, .secondary-queue-button { border-radius: 6px; }
+    button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+    .store-assurances { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin: 0 0 1.8rem; color: var(--text-muted); font-size: .73rem; }
+    .store-assurances > span { display: inline-flex; align-items: center; gap: .45rem; }
+    .assurance-mark { color: var(--mint); font-weight: 700; font-size: .95rem; }
+    .purchase-summary { margin: 0 0 1.15rem; padding-bottom: 1rem; border-bottom: 1px solid var(--right-border); }
+    .purchase-summary p { color: var(--text-muted); font-size: .78rem; line-height: 1.65; }
+    .purchase-summary .release-specs { margin-top: .5rem; font-size: .7rem; }
+    .purchase-note { margin-top: .8rem; color: var(--text-muted); font-size: .72rem; line-height: 1.6; }
+    .purchase-help { color: var(--sky); display: inline-block; margin-top: .55rem; font-size: .72rem; text-underline-offset: 3px; }
+    #quick-convert-note button { display: none; }
+    .option-tile:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; }
+    .option-tile.active { border-color: var(--coral); background: var(--coral-soft); }
+    .primary-buy-button:disabled { cursor: not-allowed; opacity: .55; }
+    .card-title { white-space: normal; line-height: 1.45; }
+    .card-meta { flex: 1; display: flex; flex-direction: column; }
+    .card-actions-row { margin-top: auto; padding-top: .8rem; }
+    .more-links summary { cursor: pointer; font-size: .78rem; color: var(--text-muted); padding: .6rem 0; }
+    .more-links .nav-footer-links { border: 0; }
+    @media (min-width: 1400px) { .release-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    @media (max-width: 960px) {
+      .dashboard-app { display: block; }
+      .dashboard-center { padding: 1.8rem 1.2rem 6rem; }
+      .store-heading { margin-bottom: 1.5rem; }
+      .store-heading h1 { font-size: 1.65rem; }
+      .store-heading p { max-width: 250px; font-size: .8rem; }
+      .spotlight-search-box { display: flex; gap: .4rem; }
+      .spotlight-input { flex-basis: 100%; }
+      .search-filter-pills { width: 100%; }
+      .mobile-nav { box-shadow: none; }
+      .mobile-nav button.active { color: var(--text); }
+      .mobile-header { box-shadow: none; }
+      .mobile-nav .mobile-nav-icon { display: none; }
+      .mobile-nav button { font-size: .75rem; min-height: 44px; }
+      .release-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 1rem; }
+      .card-title { font-size: .84rem; }
+      .card-meta { padding: .75rem; }
+      .store-assurances { gap: .6rem 1rem; font-size: .68rem; margin-bottom: 1.25rem; }
+      .card-meta-top { display: block; }
+      .card-price { display: block; margin-top: .25rem; font-size: .76rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
   </style>
 </head>
 <body>
 
   <div class="dashboard-app">
+
+    <header class="mobile-header">
+      <a href="/" class="brand-header" aria-label="AHOY Store home">
+        <div class="brand-logo-tile">A</div>
+        <div><span class="brand-name">AHOY STORE</span><span class="brand-sub">Independent music</span></div>
+      </a>
+      <button id="mobile-account-btn" class="mobile-account" onclick="openMobileAccount()">AHOY ID</button>
+    </header>
 
     <!-- ========================================== -->
     <!-- WINDOW 1: LEFT NAVIGATION (DEEP OBSIDIAN) -->
@@ -1783,67 +1992,32 @@
         <div class="brand-logo-tile">A</div>
         <div>
           <span class="brand-name">AHOY STORE</span>
-          <span class="brand-sub">Sovereign Music</span>
+          <span class="brand-sub">Independent music</span>
         </div>
       </a>
 
       <!-- Identity Node Badge -->
       <div id="user-profile-box" class="user-profile-section">
-        <div style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">Connecting node...</div>
+        <div style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">Loading account…</div>
       </div>
 
-      <!-- GROUP 1: CATALOG -->
-      <div class="nav-section-title">Catalog</div>
+      <!-- PRIMARY VIEWS (4 CORE DESTINATIONS) -->
+      <div class="nav-section-title">Navigation</div>
       <ul class="nav-list">
         <li>
           <button id="nav-featured" class="active" onclick="switchView('featured')">
-            <span>Featured</span>
-          </button>
-        </li>
-        <li>
-          <button id="nav-albums" onclick="switchView('albums')">
-            <span>Albums</span>
+            <span>Browse music</span>
             <span class="pill-tag pill-mint" id="badge-albums-count">0</span>
           </button>
         </li>
         <li>
-          <button id="nav-tracks" onclick="switchView('tracks')">
-            <span>Singles &amp; Tracks</span>
-            <span class="pill-tag pill-mint" id="badge-tracks-count">0</span>
-          </button>
-        </li>
-      </ul>
-
-      <!-- GROUP 2: CUSTOM CRAFT -->
-      <div class="nav-section-title">Physical Editions</div>
-      <ul class="nav-list">
-        <li>
           <button id="nav-cds" onclick="openBurnedCdWizard()">
-            <span>Burned Audio CDs</span>
-            <span class="pill-tag pill-mint">$5 Craft Fee</span>
+            <span>Make a CD</span>
+            <span class="pill-tag pill-mint">$5 Fee</span>
           </button>
         </li>
         <li>
-          <button id="nav-cards" onclick="switchView('cards')">
-            <span>Archival NFC Cards</span>
-            <span class="pill-tag pill-coral">$15</span>
-          </button>
-        </li>
-      </ul>
-
-      <!-- GROUP 3: PATRONAGE & LIBRARY -->
-      <div class="nav-section-title">Community</div>
-      <ul class="nav-list">
-        <li>
-          <button id="nav-artists" onclick="switchView('artists')">
-            <span>Artists &amp; Tips</span>
-            <span class="pill-tag pill-coral" id="badge-artists-count">0</span>
-          </button>
-        </li>
-        <li>
-          <button id="nav-patrons" onclick="switchView('patrons')">
-            <span>Patron Ledger</span>
-          </button>
+          <button id="nav-artists" onclick="switchView('artists')"><span>Artists</span></button>
         </li>
         <li>
           <button id="nav-library" onclick="switchView('library')">
@@ -1861,12 +2035,12 @@
         </button>
       </div>
 
-      <!-- MINIMAL FOOTER LINKS -->
+      <!-- SECONDARY & UTILITY LINKS -->
       <div class="nav-footer-links">
+        <button id="nav-patrons" onclick="switchView('patrons')" style="background:none; border:none; color:var(--text-dim); font-size:0.66rem; font-family:var(--font-mono); cursor:pointer; padding:0;">Patron Ledger</button>
+        <button id="nav-support" onclick="switchView('support')" style="background:none; border:none; color:var(--text-dim); font-size:0.66rem; font-family:var(--font-mono); cursor:pointer; padding:0;">Support &amp; FAQ</button>
         <a href="https://player.ahoy.ooo" target="_blank">Player</a>
-        <a href="https://app.ahoy.ooo" target="_blank">The Streamer</a>
-        <a href="https://id.ahoy.ooo" target="_blank">Sovereign ID</a>
-        <button onclick="switchView('support')" style="background:none; border:none; color:var(--text-dim); font-size:0.66rem; font-family:var(--font-mono); cursor:pointer; padding:0;">Support &amp; FAQ</button>
+        <a href="https://id.ahoy.ooo" target="_blank">AHOY ID</a>
       </div>
     </aside>
 
@@ -1875,6 +2049,31 @@
     <!-- ========================================== -->
     <main class="dashboard-center">
 
+      <div id="wireframe-banner" style="display:none; margin-bottom:1rem; padding:.85rem 1rem; border:1px dashed var(--coral); border-radius:12px; background:var(--coral-soft); color:var(--text); font-size:.76rem;">
+        <strong>Design wireframe</strong> · Sample content for layout review. Sign in, tips, and checkout are inactive in this preview.
+        <div class="wireframe-tabs" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem">
+          <button class="btn btn-secondary" onclick="switchView('featured')">Catalog</button>
+          <button class="btn btn-secondary" onclick="switchView('albums')">Albums</button>
+          <button class="btn btn-secondary" onclick="switchView('tracks')">Tracks</button>
+          <button class="btn btn-secondary" onclick="switchView('cds')">CD studio</button>
+          <button class="btn btn-secondary" onclick="switchView('cards')">USB editions</button>
+          <button class="btn btn-secondary" onclick="switchView('artists')">Artists</button>
+          <button class="btn btn-secondary" onclick="switchView('library')">Library</button>
+          <button class="btn btn-secondary" onclick="switchView('patrons')">Patron ledger</button>
+          <button class="btn btn-secondary" onclick="switchView('support')">Support</button>
+        </div>
+      </div>
+
+      <div id="auth-notice" role="alert" style="display:none; padding:1rem; margin-bottom:1rem; border:1px solid var(--coral-border); background:var(--coral-soft); border-radius:10px; font-size:.82rem;"></div>
+      <header class="store-heading">
+        <div><h1>Music catalog</h1><p>Independent releases. Preview, purchase, and collect.</p></div>
+        <button class="btn btn-secondary" onclick="renderQueue(); openPurchasePanel(); switchRightTab('queue')">Cart<span id="cart-count"></span></button>
+      </header>
+      <div class="store-assurances" aria-label="How the store works">
+        <span><span class="assurance-mark">▷</span> Preview before you buy</span>
+        <span><span class="assurance-mark">↓</span> MP3 downloads</span>
+        <span><span class="assurance-mark">▤</span> Saved to your library</span>
+      </div>
       <!-- SPOTLIGHT SEARCH BAR -->
       <div class="spotlight-search-box">
         <span class="spotlight-label">SEARCH</span>
@@ -1882,7 +2081,7 @@
           type="text" 
           id="catalog-search-input" 
           class="spotlight-input" 
-          placeholder="Search releases, artists, genres... (Press / to focus)" 
+          placeholder="Search music or artists" aria-label="Search music or artists"
           oninput="handleCatalogSearch(this.value)"
           autocomplete="off"
         />
@@ -1891,14 +2090,14 @@
           <button id="filter-albums" class="filter-pill" onclick="setSearchCategory('album')">Albums</button>
           <button id="filter-singles" class="filter-pill" onclick="setSearchCategory('single')">Singles</button>
           <button id="filter-cds" class="filter-pill" onclick="setSearchCategory('cd')">CDs</button>
-          <button id="filter-nfc" class="filter-pill" onclick="setSearchCategory('nfc')">NFC</button>
+          <button id="filter-nfc" class="filter-pill" onclick="setSearchCategory('usb')">USBs</button>
         </div>
       </div>
 
       <!-- VIEW 1: FEATURED CATALOG -->
       <section id="view-featured">
         <div class="section-header-row">
-          <h2 class="section-title">Catalog Releases</h2>
+          <h2 class="section-title">Browse releases</h2>
           <span id="results-count" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);"></span>
         </div>
         <div id="featured-grid" class="release-grid">
@@ -1956,14 +2155,14 @@
         </div>
       </section>
 
-      <!-- VIEW 5: NFC CARDS -->
+      <!-- VIEW 5: USB ALBUMS -->
       <section id="view-cards" style="display: none;">
         <div class="section-header-row">
-          <h2 class="section-title">Archival AHOY NFC Cards</h2>
+          <h2 class="section-title">Lossless USB Albums &amp; Mixtapes</h2>
           <span class="pill-tag pill-coral">$15.00 Shipped</span>
         </div>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.2rem;">
-          Tap-to-play contactless physical collectible cards. Tapping smartphone unlocks playback on AHOY Player and writes permanent sovereign entitlement.
+          Physical AHOY USB thumb drives preloaded with 24-bit lossless master WAVs, 320kbps MP3s, bonus artwork booklet, and plug-and-play sovereign streaming entitlement.
         </p>
         <div id="cards-grid" class="release-grid">
           <!-- Rendered by JS -->
@@ -2002,13 +2201,13 @@
           <div style="background: var(--center-surface); border: 1px solid var(--center-border); border-radius: 8px; padding: 1.1rem;">
             <h3 style="font-size: 0.9rem; margin-bottom: 0.35rem;">What is Sovereign Ownership?</h3>
             <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.55;">
-              When you purchase on AHOY Market, entitlements are inscribed directly to your Sovereign AHOY ID. You have permanent streaming rights on AHOY Player, can download raw lossless WAV/MP3 files anytime, or transfer the rights to a friend.
+              Paid digital purchases are linked to your AHOY ID after Stripe confirms payment. Your purchased MP3 appears in My Library.
             </p>
           </div>
           <div style="background: var(--center-surface); border: 1px solid var(--center-border); border-radius: 8px; padding: 1.1rem;">
             <h3 style="font-size: 0.9rem; margin-bottom: 0.35rem;">Physical Fulfillment &amp; Shipping</h3>
             <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.55;">
-              All Hand-Burned CDs and NFC Cards are pressed in-house within 24–48 hours and shipped via USPS First-Class with tracking. Custom sleeve inscriptions are printed directly onto the packaging.
+              All Hand-Burned CDs and Lossless USB Albums are crafted and flashed in-house within 24–48 hours and shipped via USPS First-Class with tracking. Custom sleeve inscriptions are printed directly onto the packaging.
             </p>
           </div>
           <div style="background: var(--center-surface); border: 1px solid var(--center-border); border-radius: 8px; padding: 1.1rem;">
@@ -2031,76 +2230,16 @@
         </div>
       </section>
 
-      <!-- FOOTER MARKETING & TRUST GUARANTEES -->
-      <footer class="center-footer">
-        <!-- TASKIE-INSPIRED 3 SUMMARY METRIC CARDS -->
-        <div class="task-summary-grid">
-          <div class="metric-card metric-coral">
-            <div class="metric-card-header">
-              <div class="metric-icon-circle coral-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span class="metric-pill">CATALOG</span>
-            </div>
-            <div class="metric-val" id="summary-release-count">8</div>
-            <div class="metric-title">Master Releases</div>
-            <div class="metric-desc">Curated full-length albums &amp; master recordings</div>
+      <!-- MINIMAL TRUST STRIP -->
+      <footer class="center-footer minimal-trust-footer">
+        <div class="minimal-trust-bar">Independent music. Digital downloads &amp; custom CDs.</div>
+        <details class="more-links"><summary>More from AHOY</summary>
+          <div class="nav-footer-links">
+            <button class="btn btn-ghost" onclick="navigateMobile('support')">Help &amp; FAQ</button>
+            <button class="btn btn-ghost" onclick="navigateMobile('patrons')">Patrons</button>
+            <a href="https://player.ahoy.ooo" target="_blank">Open Player ↗</a>
           </div>
-
-          <div class="metric-card metric-sky">
-            <div class="metric-card-header">
-              <div class="metric-icon-circle sky-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="20" x2="12" y2="10"/>
-                  <line x1="18" y1="20" x2="18" y2="4"/>
-                  <line x1="6" y1="20" x2="6" y2="16"/>
-                </svg>
-              </div>
-              <span class="metric-pill">DIRECT PAYOUT</span>
-            </div>
-            <div class="metric-val">100%</div>
-            <div class="metric-title">Direct to Artist</div>
-            <div class="metric-desc">Zero platform fees on tips &amp; masters</div>
-          </div>
-
-          <div class="metric-card metric-gold">
-            <div class="metric-card-header">
-              <div class="metric-icon-circle gold-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
-                </svg>
-              </div>
-              <span class="metric-pill">EDITIONS</span>
-            </div>
-            <div class="metric-val">$15</div>
-            <div class="metric-title">Handcrafted Physicals</div>
-            <div class="metric-desc">Burned Audio CDs &amp; Archival NFC Cards</div>
-          </div>
-        </div>
-
-        <!-- HERO / TRUST STRIP -->
-        <div class="hero-strip" style="margin-bottom: 1.25rem;">
-          <div>
-            <span class="pill-tag pill-coral" style="margin-bottom: 0.35rem;">Sovereign Music Store</span>
-            <h1>Direct Ownership. Zero Platform Cuts.</h1>
-            <p>Download lossless master recordings or commission handcrafted physical pressings.</p>
-          </div>
-          <div class="hero-stat-badge">
-            <span class="hero-stat-val">100%</span>
-            <span class="hero-stat-label">DIRECT TO ARTIST</span>
-          </div>
-        </div>
-
-        <!-- FEATURE TRUST PILLS -->
-        <div class="top-feature-pills" style="justify-content: center; margin-bottom: 1rem;">
-          <span class="feature-pill"><span class="feature-check">✓</span> Sovereign Master Audio</span>
-          <span class="feature-pill"><span class="feature-check">✓</span> 100% Direct to Artists</span>
-          <span class="feature-pill"><span class="feature-check">✓</span> Handcrafted CD &amp; NFC</span>
-          <span class="feature-pill"><span class="feature-check">✓</span> Permanent Sovereign Rights</span>
-        </div>
+        </details>
       </footer>
 
     </main>
@@ -2108,15 +2247,17 @@
     <!-- ========================================== -->
     <!-- WINDOW 3: RIGHT PURCHASE INSPECTOR -->
     <!-- ========================================== -->
+    <dialog id="purchase-dialog" class="purchase-dialog" aria-label="Release details and cart" onclick="if(event.target === this) this.close()">
     <aside class="dashboard-right">
+      <button class="btn btn-ghost purchase-close" onclick="document.getElementById('purchase-dialog').close()" autofocus>Close ×</button>
       
       <!-- MODE TOGGLE TABS -->
       <div class="right-tab-switch">
         <button id="tab-inspect-btn" class="tab-toggle-btn active" onclick="switchRightTab('inspect')">
-          Now Inspecting
+          Release details
         </button>
         <button id="tab-queue-btn" class="tab-toggle-btn" onclick="switchRightTab('queue')">
-          Order Queue (<span id="queue-counter-badge">0</span>)
+          Cart (<span id="queue-counter-badge">0</span>)
         </button>
       </div>
 
@@ -2131,11 +2272,10 @@
         </div>
         <p id="tip-target-bio" style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.45rem; line-height: 1.4;"></p>
 
-        <div class="tip-pill-row">
-          <button class="tip-pill" onclick="setTipPreset(100)">$1</button>
+        <div class="tip-pill-row" style="grid-template-columns: repeat(3, 1fr);">
+          <button class="tip-pill" onclick="setTipPreset(300)">$3</button>
           <button class="tip-pill active" onclick="setTipPreset(500)">$5</button>
           <button class="tip-pill" onclick="setTipPreset(1000)">$10</button>
-          <button class="tip-pill" onclick="setTipPreset(2000)">$20</button>
         </div>
 
         <input type="number" id="tip-custom-input" class="clean-input" placeholder="Custom Amount ($)" min="1" step="1" oninput="onCustomTipChange(this.value)" />
@@ -2165,38 +2305,42 @@
           </div>
         </div>
 
+        <div class="purchase-summary">
+          <p id="inspect-description"></p>
+          <p id="inspect-specs" class="release-specs"></p>
+        </div>
         <!-- 3 PURCHASE CHOICES -->
         <div class="option-tiles-group">
           <!-- Option A: Digital Master -->
-          <div id="tile-digital" class="option-tile active" onclick="setPurchaseFormat('digital_master')">
+          <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" id="tile-digital" class="option-tile active" onclick="setPurchaseFormat('digital_master')">
             <div class="tile-left">
-              <span class="tile-name">Digital Master</span>
-              <span class="tile-desc">Lossless WAV/MP3 + sovereign streaming</span>
+              <span class="tile-name">Digital MP3</span>
+              <span class="tile-desc">Download to your AHOY library</span>
             </div>
             <span class="tile-price">$1.00</span>
           </div>
 
           <!-- Option B: Hand-Burned CD -->
-          <div id="tile-cd" class="option-tile" onclick="openBurnedCdWizard(inspectingRelease ? inspectingRelease.id : null)">
+          <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" id="tile-cd" class="option-tile" onclick="openBurnedCdWizard(inspectingRelease ? inspectingRelease.id : null)">
             <div class="tile-left">
-              <span class="tile-name">Hand-Burned Audio CD 💿</span>
-              <span class="tile-desc">Interactive CD Studio • $5 fee + tracks</span>
+              <span class="tile-name">Custom audio CD</span>
+              <span class="tile-desc">Choose your songs • $5 + music</span>
             </div>
             <span class="tile-price">$5.00+</span>
           </div>
 
-          <!-- Option C: Archival NFC Card -->
-          <div id="tile-nfc" class="option-tile" onclick="setPurchaseFormat('nfc_card')">
+          <!-- Option C: Lossless USB Album -->
+          <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" id="tile-nfc" class="option-tile" onclick="setPurchaseFormat('usb_album')">
             <div class="tile-left">
-              <span class="tile-name">Archival NFC Card</span>
-              <span class="tile-desc">Tap-to-play collectible card</span>
+              <span class="tile-name">USB album</span>
+              <span class="tile-desc">WAV &amp; MP3 files • Checkout coming soon</span>
             </div>
             <span class="tile-price">$15.00</span>
           </div>
         </div>
 
-        <!-- CUSTOMIZATION / SHIPPING DRAWER -->
-        <div class="customization-drawer">
+        <!-- PROGRESSIVE CUSTOMIZATION / SHIPPING DRAWER -->
+        <div id="customization-drawer" class="customization-drawer" style="display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
             <span class="drawer-label" style="margin: 0;">Recipient &amp; Delivery</span>
             <div style="display: flex; gap: 0.2rem;">
@@ -2210,10 +2354,10 @@
             <input type="text" id="gift-ahoy-id" class="clean-input" placeholder="Friend's Sovereign AHOY ID (e.g. ahoy_alex)" />
           </div>
 
-          <!-- Sleeve Inscription (Available for all, prominent for CD/NFC) -->
+          <!-- Sleeve Inscription (Available for all, prominent for CD/USB) -->
           <input type="text" id="sleeve-inscription-input" class="clean-input" placeholder="Custom sleeve inscription / liner note (optional)" maxlength="160" />
 
-          <!-- Physical Shipping Inputs (Only shown for CD & NFC) -->
+          <!-- Physical Shipping Inputs (Only shown for CD & USB) -->
           <div id="physical-shipping-group" style="display: none; margin-top: 0.35rem; border-top: 1px dashed var(--right-border); padding-top: 0.5rem;">
             <span class="drawer-label" style="color: var(--coral);">USPS Shipping Address</span>
             <input type="text" id="ship-name" class="clean-input" placeholder="Full Recipient Name" />
@@ -2226,12 +2370,22 @@
           </div>
         </div>
 
+        <!-- QUICK CONVERT DIGITAL FOOTNOTE -->
+        <div id="quick-convert-note" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.3rem; margin-bottom: 0.45rem; font-size: 0.67rem; color: var(--text-dim); font-family: var(--font-mono);">
+          <span>Digital download</span>
+          <button type="button" onclick="toggleGiftMode()" style="background:none; border:none; color:var(--coral); cursor:pointer; font-size:0.67rem; font-family:var(--font-mono); text-decoration:underline; padding:0;">
+            + Gift to Friend
+          </button>
+        </div>
+
         <!-- HIGH-CONVERTING BUY BUTTON -->
         <button id="primary-action-btn" class="primary-buy-button" onclick="executeSinglePurchase()">
           Buy Digital Master — $1.00
         </button>
-        <button class="secondary-queue-button" onclick="addCurrentToQueue()">
-          + Add to Order Queue
+        <p id="purchase-note" class="purchase-note">Sign in with AHOY ID, then continue to Stripe. Your download appears in My Library after payment is confirmed.</p>
+        <a class="purchase-help" href="mailto:support@ahoy.ooo">Questions before buying? Contact support</a>
+        <button id="add-to-cart-btn" class="secondary-queue-button" style="margin-top: 1rem;" onclick="addCurrentToQueue()">
+          Add to cart
         </button>
 
         <div id="purchase-success-box" style="display: none; margin-top: 0.8rem; padding: 0.75rem; background: rgba(45, 212, 191, 0.08); border: 1px solid var(--mint); border-radius: 7px; font-size: 0.72rem; line-height: 1.45;">
@@ -2243,7 +2397,7 @@
       <!-- TAB PANEL 2: ORDER QUEUE -->
       <div id="panel-queue" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-          <span class="drawer-label" style="margin: 0;">Multi-Item Queue</span>
+          <span class="drawer-label" style="margin: 0;">Your cart</span>
           <button onclick="clearQueue()" class="btn-ghost" style="font-size: 0.65rem; font-family: var(--font-mono); padding: 0.15rem 0.35rem;">
             Clear All
           </button>
@@ -2268,12 +2422,22 @@
           </div>
 
           <button id="queue-checkout-btn" class="primary-buy-button" style="margin-top: 0.75rem;" onclick="executeQueuePurchase()">
-            Checkout Queue ($0.00)
+            Checkout ($0.00)
           </button>
         </div>
       </div>
 
     </aside>
+    </dialog>
+
+  </div>
+
+  <nav class="mobile-nav" aria-label="Main navigation">
+    <button id="mobile-nav-featured" class="active" onclick="navigateMobile('featured')"><span class="mobile-nav-icon">♫</span>Music</button>
+    <button id="mobile-nav-cds" onclick="navigateMobile('cds')"><span class="mobile-nav-icon">💿</span>CD Studio</button>
+    <button id="mobile-nav-artists" onclick="navigateMobile('artists')"><span class="mobile-nav-icon">★</span>Artists</button>
+    <button id="mobile-nav-library" onclick="navigateMobile('library')"><span class="mobile-nav-icon">▤</span>Library</button>
+  </nav>
 
   <!-- ========================================== -->
   <!-- INTERACTIVE BURNED CD MIXTAPE WIZARD MODAL -->
@@ -2537,6 +2701,7 @@
                 </div>
               </div>
 
+              <p id="cd-checkout-availability" role="status" class="purchase-note">CD payment and shipping checkout are not available yet. You can save your mix in this browser tab for later.</p>
               <button id="cd-wizard-checkout-btn" class="primary-buy-button" style="margin-top: 1rem;" onclick="submitBurnedCdOrder()">
                 Authorize Burned CD ($5.00)
               </button>
@@ -2609,7 +2774,7 @@
     let queue = [];
     
     let inspectingRelease = null;
-    let purchaseFormat = 'digital_master'; // 'digital_master' | 'burned_cd' | 'nfc_card'
+    let purchaseFormat = 'digital_master'; // 'digital_master' | 'burned_cd' | 'usb_album'
     let destinationMode = 'self'; // 'self' | 'gift'
     
     let currentTipCents = 500;
@@ -2644,21 +2809,81 @@
       },
     };
 
+    const wireframePreview = window.location.protocol === 'file:' || new URLSearchParams(window.location.search).has('wireframe');
+
+    function wireframeArtwork(label, color) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><rect width="640" height="640" fill="${color}"/><circle cx="505" cy="135" r="110" fill="#ffffff" opacity=".2"/><path d="M0 470 Q170 350 330 480 T640 420 V640 H0" fill="#1e293b" opacity=".22"/><text x="52" y="340" fill="white" font-family="sans-serif" font-weight="800" font-size="54">${label}</text><text x="52" y="400" fill="white" font-family="sans-serif" font-size="21" letter-spacing="7">AHOY MUSIC</text></svg>`;
+      return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    }
+
+    function showWireframePreview() {
+      document.body.classList.add('wireframe-preview');
+      document.getElementById('mobile-account-btn').textContent = 'AHOY ID · preview';
+      document.getElementById('wireframe-banner').style.display = 'block';
+      const box = document.getElementById('user-profile-box');
+      box.innerHTML = '<strong style="font-size:.8rem">AHOY ID area</strong><div style="font-size:.7rem;color:var(--text-muted)">Sign in state · account · library count</div>';
+      const samples = [
+        ['Harbor Lights', 'Artist One', 'single', 100, '#ff8065'],
+        ['After the Rain', 'Artist Two', 'single', 150, '#6599ad'],
+        ['Coastline Sessions', 'Artist Three', 'album', 800, '#9676ad'],
+        ['Midnight Signals', 'Artist Four', 'ep', 500, '#3e9d91'],
+      ];
+      applyReleasesData(samples.map(([title, artist, type, price, color], i) => ({
+        id: `wireframe_release_${i}`, slug: `wireframe-${i}`, title, artist,
+        artist_slug: `wireframe-artist-${i}`, description: 'Sample release description for visual layout.',
+        type, price_cents: price, artwork_url: wireframeArtwork(title, color),
+        tracks: [{ id: `wireframe_track_${i}`, release_id: `wireframe_release_${i}`, title,
+          artist, track_number: 1, duration_seconds: 192, preview_url: '', full_audio_url: '' }],
+      })));
+      catalogArtists = samples.map(([title, artist, type, price, color], i) => ({
+        id: `wireframe_artist_${i}`, slug: `wireframe-artist-${i}`, name: artist,
+        genre: ['Indie folk', 'Soul', 'Alternative', 'Electronic'][i],
+        bio: 'Artist biography placeholder. Add their story, location, and what makes this release special.',
+        avatar_url: wireframeArtwork(artist, color), banner_url: wireframeArtwork(title, color),
+      }));
+      renderArtists(catalogArtists);
+      renderLibraryData([{ id: 'wireframe_entitlement', track_id: 'wireframe_track_0', title: 'Harbor Lights',
+        artist: 'Artist One', artwork_url: wireframeArtwork('Harbor Lights', '#ff8065'), full_audio_url: '',
+        granted_at: new Date().toISOString() }], 'ahoy_preview');
+      renderLeaderboardData([]);
+      updateBuyButton();
+    }
+
     async function init() {
       initTheme();
+      updateCustomizationDrawer();
       // Fetch latest market snapshot in 1 single round trip
-      await fetchLatest();
+      if (wireframePreview) showWireframePreview();
+      else await fetchLatest();
+
+      restoreCdDraft();
+      const authError = new URLSearchParams(window.location.search).get('auth_error');
+      if (authError) {
+        const notice = document.getElementById('auth-notice');
+        notice.textContent = authError === 'registration_rejected'
+          ? 'AHOY ID sign-in is not connected to this store address yet. Your saved CD draft is still here. Please try again once the store connection is ready.'
+          : 'We could not complete AHOY ID sign-in. Your saved CD draft is still here. Please try signing in again.';
+        notice.style.display = 'block';
+      }
+      const checkoutState = new URLSearchParams(window.location.search).get('checkout');
+      if (checkoutState === 'success') {
+        switchView('library');
+        alert('Payment received. Your MP3 will appear in My Library once Stripe confirms the order. Refresh if it is still processing.');
+      } else if (checkoutState === 'cancelled') {
+        alert('Checkout was cancelled. No purchase was made.');
+      }
 
       // Keyboard shortcut '/' focuses search, 'Escape' clears
       document.addEventListener('keydown', (e) => {
-        if (e.key === '/' && document.activeElement !== document.getElementById('catalog-search-input')) {
+        if (e.key === '/' && !e.target.matches('input, textarea') && !document.querySelector('dialog[open]') && !document.querySelector('.burned-cd-modal-backdrop.active')) {
           e.preventDefault();
           const inp = document.getElementById('catalog-search-input');
           inp.focus();
           inp.select();
         } else if (e.key === 'Escape') {
-          closeBurnedCdWizard();
-          clearSearch();
+          if (document.querySelector('dialog[open]')) return;
+          if (document.querySelector('.burned-cd-modal-backdrop.active')) closeBurnedCdWizard();
+          else clearSearch();
         }
       });
 
@@ -2727,8 +2952,6 @@
         }
         if (data.artists) {
           catalogArtists = data.artists;
-          const badgeArtists = document.getElementById('badge-artists-count');
-          if (badgeArtists) badgeArtists.textContent = catalogArtists.length;
           renderArtists(catalogArtists);
         }
         if (data.leaderboard) {
@@ -2760,6 +2983,8 @@
 
     function renderUserBox() {
       const box = document.getElementById('user-profile-box');
+      const mobileAccount = document.getElementById('mobile-account-btn');
+      if (mobileAccount) mobileAccount.textContent = currentUser?.authenticated ? 'My AHOY ID' : 'Sign in';
       if (currentUser?.authenticated) {
         const name = currentUser.user.name || currentUser.user.email || currentUser.user.ahoy_id;
         box.innerHTML = `
@@ -2773,7 +2998,7 @@
         `;
       } else {
         box.innerHTML = `
-          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.45rem;">Anonymous Sovereign</div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.45rem;">Your music, collected.</div>
           <a href="/api/auth/login" class="btn btn-coral" style="width: 100%; justify-content: center; padding: 0.42rem 0.5rem; font-size: 0.72rem;">
             Sign in with AHOY ID
           </a>
@@ -2790,9 +3015,12 @@
         if (el) el.style.display = (v === viewName) ? 'block' : 'none';
         if (btn) btn.classList.toggle('active', v === viewName);
       });
+      ['featured', 'cds', 'artists', 'library'].forEach(v => {
+        document.getElementById(`mobile-nav-${v}`)?.classList.toggle('active', v === viewName);
+      });
 
-      if (viewName === 'library') loadLibrary();
-      if (viewName === 'patrons') loadLeaderboard();
+      if (viewName === 'library' && !wireframePreview) loadLibrary();
+      if (viewName === 'patrons' && !wireframePreview) loadLeaderboard();
       if (viewName === 'tracks') renderTracksTable();
       if (viewName === 'albums') renderAlbumsView();
       if (viewName === 'cds') {
@@ -2800,6 +3028,17 @@
         openBurnedCdWizard();
       }
       if (viewName === 'cards') renderCardsView();
+    }
+
+    function navigateMobile(viewName) {
+      switchView(viewName);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openMobileAccount() {
+      if (wireframePreview) return alert('AHOY ID sign in is inactive in the design wireframe.');
+      if (currentUser?.authenticated) navigateMobile('library');
+      else window.location.href = '/api/auth/login';
     }
 
     function applyReleasesData(releases) {
@@ -2825,7 +3064,7 @@
 
       // Select first release for inspector if none selected yet
       if (catalogReleases.length > 0 && !inspectingRelease) {
-        inspectRelease(catalogReleases[0].id);
+        inspectRelease(catalogReleases[0].id, false);
       }
 
       applySearchAndFilter();
@@ -2843,21 +3082,31 @@
     // SEARCH & FILTER ENGINE
     function handleCatalogSearch(query) {
       currentSearchQuery = query.toLowerCase().trim();
+      switchView('featured');
       applySearchAndFilter();
     }
 
     function clearSearch() {
       currentSearchQuery = '';
+      currentSearchCategory = 'all';
+      ['all', 'album', 'single', 'cd', 'usb'].forEach(c => {
+        const pillId = c === 'album' ? 'filter-albums' : c === 'single' ? 'filter-singles' : c === 'cd' ? 'filter-cds' : c === 'usb' ? 'filter-nfc' : 'filter-all';
+        const pill = document.getElementById(pillId);
+        if (pill) pill.classList.toggle('active', c === 'all');
+      });
       document.getElementById('catalog-search-input').value = '';
+      switchView('featured');
       applySearchAndFilter();
     }
 
     function setSearchCategory(cat) {
       currentSearchCategory = cat;
-      ['all', 'album', 'single', 'cd', 'nfc'].forEach(c => {
-        const pill = document.getElementById(`filter-${c === 'album' ? 'albums' : c === 'single' ? 'singles' : c === 'cd' ? 'cds' : c}`);
+      ['all', 'album', 'single', 'cd', 'usb'].forEach(c => {
+        const pillId = c === 'album' ? 'filter-albums' : c === 'single' ? 'filter-singles' : c === 'cd' ? 'filter-cds' : c === 'usb' ? 'filter-nfc' : 'filter-all';
+        const pill = document.getElementById(pillId);
         if (pill) pill.classList.toggle('active', c === cat);
       });
+      switchView('featured');
       applySearchAndFilter();
     }
 
@@ -2868,6 +3117,10 @@
         filtered = filtered.filter(r => r.type === 'single');
       } else if (currentSearchCategory === 'album') {
         filtered = filtered.filter(r => r.type === 'album');
+      } else if (currentSearchCategory === 'cd') {
+        filtered = filtered.filter(r => r.type === 'album' || (r.tracks && r.tracks.length > 1));
+      } else if (currentSearchCategory === 'usb') {
+        filtered = filtered.filter(r => r.type === 'album' || (r.tracks && r.tracks.length > 1));
       }
 
       if (currentSearchQuery) {
@@ -2881,7 +3134,7 @@
       }
 
       const counter = document.getElementById('results-count');
-      if (counter) counter.textContent = `${filtered.length} OF ${catalogReleases.length} SHOWN`;
+      if (counter) counter.textContent = `${filtered.length} release${filtered.length === 1 ? '' : 's'}`;
 
       renderFeaturedReleases(filtered);
     }
@@ -2926,7 +3179,7 @@
             <div class="card-artist">${escapeHtml(r.artist)}</div>
             <div class="card-actions-row">
               <button class="btn btn-coral" style="flex: 1; justify-content: center; padding: 0.42rem 0.6rem; font-size: 0.74rem;" onclick="inspectAndDirectBuy('${r.id}')">
-                Buy / Press
+                View options
               </button>
             </div>
           </div>
@@ -3056,12 +3309,12 @@
         card.className = 'release-card';
         card.onclick = () => {
           inspectRelease(r.id);
-          setPurchaseFormat('nfc_card');
+          setPurchaseFormat('usb_album');
         };
         card.innerHTML = `
           <div class="card-art-box">
             <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
-            <span class="card-format-tag" style="color: var(--coral);">NFC CARD</span>
+            <span class="card-format-tag" style="color: var(--coral);">USB ALBUM</span>
           </div>
           <div class="card-meta">
             <div class="card-meta-top">
@@ -3071,7 +3324,7 @@
             <div class="card-artist">${escapeHtml(r.artist)}</div>
             <div class="card-actions-row">
               <button class="btn btn-coral" style="flex: 1; justify-content: center; font-size: 0.72rem; padding: 0.35rem 0.5rem;">
-                Order NFC Card ($15)
+                Order USB Album ($15)
               </button>
             </div>
           </div>
@@ -3081,25 +3334,36 @@
     }
 
     // INSPECTOR CONTROL
-    function inspectRelease(releaseId) {
+    function openPurchasePanel() {
+      const dialog = document.getElementById('purchase-dialog');
+      if (!dialog.open) dialog.showModal();
+    }
+
+    function inspectRelease(releaseId, openPanel = true) {
       const rel = catalogReleases.find(r => r.id === releaseId);
       if (!rel) return;
       inspectingRelease = rel;
+      if (openPanel) openPurchasePanel();
 
       document.getElementById('inspect-cover').src = rel.artwork_url;
       document.getElementById('inspect-title').textContent = rel.title;
+      document.getElementById('inspect-description').textContent = rel.description || `Music by ${rel.artist}. Preview the release and choose your format below.`;
+      const tracks = rel.tracks || [];
+      const seconds = tracks.reduce((total, track) => total + (track.duration_seconds || 0), 0);
+      document.getElementById('inspect-specs').textContent = `${tracks.length} track${tracks.length === 1 ? '' : 's'}${seconds ? ` · ${Math.floor(seconds / 60)} min` : ''} · MP3 download`;
+      document.querySelector('#tile-digital .tile-price').textContent = `$${(rel.price_cents / 100).toFixed(2)}`;
       document.getElementById('inspect-artist').textContent = `${rel.artist} • ${rel.type.toUpperCase()}`;
 
       // Update selection visual state in cards
       document.querySelectorAll('.release-card').forEach(c => c.classList.remove('selected'));
       
       switchRightTab('inspect');
+      updateCustomizationDrawer();
       updateBuyButton();
     }
 
     function inspectAndDirectBuy(releaseId) {
       inspectRelease(releaseId);
-      document.getElementById('primary-action-btn').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function switchRightTab(tab) {
@@ -3110,15 +3374,40 @@
       document.getElementById('panel-queue').style.display = isInspect ? 'none' : 'block';
     }
 
+    function updateCustomizationDrawer() {
+      const isPhysical = purchaseFormat === 'burned_cd' || purchaseFormat === 'usb_album' || purchaseFormat === 'nfc_card';
+      const isGift = destinationMode === 'gift';
+      const drawer = document.getElementById('customization-drawer');
+      const quickNote = document.getElementById('quick-convert-note');
+      const shipGroup = document.getElementById('physical-shipping-group');
+      const giftGroup = document.getElementById('gift-input-group');
+
+      if (shipGroup) shipGroup.style.display = isPhysical ? 'block' : 'none';
+      if (giftGroup) giftGroup.style.display = isGift ? 'block' : 'none';
+
+      // Progressive disclosure: hide drawer by default for digital self-purchases
+      const showDrawer = (isPhysical || isGift) && (wireframePreview || purchaseFormat !== 'usb_album' && purchaseFormat !== 'nfc_card');
+      if (drawer) drawer.style.display = showDrawer ? 'block' : 'none';
+      if (quickNote) quickNote.style.display = (purchaseFormat === 'digital_master' && !isGift) ? 'flex' : 'none';
+    }
+
+    function toggleGiftMode() {
+      if (destinationMode === 'gift') {
+        setDestinationMode('self');
+      } else {
+        setDestinationMode('gift');
+        const giftInput = document.getElementById('gift-ahoy-id');
+        if (giftInput) giftInput.focus();
+      }
+    }
+
     function setPurchaseFormat(fmt) {
       purchaseFormat = fmt;
       document.getElementById('tile-digital').classList.toggle('active', fmt === 'digital_master');
       document.getElementById('tile-cd').classList.toggle('active', fmt === 'burned_cd');
-      document.getElementById('tile-nfc').classList.toggle('active', fmt === 'nfc_card');
+      document.getElementById('tile-nfc').classList.toggle('active', fmt === 'usb_album' || fmt === 'nfc_card');
 
-      const isPhysical = fmt === 'burned_cd' || fmt === 'nfc_card';
-      document.getElementById('physical-shipping-group').style.display = isPhysical ? 'block' : 'none';
-      
+      updateCustomizationDrawer();
       updateBuyButton();
     }
 
@@ -3126,23 +3415,43 @@
       destinationMode = mode;
       document.getElementById('dest-self-btn').classList.toggle('active', mode === 'self');
       document.getElementById('dest-gift-btn').classList.toggle('active', mode === 'gift');
-      document.getElementById('gift-input-group').style.display = mode === 'gift' ? 'block' : 'none';
+      updateCustomizationDrawer();
       updateBuyButton();
     }
 
     function updateBuyButton() {
       const btn = document.getElementById('primary-action-btn');
       if (!btn) return;
+      btn.disabled = false;
+      const digital = purchaseFormat === 'digital_master';
+      const note = document.getElementById('purchase-note');
+      document.getElementById('add-to-cart-btn').style.display = digital ? '' : 'none';
+      note.textContent = digital
+        ? 'Sign in with AHOY ID, then continue to Stripe. Your download appears in My Library after payment is confirmed.'
+        : 'USB album checkout is not available yet. You can still purchase the MP3 download.';
+      if (!digital && !wireframePreview) {
+        btn.textContent = 'USB checkout coming soon';
+        btn.disabled = true;
+        return;
+      }
 
-      let priceStr = '$1.00';
-      let actionLabel = 'Buy Digital Master';
+      let priceStr = (inspectingRelease && purchaseFormat === 'digital_master')
+        ? `$${(inspectingRelease.price_cents / 100).toFixed(2)}`
+        : '$1.00';
+      let actionLabel = 'Buy MP3';
 
       if (purchaseFormat === 'burned_cd') {
         priceStr = '$15.00';
         actionLabel = 'Order Hand-Burned CD';
-      } else if (purchaseFormat === 'nfc_card') {
+      } else if (purchaseFormat === 'usb_album' || purchaseFormat === 'nfc_card') {
         priceStr = '$15.00';
-        actionLabel = 'Order Archival NFC Card';
+        actionLabel = 'Order USB Album';
+      }
+
+      if (wireframePreview) {
+        btn.textContent = `${actionLabel} · layout preview`;
+        btn.onclick = () => alert('This is a design wireframe. Checkout is inactive.');
+        return;
       }
 
       if (!currentUser?.authenticated) {
@@ -3156,82 +3465,33 @@
 
     // DIRECT HIGH-CONVERTING SINGLE PURCHASE
     async function executeSinglePurchase() {
+      if (wireframePreview) return;
       if (!inspectingRelease) return;
       if (!currentUser?.authenticated) {
         window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
         return;
       }
 
-      const isPhysical = purchaseFormat === 'burned_cd' || purchaseFormat === 'nfc_card';
-      let shipping = null;
-
-      if (isPhysical) {
-        const name = document.getElementById('ship-name').value.trim();
-        const street = document.getElementById('ship-street').value.trim();
-        const city = document.getElementById('ship-city').value.trim();
-        const state = document.getElementById('ship-state').value.trim();
-        const zip = document.getElementById('ship-zip').value.trim();
-        const note = document.getElementById('sleeve-inscription-input').value.trim();
-
-        if (!name || !street || !city || !state || !zip) {
-          alert('Please provide a complete USPS delivery address for your physical edition.');
+      if (purchaseFormat === 'digital_master') {
+        if (destinationMode === 'gift') {
+          alert('Gift checkout is not available yet. Select My AHOY ID to buy this MP3.');
           return;
         }
-        shipping = { name, address: street, city, state, zip, country: 'US', inscription_note: note || undefined };
-      } else {
-        const note = document.getElementById('sleeve-inscription-input').value.trim();
-        if (note) shipping = { inscription_note: note };
-      }
-
-      let recipientId = null;
-      if (destinationMode === 'gift') {
-        recipientId = document.getElementById('gift-ahoy-id').value.trim();
-        if (!recipientId) {
-          alert("Please enter your friend's AHOY ID for entitlement inscription.");
-          return;
+        const btn = document.getElementById('primary-action-btn');
+        btn.disabled = true;
+        btn.textContent = 'Opening secure checkout...';
+        try {
+          const result = await api.post('/api/checkout/stripe', { release_id: inspectingRelease.id });
+          window.location.href = result.checkout_url;
+        } catch (err) {
+          alert(err.message || 'Checkout could not start. Please try again.');
+          btn.disabled = false;
+          updateBuyButton();
         }
+        return;
       }
 
-      const btn = document.getElementById('primary-action-btn');
-      btn.disabled = true;
-      btn.textContent = 'Inscribing Sovereign Ledger...';
-
-      let amountCents = purchaseFormat === 'digital_master' ? inspectingRelease.price_cents : 1500;
-
-      try {
-        const result = await api.post('/api/checkout/purchase', {
-          release_id: inspectingRelease.id,
-          recipient_ahoy_id: recipientId || undefined,
-          amount_cents: amountCents,
-          format: purchaseFormat,
-          shipping: shipping || undefined,
-          payment_method: 'instant_sovereign',
-        });
-
-        const target = recipientId || currentUser.user.ahoy_id;
-        const box = document.getElementById('purchase-success-box');
-        const msg = document.getElementById('purchase-success-msg');
-        msg.textContent = `Order #${result.purchase_id} minted! Format: ${result.format}. Inscribed to ${target}. Status: ${result.fulfillment_status}.`;
-        box.style.display = 'block';
-
-        // Clear form fields
-        document.getElementById('sleeve-inscription-input').value = '';
-        if (isPhysical) {
-          document.getElementById('ship-name').value = '';
-          document.getElementById('ship-street').value = '';
-          document.getElementById('ship-city').value = '';
-          document.getElementById('ship-state').value = '';
-          document.getElementById('ship-zip').value = '';
-        }
-
-        await fetchLatest();
-      } catch (err) {
-        console.error('Purchase error:', err);
-        alert(`Order authorization could not be completed: ${err.message || 'Network error'}`);
-      } finally {
-        btn.disabled = false;
-        updateBuyButton();
-      }
+      alert('Physical checkout is not available yet. Select Digital Master to purchase music.');
     }
 
     // ORDER QUEUE MULTI-ITEM OPERATIONS
@@ -3265,16 +3525,17 @@
       const checkoutBtn = document.getElementById('queue-checkout-btn');
 
       badge.textContent = queue.length;
+      document.getElementById('cart-count').textContent = queue.length ? ` (${queue.length})` : '';
       countLabel.textContent = queue.length;
 
       if (!queue.length) {
         container.innerHTML = `
           <div style="text-align: center; padding: 1.5rem; background: var(--right-bg); border: 1px dashed var(--right-border); border-radius: 6px; font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">
-            Queue is currently empty.
+            Your cart is empty. Choose a release to get started.
           </div>
         `;
         totalLabel.textContent = '$0.00';
-        checkoutBtn.textContent = 'Queue Empty';
+        checkoutBtn.textContent = 'Cart is empty';
         checkoutBtn.disabled = true;
         return;
       }
@@ -3293,7 +3554,7 @@
           <img src="${item.artwork_url}" class="queue-thumb" alt="${escapeHtml(item.title)}">
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 700; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.title)}</div>
-            <div style="font-size: 0.65rem; color: var(--text-muted);">${escapeHtml(item.artist)} • ${item.selected_format}</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">${escapeHtml(item.artist)} • ${item.selected_format === 'digital_master' ? 'MP3 download' : 'USB album'}</div>
           </div>
           <span style="font-family: var(--font-mono); font-weight: 700; font-size: 0.76rem; color: var(--mint);">$${(itemCents / 100).toFixed(2)}</span>
           <button onclick="removeFromQueue('${item.id}')" style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; padding: 0.2rem;">&times;</button>
@@ -3302,10 +3563,11 @@
       });
 
       totalLabel.textContent = `$${(totalCents / 100).toFixed(2)}`;
-      checkoutBtn.textContent = `Authorize Queue ($${(totalCents / 100).toFixed(2)})`;
+      checkoutBtn.textContent = `Checkout ($${(totalCents / 100).toFixed(2)})`;
     }
 
     async function executeQueuePurchase() {
+      if (wireframePreview) return alert('Checkout is inactive in the design wireframe.');
       if (!queue.length) return;
       if (!currentUser?.authenticated) {
         window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
@@ -3314,7 +3576,7 @@
 
       const btn = document.getElementById('queue-checkout-btn');
       btn.disabled = true;
-      btn.textContent = 'Processing Queue...';
+      btn.textContent = 'Processing…';
 
       try {
         let successCount = 0;
@@ -3349,8 +3611,6 @@
       try {
         const data = await api.get('/api/artists');
         catalogArtists = data.artists || [];
-        const badge = document.getElementById('badge-artists-count');
-        if (badge) badge.textContent = catalogArtists.length;
         renderArtists(catalogArtists);
       } catch (err) {
         console.error('Artists fetch error:', err);
@@ -3378,12 +3638,8 @@
           </div>
           <div class="artist-info">
             <p style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.45;">${escapeHtml(a.bio)}</p>
-            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.68rem; margin-bottom: 0.65rem;">
-              <span style="color: var(--mint);">$${(a.total_boost_cents / 100).toFixed(2)} TOTAL</span>
-              <span style="color: var(--text-dim);">${a.boost_count} TIPS</span>
-            </div>
             <button class="btn btn-coral" style="width: 100%; justify-content: center; font-size: 0.72rem;" onclick="openTipDrawer('${a.slug}')">
-              Direct Artist Tip
+              Support Artist
             </button>
           </div>
         `;
@@ -3400,6 +3656,7 @@
       const a = catalogArtists.find(x => x.slug === artistSlug);
       if (!a) return;
       activeTipArtist = a;
+      openPurchasePanel();
       document.getElementById('tip-target-name').textContent = a.name;
       document.getElementById('tip-target-bio').textContent = a.bio;
       document.getElementById('active-tip-panel').style.display = 'block';
@@ -3431,6 +3688,7 @@
     }
 
     async function executeTip() {
+      if (wireframePreview) return alert('Tips are inactive in the design wireframe.');
       if (!activeTipArtist) return;
       if (!currentUser?.authenticated) {
         window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname + '?tip=' + activeTipArtist.slug)}`;
@@ -3476,10 +3734,8 @@
         <table class="track-table">
           <thead>
             <tr>
-              <th style="width: 50px;">Rank</th>
               <th>Patron</th>
-              <th>Contributions</th>
-              <th>Total Given</th>
+          <th>Thanks</th>
             </tr>
           </thead>
           <tbody>
@@ -3488,13 +3744,11 @@
       leaderboard.forEach(entry => {
         html += `
           <tr>
-            <td style="font-family: var(--font-mono); font-weight: 700;">#${entry.rank}</td>
             <td>
               <div style="font-weight: 700;">${escapeHtml(entry.supporter_name)}</div>
               <div style="font-size: 0.65rem; color: var(--text-dim); font-family: var(--font-mono);">${escapeHtml(entry.ahoy_id)}</div>
             </td>
-            <td style="font-family: var(--font-mono); color: var(--text-muted);">${entry.boost_count}</td>
-            <td style="font-family: var(--font-mono); color: var(--coral); font-weight: 700;">$${(entry.total_cents / 100).toFixed(2)}</td>
+            <td style="font-family: var(--font-mono); color: var(--text-muted);">Thank you</td>
           </tr>
         `;
       });
@@ -3559,7 +3813,7 @@
                   Play
                 </button>
                 <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
-                  WAV/MP3
+                  Download MP3
                 </a>
                 <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" target="_blank" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;">
                   Player
@@ -3629,7 +3883,34 @@
     let cdDestinationMode = 'self';
     let draggedTrackId = null;
 
+    function saveCdDraft() {
+      try {
+        sessionStorage.setItem('ahoy_cd_draft', JSON.stringify({
+          trackIds: burnedCdTracks.map(t => t.id), title: cdTitle,
+          marker: cdMarkerColor, color: cdMarkerColorHex, savedAt: Date.now()
+        }));
+        return true;
+      } catch { return false; }
+    }
+
+    function restoreCdDraft() {
+      try {
+        const draft = JSON.parse(sessionStorage.getItem('ahoy_cd_draft') || 'null');
+        if (!draft || Date.now() - draft.savedAt > 86400000 || !Array.isArray(draft.trackIds)) return;
+        burnedCdTracks = draft.trackIds.map(id => allTracks.find(t => t.id === id)).filter(Boolean);
+        cdTitle = typeof draft.title === 'string' ? draft.title.slice(0, 100) : 'MY AHOY MIXTAPE';
+        const colors = { black: '#1E293B', coral: '#FF7A59', sky: '#0284C7', mint: '#0D9488', silver: '#94A3B8' };
+        cdMarkerColor = Object.hasOwn(colors, draft.marker) ? draft.marker : 'black';
+        cdMarkerColorHex = colors[cdMarkerColor];
+      } catch { /* A missing or invalid draft does not block browsing. */ }
+    }
+
+    window.addEventListener('pagehide', () => {
+      if (burnedCdTracks.length) saveCdDraft();
+    });
+
     function openBurnedCdWizard(initialReleaseOrTrackId = null) {
+      document.getElementById('purchase-dialog').close();
       const modal = document.getElementById('burned-cd-modal-backdrop');
       if (!modal) return;
 
@@ -3663,6 +3944,7 @@
       if (titleInp) titleInp.value = cdTitle;
       
       handleCdTitleChange(cdTitle);
+      setMarkerColor(cdMarkerColor, cdMarkerColorHex);
       updateCdDiscAndCapacity();
       renderCdPoolTracks('');
       setWizardStep(1);
@@ -4020,19 +4302,20 @@
       if (revTotalPrice) revTotalPrice.textContent = `$${(totalCents / 100).toFixed(2)}`;
 
       const buyBtn = document.getElementById('cd-wizard-checkout-btn');
-      if (buyBtn) {
-        if (!currentUser?.authenticated) {
-          buyBtn.textContent = `Sign in with AHOY ID to Complete Order ($${(totalCents / 100).toFixed(2)})`;
-          buyBtn.onclick = () => window.location.href = `/api/auth/login?return_to=${encodeURIComponent(window.location.pathname)}`;
-        } else {
-          buyBtn.textContent = `Authorize Hand-Burned CD ($${(totalCents / 100).toFixed(2)})`;
-          buyBtn.onclick = submitBurnedCdOrder;
-        }
-      }
+      buyBtn.disabled = false;
+      buyBtn.textContent = 'Save CD draft';
+      buyBtn.onclick = () => {
+        const saved = saveCdDraft();
+        document.getElementById('cd-checkout-availability').textContent = saved
+          ? 'Draft saved for this browser tab. CD payment and shipping checkout are not available yet. No order has been placed.'
+          : 'Your browser could not save this draft. Keep this tab open to retain your mix.';
+      };
     }
 
     // CHECKOUT SUBMISSION
     async function submitBurnedCdOrder() {
+      saveCdDraft();
+      return alert('CD checkout is not available yet. Your mix is saved in this browser tab; no order has been placed.');
       if (burnedCdTracks.length === 0) {
         alert("Please add at least 1 track to your CD!");
         setWizardStep(1);

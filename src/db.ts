@@ -164,6 +164,17 @@ export class MarketStore {
         created_at TEXT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS stripe_checkout_orders (
+        session_id TEXT PRIMARY KEY,
+        ahoy_id TEXT NOT NULL,
+        email TEXT,
+        release_id TEXT NOT NULL,
+        track_id TEXT,
+        amount_cents INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TEXT NOT NULL
+      );
+
       CREATE TABLE IF NOT EXISTS entitlements (
         id TEXT PRIMARY KEY,
         ahoy_id TEXT NOT NULL,
@@ -777,7 +788,7 @@ export class MarketStore {
     amount_cents: number;
     payment_method: string;
     payment_ref: string;
-    format?: 'digital_master' | 'nfc_card' | 'burned_cd';
+    format?: 'digital_master' | 'usb_album' | 'burned_cd' | 'nfc_card';
     shipping?: {
       name?: string;
       address?: string;
@@ -848,6 +859,28 @@ export class MarketStore {
 
     const count = tx();
     return { purchaseId, entitlementCount: count, grantedTo, format, fulfillmentStatus };
+  }
+
+  saveStripeCheckout(data: { session_id: string; ahoy_id: string; email?: string | null; release_id: string; track_id?: string | null; amount_cents: number }) {
+    this.db.prepare(`INSERT INTO stripe_checkout_orders (session_id, ahoy_id, email, release_id, track_id, amount_cents, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`).run(data.session_id, data.ahoy_id, data.email || null, data.release_id, data.track_id || null, data.amount_cents, new Date().toISOString());
+  }
+
+  completeStripeCheckout(session: { id: string; payment_status?: string; amount_total?: number; currency?: string }) {
+    if (session.payment_status !== 'paid' || session.currency !== 'usd') return false;
+    const tx = this.db.transaction(() => {
+      const order = this.db.prepare(`SELECT * FROM stripe_checkout_orders WHERE session_id = ?`).get(session.id) as
+        { ahoy_id: string; email: string | null; release_id: string; track_id: string | null; amount_cents: number; status: string } | undefined;
+      if (!order || order.status !== 'pending' || order.amount_cents !== session.amount_total) return false;
+      this.recordPurchase({
+        ahoy_id: order.ahoy_id, email: order.email, release_id: order.release_id,
+        track_id: order.track_id, amount_cents: order.amount_cents,
+        payment_method: 'stripe', payment_ref: session.id, format: 'digital_master',
+      });
+      this.db.prepare(`UPDATE stripe_checkout_orders SET status = 'completed' WHERE session_id = ?`).run(session.id);
+      return true;
+    });
+    return tx();
   }
 
   getEntitlements(ahoyId: string): Entitlement[] {

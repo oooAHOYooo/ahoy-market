@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginAsync, FastifyRequest, FastifyReply } fro
 import { z } from 'zod';
 import { MarketStore, UserSession } from '../db.js';
 import { config } from '../config.js';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const purchaseInput = z.object({
   release_id: z.string().min(1),
@@ -9,7 +10,7 @@ const purchaseInput = z.object({
   amount_cents: z.number().int().positive().optional(),
   payment_method: z.enum(['instant_sovereign', 'test_card', 'stripe']).default('instant_sovereign'),
   recipient_ahoy_id: z.string().optional(),
-  format: z.enum(['digital_master', 'nfc_card', 'burned_cd']).default('digital_master'),
+  format: z.enum(['digital_master', 'usb_album', 'burned_cd', 'nfc_card']).default('digital_master'),
   shipping: z.object({
     name: z.string().min(1).optional(),
     address: z.string().min(1).optional(),
@@ -64,7 +65,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
     // 3. Header (e.g. from AHOY Player with user's verified ahoy_id)
     const xAhoyId = request.headers['x-ahoy-id'];
-    if (typeof xAhoyId === 'string' && /^ahoy_[A-Za-z0-9_-]{3,}$/.test(xAhoyId)) {
+    if (!config.isProduction && typeof xAhoyId === 'string' && /^ahoy_[A-Za-z0-9_-]{3,}$/.test(xAhoyId)) {
       return { ahoy_id: xAhoyId };
     }
 
@@ -75,8 +76,10 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   app.get('/api/market/latest', async (request: FastifyRequest) => {
     const auth = getAuthUser(request);
     const releases = store.getReleasesWithTracks();
-    const artists = store.getArtists();
-    const leaderboard = store.getGlobalBoostersLeaderboard(10);
+    const artists = store.getArtists().map(({ total_boost_cents: _total, boost_count: _count, ...artist }) => artist);
+    const leaderboard = store.getGlobalBoostersLeaderboard(10)
+      .map(({ total_cents: _total, boost_count: _count, rank: _rank, ...supporter }) => supporter)
+      .sort((a, b) => a.supporter_name.localeCompare(b.supporter_name));
     const library = auth ? store.getEntitlements(auth.ahoy_id) : [];
     const boostStats = auth ? store.getUserBoostStats(auth.ahoy_id) : null;
 
@@ -103,9 +106,9 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     return { release };
   });
 
-  // GET /api/artists -> List artists with boost totals
+  // GET /api/artists -> Public artist catalog; supporter totals stay private
   app.get('/api/artists', async () => {
-    const artists = store.getArtists();
+    const artists = store.getArtists().map(({ total_boost_cents: _total, boost_count: _count, ...artist }) => artist);
     return { artists };
   });
 
@@ -113,7 +116,8 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   app.get('/api/artists/:idOrSlug', async (request: FastifyRequest<{ Params: { idOrSlug: string } }>, reply: FastifyReply) => {
     const artist = store.getArtist(request.params.idOrSlug);
     if (!artist) return reply.code(404).send({ error: 'artist_not_found' });
-    return { artist };
+    const { total_boost_cents: _total, boost_count: _count, ...publicArtist } = artist;
+    return { artist: publicArtist };
   });
 
   // GET /api/artists/:slug/boosts -> Get recent boosts for an artist
@@ -123,12 +127,13 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     return {
       artist_slug: request.params.slug,
       count: boosts.length,
-      boosts,
+      boosts: boosts.map(({ amount_cents: _amount, ...boost }) => boost),
     };
   });
 
   // POST /api/boost -> Boost / Tip an artist directly with AHOY ID
   app.post('/api/boost', async (request: FastifyRequest, reply: FastifyReply) => {
+    if (config.isProduction) return reply.code(403).send({ error: 'boost_checkout_unavailable' });
     const auth = getAuthUser(request);
     if (!auth) {
       return reply.code(401).send({
@@ -188,7 +193,9 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   // GET /api/leaderboard/boosters -> Global top patrons leaderboard
   app.get('/api/leaderboard/boosters', async (request: FastifyRequest<{ Querystring: { limit?: string } }>) => {
     const limit = parseInt(request.query.limit || '10', 10);
-    const leaderboard = store.getGlobalBoostersLeaderboard(limit);
+    const leaderboard = store.getGlobalBoostersLeaderboard(limit)
+      .map(({ total_cents: _total, boost_count: _count, rank: _rank, ...supporter }) => supporter);
+    leaderboard.sort((a, b) => a.supporter_name.localeCompare(b.supporter_name));
     return {
       leaderboard,
     };
@@ -196,6 +203,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
   // POST /api/checkout/purchase -> Buy a song or album with AHOY ID
   app.post('/api/checkout/purchase', async (request: FastifyRequest, reply: FastifyReply) => {
+    if (config.isProduction) return reply.code(403).send({ error: 'use_stripe_checkout' });
     const auth = getAuthUser(request);
     if (!auth) {
       return reply.code(401).send({
@@ -252,8 +260,68 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     });
   });
 
+  // Digital purchases are priced on the server and remain pending until Stripe confirms payment.
+  app.post('/api/checkout/stripe', async (request: FastifyRequest, reply: FastifyReply) => {
+    const auth = getAuthUser(request);
+    if (!auth) return reply.code(401).send({ error: 'authentication_required' });
+    if (!config.stripeSecretKey || !config.stripeWebhookSecret) return reply.code(503).send({ error: 'stripe_not_configured' });
+    const parsed = z.object({ release_id: z.string().min(1), track_id: z.string().optional() }).safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: 'invalid_checkout_payload' });
+    const release = store.getRelease(parsed.data.release_id);
+    if (!release) return reply.code(404).send({ error: 'release_not_found' });
+    const track = parsed.data.track_id ? release.tracks.find(t => t.id === parsed.data.track_id) : null;
+    if (parsed.data.track_id && !track) return reply.code(400).send({ error: 'track_not_in_release' });
+    // Singles and albums currently use the release's catalog price.
+    const amount = release.price_cents;
+    const params = new URLSearchParams({
+      mode: 'payment',
+      success_url: `${config.publicBaseUrl}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${config.publicBaseUrl}/?checkout=cancelled`,
+      'line_items[0][price_data][currency]': 'usd',
+      'line_items[0][price_data][unit_amount]': String(amount),
+      'line_items[0][price_data][product_data][name]': `${release.artist} — ${track?.title || release.title} (digital)`,
+      'line_items[0][quantity]': '1',
+      client_reference_id: auth.ahoy_id,
+    });
+    if (auth.email) params.set('customer_email', auth.email);
+    let stripeResponse: Response;
+    try {
+      stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${config.stripeSecretKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params,
+      });
+    } catch { return reply.code(502).send({ error: 'stripe_unavailable' }); }
+    if (!stripeResponse.ok) return reply.code(502).send({ error: 'stripe_checkout_failed' });
+    const session = await stripeResponse.json() as { id?: string; url?: string };
+    if (!session.id || !session.url) return reply.code(502).send({ error: 'stripe_checkout_failed' });
+    store.saveStripeCheckout({ session_id: session.id, ahoy_id: auth.ahoy_id, email: auth.email,
+      release_id: release.id, track_id: track?.id, amount_cents: amount });
+    return { checkout_url: session.url };
+  });
+
+  app.post('/api/stripe/webhook', async (request: FastifyRequest, reply: FastifyReply) => {
+    const raw = (request as FastifyRequest & { rawBody?: Buffer }).rawBody;
+    const signature = request.headers['stripe-signature'];
+    if (!config.stripeWebhookSecret || !raw || typeof signature !== 'string') return reply.code(400).send({ error: 'invalid_signature' });
+    const parts = Object.fromEntries(signature.split(',').map(part => part.split('=', 2)));
+    const timestamp = Number(parts.t);
+    if (!Number.isFinite(timestamp) || Math.abs(Date.now() / 1000 - timestamp) > 300) return reply.code(400).send({ error: 'invalid_signature' });
+    const expected = createHmac('sha256', config.stripeWebhookSecret).update(`${timestamp}.${raw.toString('utf8')}`).digest('hex');
+    const candidate = Buffer.from(parts.v1 || '', 'hex');
+    if (candidate.length !== 32 || !timingSafeEqual(candidate, Buffer.from(expected, 'hex'))) return reply.code(400).send({ error: 'invalid_signature' });
+    const event = request.body as { type?: string; data?: { object?: { id?: string; payment_status?: string; amount_total?: number; currency?: string } } };
+    if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
+      const session = event.data?.object;
+      if (session?.id) store.completeStripeCheckout({ id: session.id, payment_status: session.payment_status,
+        amount_total: session.amount_total, currency: session.currency });
+    }
+    return { received: true };
+  });
+
   // POST /api/checkout/burned-cd -> Custom Mixtape Burned CD Wizard order
   app.post('/api/checkout/burned-cd', async (request: FastifyRequest, reply: FastifyReply) => {
+    if (config.isProduction) return reply.code(403).send({ error: 'physical_checkout_unavailable' });
     const auth = getAuthUser(request);
     if (!auth) {
       return reply.code(401).send({
@@ -364,7 +432,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
     const auth = getAuthUser(request);
     const queryAhoyId = request.query.ahoy_id;
-    const effectiveAhoyId = auth?.ahoy_id || queryAhoyId;
+    const effectiveAhoyId = auth?.ahoy_id || (!config.isProduction ? queryAhoyId : undefined);
 
     const isEntitled = effectiveAhoyId ? store.hasEntitlement(effectiveAhoyId, trackId) : false;
 
@@ -384,7 +452,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
     const auth = getAuthUser(request);
     const queryAhoyId = request.query.ahoy_id;
-    const effectiveAhoyId = auth?.ahoy_id || queryAhoyId;
+    const effectiveAhoyId = auth?.ahoy_id || (!config.isProduction ? queryAhoyId : undefined);
 
     const isEntitled = effectiveAhoyId ? store.hasEntitlement(effectiveAhoyId, trackId) : false;
     if (!isEntitled) {

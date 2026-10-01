@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { MarketStore } from '../src/db.js';
 import { FastifyInstance } from 'fastify';
+import { createHmac } from 'node:crypto';
+import { config } from '../src/config.js';
 
 describe('AHOY Market API & Entitlement Flow', () => {
   let store: MarketStore;
@@ -22,6 +24,41 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.service).toBe('ahoy-market');
+  });
+
+  it('grants a digital purchase only after a signed paid Stripe event and ignores replays', async () => {
+    const originalKey = config.stripeSecretKey;
+    const originalSecret = config.stripeWebhookSecret;
+    const originalFetch = globalThis.fetch;
+    config.stripeSecretKey = 'sk_test_local';
+    config.stripeWebhookSecret = 'whsec_local';
+    globalThis.fetch = async () => new Response(JSON.stringify({ id: 'cs_test_local_1', url: 'https://checkout.stripe.com/test' }), { status: 200 });
+    try {
+      const login = await app.inject({ method: 'POST', url: '/api/auth/dev-login', payload: { ahoy_id: 'ahoy_stripe_buyer' } });
+      const cookie = login.cookies.find(c => c.name === 'ahoy_market_session')!;
+      const checkout = await app.inject({ method: 'POST', url: '/api/checkout/stripe',
+        cookies: { ahoy_market_session: cookie.value }, payload: { release_id: 'rel_samuel_witch_1', amount_cents: 1 } });
+      expect(checkout.statusCode).toBe(200);
+      expect(checkout.json().checkout_url).toBe('https://checkout.stripe.com/test');
+      expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(0);
+      const release = store.getRelease('rel_samuel_witch_1')!;
+      const event = JSON.stringify({ type: 'checkout.session.completed', data: { object: {
+        id: 'cs_test_local_1', payment_status: 'paid', amount_total: release.price_cents, currency: 'usd' } } });
+      const timestamp = Math.floor(Date.now() / 1000);
+      const signature = `t=${timestamp},v1=${createHmac('sha256', config.stripeWebhookSecret).update(`${timestamp}.${event}`).digest('hex')}`;
+      const invalid = await app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'stripe-signature': 't=1,v1=bad', 'content-type': 'application/json' }, payload: event });
+      expect(invalid.statusCode).toBe(400);
+      expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(0);
+      const paid = await app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'stripe-signature': signature, 'content-type': 'application/json' }, payload: event });
+      expect(paid.statusCode).toBe(200);
+      expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(release.tracks.length);
+      await app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'stripe-signature': signature, 'content-type': 'application/json' }, payload: event });
+      expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(release.tracks.length);
+    } finally {
+      config.stripeSecretKey = originalKey;
+      config.stripeWebhookSecret = originalSecret;
+      globalThis.fetch = originalFetch;
+    }
   });
 
   it('lists catalog releases with tracks', async () => {
@@ -296,7 +333,7 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(recEntBody.tracks[0].title).toBe('Sunflower');
   });
 
-  it('handles physical AHOY NFC Card and custom Burned CD orders with shipping info', async () => {
+  it('handles physical AHOY USB Album and custom Burned CD orders with shipping info', async () => {
     const patronId = 'ahoy_patron_collector';
     const loginRes = await app.inject({
       method: 'POST',
@@ -305,7 +342,34 @@ describe('AHOY Market API & Entitlement Flow', () => {
     });
     const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session');
 
-    // Purchase physical Burned CD edition
+    // 1. Purchase physical Lossless USB Album edition
+    const usbOrderRes = await app.inject({
+      method: 'POST',
+      url: '/api/checkout/purchase',
+      cookies: { ahoy_market_session: cookie!.value },
+      payload: {
+        release_id: 'rel_samuel_witch_1',
+        amount_cents: 1500,
+        format: 'usb_album',
+        shipping: {
+          name: 'Jane Doe',
+          address: '42 Harbor Lane',
+          city: 'Mystic',
+          state: 'CT',
+          zip: '06355',
+          country: 'US',
+          inscription_note: 'AHOY Mixtape on USB - For Jane.',
+        },
+      },
+    });
+    expect(usbOrderRes.statusCode).toBe(201);
+    const usbBody = usbOrderRes.json();
+    expect(usbBody.success).toBe(true);
+    expect(usbBody.format).toBe('usb_album');
+    expect(usbBody.fulfillment_status).toBe('queued_for_crafting');
+    expect(usbBody.entitlement_count).toBe(1);
+
+    // 2. Purchase physical Burned CD edition
     const cdOrderRes = await app.inject({
       method: 'POST',
       url: '/api/checkout/purchase',

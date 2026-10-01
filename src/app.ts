@@ -16,6 +16,15 @@ export function buildApp(storeOption?: MarketStore): FastifyInstance {
   const store = storeOption || new MarketStore(config.databasePath);
   const app = Fastify({ logger: false });
 
+  // Preserve Stripe's exact signed bytes while keeping normal JSON parsing for API routes.
+  app.removeContentTypeParser('application/json');
+  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (request, body, done) => {
+    try {
+      if (request.url.startsWith('/api/stripe/webhook')) (request as typeof request & { rawBody: Buffer }).rawBody = body as Buffer;
+      done(null, JSON.parse((body as Buffer).toString('utf8')));
+    } catch (error) { done(error as Error); }
+  });
+
   // Plugins
   app.register(cors, {
     origin: true,

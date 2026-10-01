@@ -36,3 +36,24 @@ npm run dev
 ```
 
 Visit `http://127.0.0.1:3020`.
+
+## Paid digital checkout setup
+
+Digital checkout uses Stripe Checkout. The server prices the release from its catalog, creates a pending order, and grants the buyer's authenticated AHOY ID entitlement only after a signed `checkout.session.completed` or `checkout.session.async_payment_succeeded` event reports `payment_status=paid`. The browser return page does not grant ownership.
+
+Configure these environment variables on the service:
+
+| Variable | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Secret API key from the Stripe account receiving payments |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret for the webhook endpoint below |
+| `PUBLIC_BASE_URL` | Public HTTPS origin of this market, such as `https://market.ahoy.ooo` |
+| `AHOY_ID_URL` | AHOY ID issuer origin |
+| `AHOY_CLIENT_ID` | Registered marketplace OAuth client ID |
+| `AHOY_REDIRECT_URI` | Registered `https://.../api/auth/callback` URL |
+| `DATABASE_PATH` | SQLite path on a persistent disk or volume |
+| `COOKIE_SECRET` | Random private cookie signing secret |
+
+Create a Stripe webhook destination at `https://<market-host>/api/stripe/webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Test with Stripe test keys and a real AHOY ID login before switching to live keys. An ephemeral container filesystem loses pending orders and entitlements after restart, so mount persistent storage before accepting live payments.
+
+The current seeded catalog uses public S3 MP3 URLs for both previews and purchased audio. The checkout records ownership in the market ledger, but it does not make the audio file private. Separate preview assets and private full files with short-lived authorized downloads are still needed for exclusive paid access. Physical editions and artist boosts do not have paid checkout yet; their direct purchase endpoints are disabled in production.

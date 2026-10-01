@@ -14,4 +14,6 @@ export const config = {
   playerUrl: (process.env.AHOY_PLAYER_URL || 'https://player.ahoy.ooo').replace(/\/$/, ''),
   streamerUrl: (process.env.AHOY_STREAMER_URL || 'https://app.ahoy.ooo').replace(/\/$/, ''),
   isProduction: process.env.NODE_ENV === 'production',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
 };

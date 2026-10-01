@@ -11,7 +11,7 @@ export function generatePkce() {
 
 export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app: FastifyInstance) => {
   // In-memory PKCE state cache (expires after 10 min)
-  const pkceCache = new Map<string, { verifier: string; returnTo: string; createdAt: number }>();
+  const pkceCache = new Map<string, { verifier: string; returnTo: string; redirectUri: string; createdAt: number }>();
 
   // Helper to extract session from request
   const getSessionFromRequest = (request: FastifyRequest): UserSession | null => {
@@ -54,11 +54,20 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
   app.get('/api/auth/login', async (request: FastifyRequest<{ Querystring: { return_to?: string } }>, reply: FastifyReply) => {
     const { verifier, challenge } = generatePkce();
     const state = randomBytes(16).toString('base64url');
-    const returnTo = request.query.return_to || '/';
+    const requestedReturn = request.query.return_to;
+    const returnTo = typeof requestedReturn === 'string' && /^\/(?![\/\\])/.test(requestedReturn) && !/[\\\r\n]/.test(requestedReturn) ? requestedReturn : '/';
+    const callback = new URL(config.redirectUri);
+    // Keep local browser storage and the session cookie on the same loopback host.
+    const loopbackHosts = ['localhost', '127.0.0.1'];
+    if (!config.isProduction && loopbackHosts.includes(callback.hostname) && loopbackHosts.includes(request.hostname)) {
+      callback.hostname = request.hostname;
+    }
+    const redirectUri = callback.toString();
 
     pkceCache.set(state, {
       verifier,
       returnTo,
+      redirectUri,
       createdAt: Date.now(),
     });
 
@@ -71,13 +80,24 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
     const authUrl = new URL(`${config.ahoyIdUrl}/oauth/authorize`);
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('client_id', config.clientId);
-    authUrl.searchParams.set('redirect_uri', config.redirectUri);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('scope', 'openid profile email');
     authUrl.searchParams.set('code_challenge', challenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
     authUrl.searchParams.set('state', state);
 
-    return reply.redirect(authUrl.toString());
+    // Validate registration before sending the browser away to a raw provider error.
+    try {
+      const check = await fetch(authUrl, { redirect: 'manual', signal: AbortSignal.timeout(8000) });
+      if (check.status !== 200 && check.status !== 302 && check.status !== 303) {
+        pkceCache.delete(state);
+        return reply.redirect('/?auth_error=' + (check.status === 400 ? 'registration_rejected' : 'provider_unavailable'));
+      }
+    } catch {
+      pkceCache.delete(state);
+      return reply.redirect('/?auth_error=provider_unavailable');
+    }
+    return reply.header('Cache-Control', 'no-store').redirect(authUrl.toString());
   });
 
   // GET /api/auth/callback -> Handles OAuth PKCE callback from AHOY ID
@@ -93,20 +113,21 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
     }
 
     const stateData = pkceCache.get(state);
-    if (!stateData) {
+    if (!stateData || Date.now() - stateData.createdAt > 600_000) {
+      if (state) pkceCache.delete(state);
       return reply.redirect('/?auth_error=invalid_state');
     }
     pkceCache.delete(state);
 
     try {
       // Exchange code for token with AHOY ID
-      const tokenResponse = await fetch(`${config.ahoyIdUrl}/oauth/token`, {
+      const tokenResponse = await fetch(`${config.ahoyIdUrl}/api/v1/oauth/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           grant_type: 'authorization_code',
           code,
-          redirect_uri: config.redirectUri,
+          redirect_uri: stateData.redirectUri,
           client_id: config.clientId,
           code_verifier: stateData.verifier,
         }),
@@ -127,7 +148,7 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
       let name = tokenData.user?.name || null;
 
       if (!ahoyId && accessToken) {
-        const userinfoRes = await fetch(`${config.ahoyIdUrl}/oauth/userinfo`, {
+        const userinfoRes = await fetch(`${config.ahoyIdUrl}/api/v1/oauth/userinfo`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (userinfoRes.ok) {
