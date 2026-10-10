@@ -53,7 +53,7 @@ Configure these environment variables on the service:
 | `STRIPE_SECRET_KEY` | Secret API key from the Stripe account receiving payments |
 | `STRIPE_WEBHOOK_SECRET` | Signing secret for the webhook endpoint below |
 | `PUBLIC_BASE_URL` | Public HTTPS origin of this market, such as `https://market.ahoy.ooo` |
-| `AHOY_ID_URL` | AHOY ID issuer origin |
+| `AHOY_ID_URL` | AHOY ID issuer origin (`https://id.ahoy.ooo` in production) |
 | `AHOY_CLIENT_ID` | Registered marketplace OAuth client ID |
 | `AHOY_REDIRECT_URI` | Registered `https://.../api/auth/callback` URL |
 | `DATABASE_PATH` | SQLite path on a persistent disk or volume |

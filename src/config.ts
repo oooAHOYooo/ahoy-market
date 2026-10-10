@@ -6,7 +6,7 @@ export const config = {
   host: process.env.HOST || '0.0.0.0',
   databasePath: process.env.DATABASE_PATH || './market.db',
   cookieSecret: process.env.COOKIE_SECRET || 'ahoy-market-session-secret-key-32chars-min',
-  ahoyIdUrl: (process.env.AHOY_ID_URL || 'https://ahoy-id.onrender.com').replace(/\/$/, ''),
+  ahoyIdUrl: (process.env.AHOY_ID_URL || 'https://id.ahoy.ooo').replace(/\/$/, ''),
   clientId: process.env.AHOY_CLIENT_ID || 'app.ahoy.market',
   clientSecret: process.env.AHOY_CLIENT_SECRET || undefined,
   redirectUri: process.env.AHOY_REDIRECT_URI || 'http://127.0.0.1:3020/api/auth/callback',
