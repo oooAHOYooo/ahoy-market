@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { MarketStore, UserSession } from '../db.js';
 import { config } from '../config.js';
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { Readable } from 'node:stream';
 
 const purchaseInput = z.object({
   release_id: z.string().min(1),
@@ -300,6 +301,14 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     return { checkout_url: session.url };
   });
 
+  app.get('/api/checkout/stripe/:sessionId', async (request: FastifyRequest<{ Params: { sessionId: string } }>, reply: FastifyReply) => {
+    const auth = getAuthUser(request);
+    if (!auth) return reply.code(401).send({ error: 'authentication_required' });
+    const status = store.getStripeCheckoutStatus(request.params.sessionId, auth.ahoy_id);
+    if (!status) return reply.code(404).send({ error: 'checkout_not_found' });
+    return { status };
+  });
+
   app.post('/api/stripe/webhook', async (request: FastifyRequest, reply: FastifyReply) => {
     const raw = (request as FastifyRequest & { rawBody?: Buffer }).rawBody;
     const signature = request.headers['stripe-signature'];
@@ -462,9 +471,20 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
       });
     }
 
-    // Set download headers and redirect to full audio
+    // Serve the file from this origin so the browser receives attachment headers.
+    // A redirect to the audio host can discard Content-Disposition and open a player instead.
+    let audioResponse: Response;
+    try {
+      audioResponse = await fetch(track.full_audio_url, { signal: AbortSignal.timeout(30_000) });
+    } catch {
+      return reply.code(502).send({ error: 'download_unavailable' });
+    }
+    if (!audioResponse.ok || !audioResponse.body) return reply.code(502).send({ error: 'download_unavailable' });
     const filename = `${track.artist} - ${track.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-');
-    reply.header('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
-    return reply.redirect(track.full_audio_url);
+    const asciiFilename = filename.replace(/[^\x20-\x7e]/g, '_');
+    reply.header('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
+    reply.header('Content-Type', 'audio/mpeg');
+    reply.header('Cache-Control', 'private, no-store');
+    return reply.send(Readable.fromWeb(audioResponse.body as import('node:stream/web').ReadableStream));
   });
 };

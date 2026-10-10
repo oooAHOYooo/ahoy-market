@@ -32,10 +32,15 @@ Sovereign digital music & merchandise storefront for the AHOY Indie Media Ecosys
 
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 ```
 
 Visit `http://127.0.0.1:3020`.
+
+Use Node 22 for local development. Run `npm run build` and `npm test` before release; the tests use the native `better-sqlite3` module and require dependencies installed for the active Node version.
+
+AHOY ID registers separate market clients with `openid profile` scopes: `app.ahoy.market.local` for `http://127.0.0.1:3020/api/auth/callback`, and `app.ahoy.market` for `https://market.ahoy.ooo/api/auth/callback`. Apply the AHOY ID market-client migration before real sign-in. The local development login helper exercises only the market session flow.
 
 ## Paid digital checkout setup
 
@@ -55,5 +60,7 @@ Configure these environment variables on the service:
 | `COOKIE_SECRET` | Random private cookie signing secret |
 
 Create a Stripe webhook destination at `https://<market-host>/api/stripe/webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Test with Stripe test keys and a real AHOY ID login before switching to live keys. An ephemeral container filesystem loses pending orders and entitlements after restart, so mount persistent storage before accepting live payments.
+
+For the first paid release, configure the production URL and registered AHOY ID callback, mount a persistent directory for `DATABASE_PATH`, set the two Stripe secrets, and verify a test card purchase reaches My Library and downloads an MP3. The buyer return page checks the pending order until the signed webhook confirms it. The market currently sells digital music only; physical editions and boosts have no live checkout.
 
 The current seeded catalog uses public S3 MP3 URLs for both previews and purchased audio. The checkout records ownership in the market ledger, but it does not make the audio file private. Separate preview assets and private full files with short-lived authorized downloads are still needed for exclusive paid access. Physical editions and artist boosts do not have paid checkout yet; their direct purchase endpoints are disabled in production.

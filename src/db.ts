@@ -866,6 +866,12 @@ export class MarketStore {
       VALUES (?, ?, ?, ?, ?, ?, ?)`).run(data.session_id, data.ahoy_id, data.email || null, data.release_id, data.track_id || null, data.amount_cents, new Date().toISOString());
   }
 
+  getStripeCheckoutStatus(sessionId: string, ahoyId: string): 'pending' | 'completed' | null {
+    const order = this.db.prepare('SELECT status FROM stripe_checkout_orders WHERE session_id = ? AND ahoy_id = ?')
+      .get(sessionId, ahoyId) as { status: 'pending' | 'completed' } | undefined;
+    return order?.status || null;
+  }
+
   completeStripeCheckout(session: { id: string; payment_status?: string; amount_total?: number; currency?: string }) {
     if (session.payment_status !== 'paid' || session.currency !== 'usd') return false;
     const tx = this.db.transaction(() => {

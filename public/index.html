@@ -2272,6 +2272,7 @@
           <h2 class="section-title">My Sovereign Library</h2>
           <span id="library-count-badge" class="pill-tag pill-mint">0 tracks</span>
         </div>
+        <p id="checkout-status" role="status" aria-live="polite" style="display: none; color: var(--text-muted); font-size: 0.78rem;"></p>
         <div id="library-content">
           <!-- Rendered by JS -->
         </div>
@@ -2910,7 +2911,8 @@
       const checkoutState = new URLSearchParams(window.location.search).get('checkout');
       if (checkoutState === 'success') {
         switchView('library');
-        alert('Payment received. Your MP3 will appear in My Library once Stripe confirms the order. Refresh if it is still processing.');
+        const sessionId = new URLSearchParams(window.location.search).get('session_id');
+        if (sessionId) void waitForCheckout(sessionId);
       } else if (checkoutState === 'cancelled') {
         alert('Checkout was cancelled. No purchase was made.');
       }
@@ -3855,7 +3857,7 @@
                 <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}', this)">
                   Play
                 </button>
-                <a href="/api/download/${encodeURIComponent(t.id)}?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
+                <a href="/api/download/${encodeURIComponent(t.track_id)}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
                   Download MP3
                 </a>
                 <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" target="_blank" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;">
@@ -3879,6 +3881,27 @@
       } catch (err) {
         console.error('Library fetch error:', err);
       }
+    }
+
+    async function waitForCheckout(sessionId) {
+      const notice = document.getElementById('checkout-status');
+      notice.style.display = 'block';
+      notice.textContent = 'Confirming your payment and adding your music to the library…';
+      for (let attempt = 0; attempt < 15; attempt++) {
+        try {
+          const checkout = await api.get(`/api/checkout/stripe/${encodeURIComponent(sessionId)}`);
+          if (checkout.status === 'completed') {
+            await loadLibrary();
+            notice.textContent = 'Payment confirmed. Your music is ready to play and download.';
+            return;
+          }
+        } catch {
+          notice.textContent = 'We could not check this order. Refresh the page to view your library.';
+          return;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      notice.textContent = 'Your payment is still processing. Refresh this page in a moment to check your library.';
     }
 
     // AUDIO PLAYBACK

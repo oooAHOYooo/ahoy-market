@@ -26,6 +26,33 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(body.service).toBe('ahoy-market');
   });
 
+  it('signs in through the AHOY ID PKCE and userinfo contract', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (input) => {
+      const url = String(input);
+      if (url.includes('/oauth/authorize')) return new Response(null, { status: 302 });
+      if (url.endsWith('/api/v1/oauth/token')) return Response.json({ access_token: 'test_access_token' });
+      if (url.endsWith('/api/v1/oauth/userinfo')) return Response.json({ sub: 'ahoy_identity_buyer', name: 'Identity Buyer' });
+      throw new Error(`Unexpected identity URL: ${url}`);
+    };
+    try {
+      const login = await app.inject({ method: 'GET', url: '/api/auth/login' });
+      expect(login.statusCode).toBe(302);
+      const authorize = new URL(login.headers.location as string);
+      expect(authorize.searchParams.get('client_id')).toBe(config.clientId);
+      expect(authorize.searchParams.get('scope')).toBe('openid profile');
+      expect(authorize.searchParams.get('code_challenge_method')).toBe('S256');
+      const callback = await app.inject({ method: 'GET', url: `/api/auth/callback?code=${'c'.repeat(32)}&state=${authorize.searchParams.get('state')}` });
+      expect(callback.statusCode).toBe(302);
+      expect(callback.headers.location).toBe('/');
+      const cookie = callback.cookies.find(c => c.name === 'ahoy_market_session')!;
+      const me = await app.inject({ method: 'GET', url: '/api/auth/me', cookies: { ahoy_market_session: cookie.value } });
+      expect(me.json().user.ahoy_id).toBe('ahoy_identity_buyer');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('grants a digital purchase only after a signed paid Stripe event and ignores replays', async () => {
     const originalKey = config.stripeSecretKey;
     const originalSecret = config.stripeWebhookSecret;
@@ -41,6 +68,13 @@ describe('AHOY Market API & Entitlement Flow', () => {
       expect(checkout.statusCode).toBe(200);
       expect(checkout.json().checkout_url).toBe('https://checkout.stripe.com/test');
       expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(0);
+      const statusUrl = '/api/checkout/stripe/cs_test_local_1';
+      const pending = await app.inject({ method: 'GET', url: statusUrl, cookies: { ahoy_market_session: cookie.value } });
+      expect(pending.json().status).toBe('pending');
+      const otherLogin = await app.inject({ method: 'POST', url: '/api/auth/dev-login', payload: { ahoy_id: 'ahoy_other_buyer' } });
+      const otherCookie = otherLogin.cookies.find(c => c.name === 'ahoy_market_session')!;
+      const otherStatus = await app.inject({ method: 'GET', url: statusUrl, cookies: { ahoy_market_session: otherCookie.value } });
+      expect(otherStatus.statusCode).toBe(404);
       const release = store.getRelease('rel_samuel_witch_1')!;
       const event = JSON.stringify({ type: 'checkout.session.completed', data: { object: {
         id: 'cs_test_local_1', payment_status: 'paid', amount_total: release.price_cents, currency: 'usd' } } });
@@ -52,6 +86,8 @@ describe('AHOY Market API & Entitlement Flow', () => {
       const paid = await app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'stripe-signature': signature, 'content-type': 'application/json' }, payload: event });
       expect(paid.statusCode).toBe(200);
       expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(release.tracks.length);
+      const completed = await app.inject({ method: 'GET', url: statusUrl, cookies: { ahoy_market_session: cookie.value } });
+      expect(completed.json().status).toBe('completed');
       await app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'stripe-signature': signature, 'content-type': 'application/json' }, payload: event });
       expect(store.getEntitlements('ahoy_stripe_buyer')).toHaveLength(release.tracks.length);
     } finally {
@@ -215,8 +251,8 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(leaderBody.leaderboard.length).toBe(1);
     expect(leaderBody.leaderboard[0].ahoy_id).toBe(ahoyId);
     expect(leaderBody.leaderboard[0].supporter_name).toBe('First Mate Jack');
-    expect(leaderBody.leaderboard[0].total_cents).toBe(2500);
-    expect(leaderBody.leaderboard[0].rank).toBe(1);
+    expect(leaderBody.leaderboard[0]).not.toHaveProperty('total_cents');
+    expect(leaderBody.leaderboard[0]).not.toHaveProperty('rank');
   });
 
   it('completes purchase for authenticated user and grants sovereign entitlement', async () => {
@@ -275,14 +311,22 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(streamRes.statusCode).toBe(302);
     expect(streamRes.headers.location).toBe('https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3');
 
-    // 6. Download endpoint redirect & content disposition for entitled user
-    const dlRes = await app.inject({
-      method: 'GET',
-      url: `/api/download/trk_seen_better_days?ahoy_id=${encodeURIComponent(ahoyId)}`,
-    });
-    expect(dlRes.statusCode).toBe(302);
-    expect(dlRes.headers['content-disposition']).toContain('attachment');
-    expect(dlRes.headers.location).toBe('https://ahoycollection.s3.us-east-2.amazonaws.com/01%20I%27ve%20Seen%20Better%20Days.mp3');
+    // 6. Download streams the owned file with attachment headers on this origin
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () => new Response('test mp3 bytes', { status: 200 });
+    try {
+      const dlRes = await app.inject({
+        method: 'GET',
+        url: '/api/download/trk_seen_better_days',
+        cookies: { ahoy_market_session: cookie!.value },
+      });
+      expect(dlRes.statusCode).toBe(200);
+      expect(dlRes.headers['content-disposition']).toContain('attachment');
+      expect(dlRes.headers['content-type']).toContain('audio/mpeg');
+      expect(dlRes.body).toBe('test mp3 bytes');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
 
     // 7. Download endpoint rejects unentitled user
     const unentitledDlRes = await app.inject({
