@@ -24,6 +24,7 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.service).toBe('ahoy-market');
+    expect(body.database).toBe('connected');
   });
 
   it('signs in through the AHOY ID PKCE and userinfo contract', async () => {

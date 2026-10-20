@@ -977,6 +977,11 @@ export class MarketStore {
     this.db.prepare('DELETE FROM sessions WHERE session_token = ?').run(token);
   }
 
+  checkHealth(): boolean {
+    const row = this.db.prepare('SELECT 1 as alive').get() as { alive: number } | undefined;
+    return row?.alive === 1;
+  }
+
   close() {
     this.db.close();
   }

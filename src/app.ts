@@ -81,13 +81,25 @@ export function buildApp(storeOption?: MarketStore): FastifyInstance {
     },
   });
 
-  // Health check
-  const healthHandler = async () => ({
-    status: 'ok',
-    service: 'ahoy-market',
-    version: '0.1.0',
-    ahoy_id_service: config.ahoyIdUrl,
-  });
+  // Health and readiness checks with database probe
+  const healthHandler = async (_request: unknown, reply: { code: (n: number) => { send: (payload: unknown) => unknown } }) => {
+    try {
+      const dbHealthy = store.checkHealth();
+      if (!dbHealthy) {
+        return reply.code(503).send({ status: 'unhealthy', service: 'ahoy-market', database: 'disconnected' });
+      }
+      return {
+        status: 'ok',
+        service: 'ahoy-market',
+        version: '0.1.0',
+        database: 'connected',
+        ahoy_id_service: config.ahoyIdUrl,
+      };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'database_error';
+      return reply.code(503).send({ status: 'unhealthy', service: 'ahoy-market', error: message });
+    }
+  };
   app.get('/health', healthHandler);
   app.get('/ops/selftest', healthHandler);
 
