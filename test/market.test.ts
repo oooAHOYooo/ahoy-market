@@ -657,13 +657,26 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(manifest.start_url).toBe('/');
     expect(manifest.theme_color).toBe('#F04478');
     expect(manifest.icons.length).toBeGreaterThan(0);
+    expect(manifest.icons.some((i: any) => i.src === '/icon-192.png')).toBe(true);
+    expect(manifest.icons.some((i: any) => i.src === '/icon-512.png')).toBe(true);
 
-    // 2. Verify /sw.js
+    // 2. Verify PWA square icons are served
+    const icon192Res = await app.inject({ method: 'GET', url: '/icon-192.png' });
+    expect(icon192Res.statusCode).toBe(200);
+    expect(icon192Res.headers['content-type']).toBe('image/png');
+
+    const icon512Res = await app.inject({ method: 'GET', url: '/icon-512.png' });
+    expect(icon512Res.statusCode).toBe(200);
+    expect(icon512Res.headers['content-type']).toBe('image/png');
+
+    // 3. Verify /sw.js
     const swRes = await app.inject({ method: 'GET', url: '/sw.js' });
     expect(swRes.statusCode).toBe(200);
     expect(swRes.headers['content-type']).toContain('javascript');
     expect(swRes.headers['cache-control']).toBe('no-cache');
     expect(swRes.body).toContain('ahoy-vault-audio-v1');
     expect(swRes.body).toContain('ahoy-market-shell-v1');
+    expect(swRes.body).toContain('/icon-192.png');
+    expect(swRes.body).toContain('/icon-512.png');
   });
 });

@@ -6,6 +6,8 @@ const SHELL_ASSETS = [
   '/index.html',
   '/manifest.json',
   '/ahoy-wordmark.png',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -32,6 +34,52 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Helper: Handle Range requests for cached audio in CacheStorage
+// Enables Safari/iOS WebKit and Chrome to stream, scrub, and play offline audio cleanly
+async function handleAudioRangeRequest(request, cachedResponse) {
+  const rangeHeader = request.headers.get('Range');
+  if (!rangeHeader) {
+    return cachedResponse;
+  }
+
+  const arrayBuffer = await cachedResponse.arrayBuffer();
+  const total = arrayBuffer.byteLength;
+  const bytesMatch = /^bytes\s*=\s*(\d*)\s*-\s*(\d*)$/i.exec(rangeHeader);
+
+  if (!bytesMatch) {
+    return cachedResponse;
+  }
+
+  let start = bytesMatch[1] ? parseInt(bytesMatch[1], 10) : 0;
+  let end = bytesMatch[2] ? parseInt(bytesMatch[2], 10) : total - 1;
+
+  if (start >= total || end >= total || start > end) {
+    return new Response(null, {
+      status: 416,
+      statusText: 'Range Not Satisfiable',
+      headers: {
+        'Content-Range': `bytes */${total}`,
+        'Accept-Ranges': 'bytes',
+      },
+    });
+  }
+
+  const sliced = arrayBuffer.slice(start, end + 1);
+  const contentType = cachedResponse.headers.get('Content-Type') || 'audio/mpeg';
+
+  return new Response(sliced, {
+    status: 206,
+    statusText: 'Partial Content',
+    headers: {
+      'Content-Type': contentType,
+      'Content-Range': `bytes ${start}-${end}/${total}`,
+      'Content-Length': String(sliced.byteLength),
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=31536000',
+    },
+  });
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -51,9 +99,11 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/download/') || url.pathname.endsWith('.mp3')) {
     event.respondWith(
       caches.open(VAULT_CACHE).then(async (vault) => {
-        const cachedAudio = await vault.match(request);
+        // Try exact match, then match ignoring search query (?ahoy_id=...), then pathname
+        const cachedAudio = (await vault.match(request, { ignoreSearch: true })) ||
+                            (await vault.match(url.pathname, { ignoreSearch: true }));
         if (cachedAudio) {
-          return cachedAudio;
+          return handleAudioRangeRequest(request, cachedAudio);
         }
         return fetch(request).catch(() => {
           return new Response('Audio file not found in offline vault', { status: 404 });
@@ -63,7 +113,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static assets: Cache-first with background network update
+  // 3. API market latest state: Network-first with shell cache fallback
+  if (url.pathname === '/api/market/latest') {
+    event.respondWith(
+      fetch(request).then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      }).catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        return new Response(JSON.stringify({ error: 'offline', releases: [], artists: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      })
+    );
+    return;
+  }
+
+  // 4. Static assets: Cache-first with background network update
   if (
     url.pathname.endsWith('.png') ||
     url.pathname.endsWith('.jpg') ||
@@ -87,6 +158,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. Default: Fetch directly from network
+  // 5. Default: Fetch directly from network
   event.respondWith(fetch(request));
 });

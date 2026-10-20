@@ -6,14 +6,14 @@
   <title>AHOY Store — Sovereign Music &amp; Custom Pressings</title>
   <meta name="description" content="Sovereign digital music and custom physical pressings from the AHOY indie media ecosystem. Direct artist support with AHOY ID.">
   <meta name="theme-color" content="#F04478">
-  <link rel="icon" type="image/png" href="/ahoy-wordmark.png">
+  <link rel="icon" type="image/png" href="/icon-192.png">
 
   <!-- Progressive Web App (PWA) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="AHOY Store">
-  <link rel="apple-touch-icon" href="/ahoy-wordmark.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
 
   <!-- Open Graph / Social Sharing -->
   <meta property="og:title" content="AHOY Store — Sovereign Music &amp; Custom Pressings">
@@ -2296,9 +2296,17 @@
 
       <!-- VIEW 9: SOVEREIGN LIBRARY -->
       <section id="view-library" style="display: none;">
-        <div class="section-header-row">
-          <h2 class="section-title">My Sovereign Library</h2>
-          <span id="library-count-badge" class="pill-tag pill-mint">0 tracks</span>
+        <div class="section-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h2 class="section-title" style="margin: 0;">My Sovereign Library</h2>
+            <span id="library-count-badge" class="pill-tag pill-mint">0 tracks</span>
+          </div>
+          <div id="library-vault-actions" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <button id="btn-vault-all" class="btn btn-secondary" style="font-size: 0.7rem; padding: 0.3rem 0.65rem;" onclick="vaultAllLibraryTracks()" title="Save all entitled tracks to your device for offline playback">
+              📥 Vault All (Offline)
+            </button>
+            <span id="vault-storage-status" style="font-size: 0.68rem; color: var(--text-dim); font-family: var(--font-mono);"></span>
+          </div>
         </div>
         <p id="checkout-status" role="status" aria-live="polite" style="display: none; color: var(--text-muted); font-size: 0.78rem;"></p>
         <div id="library-content">
@@ -3042,14 +3050,28 @@
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
 
+    let currentLibraryTracks = [];
+
+    async function updateVaultStorageIndicator() {
+      const el = document.getElementById('vault-storage-status');
+      if (!el) return;
+      if ('storage' in navigator && navigator.storage.estimate) {
+        try {
+          const estimate = await navigator.storage.estimate();
+          const usedMb = ((estimate.usage || 0) / (1024 * 1024)).toFixed(1);
+          el.textContent = `• ${usedMb} MB cached`;
+        } catch {}
+      }
+    }
+
     async function isTrackInVault(trackId, audioUrl) {
       if (!('caches' in window)) return false;
       try {
         const cache = await caches.open(VAULT_CACHE_NAME);
-        const matchDownload = await cache.match(`/api/download/${encodeURIComponent(trackId)}`);
+        const matchDownload = await cache.match(`/api/download/${encodeURIComponent(trackId)}`, { ignoreSearch: true });
         if (matchDownload) return true;
         if (audioUrl) {
-          const matchAudio = await cache.match(audioUrl);
+          const matchAudio = await cache.match(audioUrl, { ignoreSearch: true });
           if (matchAudio) return true;
         }
       } catch {}
@@ -3066,8 +3088,8 @@
         const cache = await caches.open(VAULT_CACHE_NAME);
         const alreadyVaulted = await isTrackInVault(trackId, audioUrl);
         if (alreadyVaulted) {
-          await cache.delete(`/api/download/${encodeURIComponent(trackId)}`);
-          if (audioUrl) await cache.delete(audioUrl);
+          await cache.delete(`/api/download/${encodeURIComponent(trackId)}`, { ignoreSearch: true });
+          if (audioUrl) await cache.delete(audioUrl, { ignoreSearch: true });
           if (btn) {
             btn.className = 'btn btn-secondary';
             btn.innerHTML = '📥 Vault (Offline)';
@@ -3101,6 +3123,7 @@
             btn.title = 'Saved locally in offline vault';
           }
         }
+        updateVaultStorageIndicator();
       } catch (err) {
         console.error('Vault toggle error:', err);
         alert('Could not vault track for offline playback: ' + err.message);
@@ -3109,6 +3132,65 @@
           btn.textContent = '📥 Vault (Offline)';
         }
       }
+    }
+
+    async function vaultAllLibraryTracks() {
+      if (!('caches' in window)) {
+        alert('Offline vaulting requires Cache Storage support in your browser.');
+        return;
+      }
+      if (!currentLibraryTracks.length) return;
+      const btn = document.getElementById('btn-vault-all');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = `⏳ Vaulting 0/${currentLibraryTracks.length}…`;
+      }
+
+      let count = 0;
+      for (let i = 0; i < currentLibraryTracks.length; i++) {
+        const t = currentLibraryTracks[i];
+        if (btn) btn.textContent = `⏳ Vaulting ${i + 1}/${currentLibraryTracks.length}…`;
+        try {
+          const cache = await caches.open(VAULT_CACHE_NAME);
+          const downloadUrl = `/api/download/${encodeURIComponent(t.track_id)}`;
+          const already = await isTrackInVault(t.track_id, t.full_audio_url);
+          if (!already) {
+            const res = await fetch(downloadUrl);
+            if (res.ok) {
+              const blob = await res.blob();
+              const responseToCache = new Response(blob, {
+                headers: {
+                  'Content-Type': 'audio/mpeg',
+                  'Cache-Control': 'public, max-age=31536000',
+                },
+              });
+              await cache.put(downloadUrl, responseToCache.clone());
+              if (t.full_audio_url) {
+                await cache.put(t.full_audio_url, responseToCache);
+              }
+            }
+          }
+          const trackBtn = document.getElementById(`vault-btn-${t.track_id}`);
+          if (trackBtn) {
+            trackBtn.className = 'btn btn-mint';
+            trackBtn.innerHTML = '✓ Vaulted';
+          }
+          count++;
+        } catch (err) {
+          console.warn('Batch vault error for track', t.id, err);
+        }
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.className = 'btn btn-mint';
+        btn.innerHTML = `✓ ${count} Vaulted`;
+        setTimeout(() => {
+          btn.className = 'btn btn-secondary';
+          btn.innerHTML = '📥 Vault All (Offline)';
+        }, 3500);
+      }
+      updateVaultStorageIndicator();
     }
 
     // UNIFIED LATEST MARKET STATE FETCHER
@@ -3132,9 +3214,25 @@
         if (data.library && currentUser?.authenticated) {
           renderLibraryData(data.library, currentUser.user.ahoy_id);
         }
+        try {
+          localStorage.setItem('ahoy_catalog_cache', JSON.stringify({
+            releases: data.releases,
+            artists: data.artists,
+            leaderboard: data.leaderboard,
+          }));
+        } catch {}
         return data;
       } catch (err) {
         console.warn('fetchLatest error, checking offline cache:', err);
+        try {
+          const cachedCatalog = JSON.parse(localStorage.getItem('ahoy_catalog_cache') || '{}');
+          if (cachedCatalog.releases) applyReleasesData(cachedCatalog.releases);
+          if (cachedCatalog.artists) {
+            catalogArtists = cachedCatalog.artists;
+            renderArtists(catalogArtists);
+          }
+          if (cachedCatalog.leaderboard) renderLeaderboardData(cachedCatalog.leaderboard);
+        } catch {}
         try {
           const cachedLib = JSON.parse(localStorage.getItem('ahoy_library_cache') || '{}');
           if (cachedLib.tracks && cachedLib.tracks.length) {
@@ -3959,11 +4057,13 @@
 
     // PURCHASED LIBRARY
     function renderLibraryData(tracks, ahoyId) {
+      currentLibraryTracks = tracks || [];
       if (tracks && tracks.length) {
         try {
           localStorage.setItem('ahoy_library_cache', JSON.stringify({ tracks, ahoyId }));
         } catch {}
       }
+      updateVaultStorageIndicator();
 
       const libraryCountBadge = document.getElementById('library-count-badge');
       if (libraryCountBadge) libraryCountBadge.textContent = `${tracks.length} tracks`;
@@ -4203,7 +4303,8 @@
       if ('caches' in window) {
         try {
           const cache = await caches.open(VAULT_CACHE_NAME);
-          const cachedMatch = (trackId && await cache.match(`/api/download/${encodeURIComponent(trackId)}`)) || (url && await cache.match(url));
+          const cachedMatch = (trackId && await cache.match(`/api/download/${encodeURIComponent(trackId)}`, { ignoreSearch: true })) ||
+                              (url && await cache.match(url, { ignoreSearch: true }));
           if (cachedMatch) {
             const blob = await cachedMatch.blob();
             playUrl = URL.createObjectURL(blob);
@@ -4213,7 +4314,24 @@
 
       audioElement.src = playUrl;
       activeTrackButton = sourceElement;
-      audioElement.play().then(() => { sourceElement.textContent = 'Pause'; }).catch(() => {
+      audioElement.play().then(() => {
+        sourceElement.textContent = 'Pause';
+        if ('mediaSession' in navigator) {
+          try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: title || 'Track',
+              artist: artist || 'AHOY Artist',
+              album: 'AHOY Sovereign Music',
+              artwork: [
+                { src: art || '/icon-512.png', sizes: '512x512', type: 'image/png' },
+                { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+              ]
+            });
+            navigator.mediaSession.setActionHandler('play', () => { audioElement.play(); });
+            navigator.mediaSession.setActionHandler('pause', () => { audioElement.pause(); });
+          } catch {}
+        }
+      }).catch(() => {
         sourceElement.textContent = 'Unavailable';
         activeTrackButton = null;
       });
