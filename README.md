@@ -138,3 +138,38 @@ AHOY Store is a full Progressive Web App installable as a standalone application
   - **Offline Audio Vault (`ahoy-vault-audio-v1`):** Intercepts playback and download requests to serve saved audio files directly from the local browser Cache Storage when offline.
 - **Sovereign Local Vaulting:**
   In **My Library**, patrons can click **"📥 Vault"** on any owned song to download and store the master MP3 locally. When offline (e.g. sailing, flying, or off-grid), an offline indicator appears, the library remains populated, and clicking **"Play"** streams directly from the locally stored audio blob with zero network requirements.
+
+## Anti-Piracy & Sovereign Audio Protection
+
+AHOY Market adheres to a **sovereign music philosophy**: music files are DRM-free standard MP3s that fans genuinely own, playable on car dashboards, offline iPods, and DAWs without invasive runtime DRM. To protect artists against commercial piracy, leaks, and automated ripping, the platform implements multi-tiered forensic provenance and anti-leech safeguards:
+
+### 1. Forensic Metadata Inscription & Digital Watermarking
+- **Standard ID3v2 Provenance Frames:** When an entitled patron downloads an MP3 (`GET /api/download/:trackId`), the server inscribes digital provenance frames into the file:
+  - `TOWN`: Inscribes the official ID3v2 "File owner/licensee" with the buyer's `ahoy_id`.
+  - `TCOP`: Declares exclusive sovereign licensing to the buyer.
+  - `COMM`: Inscribes a persistent comment with the entitlement ledger reference ID and cryptographic proof.
+  - `TXXX (AHOY_PROVENANCE)`: User-defined text frame containing the buyer's ID and server-signed HMAC fingerprint.
+- **Cryptographic EOF Ledger Trailer:** The server appends a tamper-proof provenance block (`---BEGIN AHOY SOVEREIGN PROVENANCE LEDGER---`) at the end of the file containing the full JSON entitlement receipt, timestamp, and signature. Standard audio decoders ignore trailing bytes during playback, but any file inspection or automated crawler can extract and trace the origin if a file is re-uploaded to torrents, Soulseek, Telegram, or Discord.
+- **Proof Response Headers:** Injected on all master downloads:
+  - `X-Ahoy-Inscribed-To: ahoy_...`
+  - `X-Ahoy-Ledger-Ref: ent_...`
+  - `X-Ahoy-Forensic-Signature: <64-char HMAC-SHA256>`
+
+### 2. Public Catalog Master Audio URL Stripping
+- Public storefront catalog endpoints (`GET /api/releases`, `GET /api/releases/:idOrSlug`, and `GET /api/market/latest`) sanitize track records using `sanitizePublicTrack()`, stripping `full_audio_url` from public payloads.
+- Unauthenticated scrapers and web crawlers can only access 30-second trimmed public preview clips (`preview_url`). Full-length master audio URLs are strictly restricted to authenticated library and entitlement queries.
+
+### 3. Ephemeral Signed Download Tokens (Anti-Hotlink & Anti-Sharing)
+- Direct master downloads require an active session cookie or a short-lived cryptographic token generated via `GET /api/me/download-token/:trackId`.
+- Tokens are bound to `trackId + ahoyId + timestamp` using HMAC-SHA256 and expire after 15 minutes.
+- Copying and posting raw download links onto public forums or pirate boards fails with `401 Unauthorized` or `403 Forbidden` once the token expires or when accessed without session credentials.
+
+### 4. Anti-Leech Rate Limiting (Scrape Protection)
+- Audio download and stream endpoints are guarded by an in-memory sliding window rate limiter (`antiLeechLimiter`).
+- Restricts accounts or IPs from mass-downloading more than 20 master audio files within a 5-minute window.
+- Exceeding the threshold returns `429 Too Many Requests` with a `Retry-After` header, blocking automated catalog rippers.
+
+### 5. Private Cloud Storage (Pre-Signed S3 / CloudFront URLs)
+- Master audio files reside in private cloud storage with public access blocked.
+- Master stream and download URLs resolve through AWS SigV4 pre-signed URLs or CloudFront signed cookies with a 15-minute expiration window (`X-Amz-Expires=900`).
+

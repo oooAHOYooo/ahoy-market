@@ -3,8 +3,15 @@ import { z } from 'zod';
 import { MarketStore, UserSession } from '../db.js';
 import { config } from '../config.js';
 import { getAuthorizedAudioUrl } from '../storage.js';
+import {
+  sanitizePublicTrack,
+  generateDownloadToken,
+  verifyDownloadToken,
+  generateForensicSignature,
+  inscribeAudioProvenance,
+  antiLeechLimiter,
+} from '../antiPiracy.js';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { Readable } from 'node:stream';
 
 const purchaseInput = z.object({
   release_id: z.string().min(1),
@@ -77,7 +84,10 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   // GET /api/market/latest -> Combined initial/latest market state in 1 round trip
   app.get('/api/market/latest', async (request: FastifyRequest) => {
     const auth = getAuthUser(request);
-    const releases = store.getReleasesWithTracks();
+    const releases = store.getReleasesWithTracks().map(r => ({
+      ...r,
+      tracks: r.tracks.map(sanitizePublicTrack),
+    }));
     const artists = store.getPublicArtists();
     const leaderboard = store.getGlobalBoostersLeaderboard(10)
       .map(({ total_cents: _total, boost_count: _count, rank: _rank, ...supporter }) => supporter)
@@ -95,17 +105,25 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     };
   });
 
-  // GET /api/releases -> List all available releases in store
+  // GET /api/releases -> List all available releases in store (sanitized for public browsing)
   app.get('/api/releases', async () => {
-    const releases = store.getReleasesWithTracks();
+    const releases = store.getReleasesWithTracks().map(r => ({
+      ...r,
+      tracks: r.tracks.map(sanitizePublicTrack),
+    }));
     return { releases };
   });
 
-  // GET /api/releases/:idOrSlug -> Get single release
+  // GET /api/releases/:idOrSlug -> Get single release (sanitized for public browsing)
   app.get('/api/releases/:idOrSlug', async (request: FastifyRequest<{ Params: { idOrSlug: string } }>, reply: FastifyReply) => {
     const release = store.getRelease(request.params.idOrSlug);
     if (!release) return reply.code(404).send({ error: 'release_not_found' });
-    return { release };
+    return {
+      release: {
+        ...release,
+        tracks: release.tracks.map(sanitizePublicTrack),
+      },
+    };
   });
 
   // GET /api/artists -> Public artist catalog; supporter totals stay private
@@ -405,6 +423,25 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     };
   });
 
+  // GET /api/me/download-token/:trackId -> Generate short-lived (15-min) signed download token
+  app.get('/api/me/download-token/:trackId', async (request: FastifyRequest<{ Params: { trackId: string } }>, reply: FastifyReply) => {
+    const auth = getAuthUser(request);
+    if (!auth) return reply.code(401).send({ error: 'authentication_required' });
+    const { trackId } = request.params;
+    const isEntitled = store.hasEntitlement(auth.ahoy_id, trackId);
+    if (!isEntitled) {
+      return reply.code(403).send({ error: 'entitlement_required', message: 'You must own this release to generate a download token.' });
+    }
+    const token = generateDownloadToken(trackId, auth.ahoy_id, 900);
+    return {
+      track_id: trackId,
+      ahoy_id: auth.ahoy_id,
+      download_token: token,
+      expires_in_seconds: 900,
+      download_url: `${config.publicBaseUrl}/api/download/${encodeURIComponent(trackId)}?token=${encodeURIComponent(token)}`,
+    };
+  });
+
   // GET /api/entitlements -> Public/Player Entitlements query
   // Player at player.ahoy.ooo calls this with `?ahoy_id=...` or `x-ahoy-id`
   app.get('/api/entitlements', async (request: FastifyRequest<{ Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
@@ -438,14 +475,15 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   });
 
   // GET /api/stream/:trackId -> Stream audio for entitled user
-  app.get('/api/stream/:trackId', async (request: FastifyRequest<{ Params: { trackId: string }; Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
+  app.get('/api/stream/:trackId', async (request: FastifyRequest<{ Params: { trackId: string }; Querystring: { ahoy_id?: string; token?: string } }>, reply: FastifyReply) => {
     const { trackId } = request.params;
     const track = store.getTrack(trackId);
     if (!track) return reply.code(404).send({ error: 'track_not_found' });
 
     const auth = getAuthUser(request);
+    const tokenData = request.query.token ? verifyDownloadToken(request.query.token, trackId) : null;
     const queryAhoyId = request.query.ahoy_id;
-    const effectiveAhoyId = auth?.ahoy_id || (!config.isProduction ? queryAhoyId : undefined);
+    const effectiveAhoyId = auth?.ahoy_id || tokenData?.ahoyId || (!config.isProduction ? queryAhoyId : undefined);
 
     const isEntitled = effectiveAhoyId ? store.hasEntitlement(effectiveAhoyId, trackId) : false;
 
@@ -457,17 +495,35 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     return reply.redirect(track.preview_url);
   });
 
-  // GET /api/download/:trackId -> Download raw audio file for entitled user
-  app.get('/api/download/:trackId', async (request: FastifyRequest<{ Params: { trackId: string }; Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
+  // GET /api/download/:trackId -> Download raw audio file for entitled user with forensic provenance
+  app.get('/api/download/:trackId', async (request: FastifyRequest<{ Params: { trackId: string }; Querystring: { ahoy_id?: string; token?: string } }>, reply: FastifyReply) => {
     const { trackId } = request.params;
     const track = store.getTrack(trackId);
     if (!track) return reply.code(404).send({ error: 'track_not_found' });
 
     const auth = getAuthUser(request);
+    const tokenData = request.query.token ? verifyDownloadToken(request.query.token, trackId) : null;
     const queryAhoyId = request.query.ahoy_id;
-    const effectiveAhoyId = auth?.ahoy_id || (!config.isProduction ? queryAhoyId : undefined);
+    const effectiveAhoyId = auth?.ahoy_id || tokenData?.ahoyId || (!config.isProduction ? queryAhoyId : undefined);
 
-    const isEntitled = effectiveAhoyId ? store.hasEntitlement(effectiveAhoyId, trackId) : false;
+    if (!effectiveAhoyId) {
+      return reply.code(401).send({
+        error: 'authentication_required',
+        message: 'You must sign in with your AHOY ID or provide a valid download token.',
+      });
+    }
+
+    // Anti-leech rate limiter protection
+    const rateLimit = antiLeechLimiter.isRateLimited(effectiveAhoyId);
+    if (rateLimit.limited) {
+      reply.header('Retry-After', String(rateLimit.retryAfterSeconds));
+      return reply.code(429).send({
+        error: 'rate_limit_exceeded',
+        message: 'To protect artists against automated leeching, downloads are limited. Please try again shortly.',
+      });
+    }
+
+    const isEntitled = store.hasEntitlement(effectiveAhoyId, trackId);
     if (!isEntitled) {
       return reply.code(403).send({
         error: 'entitlement_required',
@@ -475,8 +531,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
       });
     }
 
-    // Serve the file from this origin so the browser receives attachment headers.
-    // A redirect to the audio host can discard Content-Disposition and open a player instead.
+    // Fetch master audio from storage
     const downloadUrl = getAuthorizedAudioUrl(track.full_audio_url);
     let audioResponse: Response;
     try {
@@ -484,12 +539,31 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     } catch {
       return reply.code(502).send({ error: 'download_unavailable' });
     }
-    if (!audioResponse.ok || !audioResponse.body) return reply.code(502).send({ error: 'download_unavailable' });
+    if (!audioResponse.ok) return reply.code(502).send({ error: 'download_unavailable' });
+
+    const rawBuffer = Buffer.from(await audioResponse.arrayBuffer());
+    const entitlement = store.getEntitlements(effectiveAhoyId).find(e => e.track_id === trackId);
+    
+    // Inscribe forensic provenance & ID3 metadata
+    const watermarkedBuffer = inscribeAudioProvenance(rawBuffer, {
+      trackId: track.id,
+      trackTitle: track.title,
+      artist: track.artist,
+      ownerAhoyId: effectiveAhoyId,
+      entitlementId: entitlement?.id,
+      grantedAt: entitlement?.granted_at,
+    });
+    const forensicSig = generateForensicSignature(track.id, effectiveAhoyId, entitlement?.id);
+
     const filename = `${track.artist} - ${track.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-').replace(/[\r\n]/g, '');
     const asciiFilename = filename.replace(/[^\x20-\x7e]/g, '_');
     reply.header('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
     reply.header('Content-Type', 'audio/mpeg');
+    reply.header('Content-Length', String(watermarkedBuffer.length));
     reply.header('Cache-Control', 'private, no-store');
-    return reply.send(Readable.fromWeb(audioResponse.body as import('node:stream/web').ReadableStream));
+    reply.header('X-Ahoy-Inscribed-To', effectiveAhoyId);
+    reply.header('X-Ahoy-Ledger-Ref', entitlement?.id || 'direct_grant');
+    reply.header('X-Ahoy-Forensic-Signature', forensicSig);
+    return reply.send(watermarkedBuffer);
   });
 };

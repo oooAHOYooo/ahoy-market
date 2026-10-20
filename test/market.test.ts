@@ -4,6 +4,7 @@ import { MarketStore } from '../src/db.js';
 import { FastifyInstance } from 'fastify';
 import { createHmac } from 'node:crypto';
 import { config } from '../src/config.js';
+import { extractAudioProvenance, antiLeechLimiter } from '../src/antiPiracy.js';
 
 describe('AHOY Market API & Entitlement Flow', () => {
   let store: MarketStore;
@@ -324,7 +325,10 @@ describe('AHOY Market API & Entitlement Flow', () => {
       expect(dlRes.statusCode).toBe(200);
       expect(dlRes.headers['content-disposition']).toContain('attachment');
       expect(dlRes.headers['content-type']).toContain('audio/mpeg');
-      expect(dlRes.body).toBe('test mp3 bytes');
+      expect(dlRes.body).toContain('test mp3 bytes');
+      expect(dlRes.body).toContain('AHOY SOVEREIGN PROVENANCE LEDGER');
+      expect(dlRes.headers['x-ahoy-inscribed-to']).toBe(ahoyId);
+      expect(dlRes.headers['x-ahoy-forensic-signature']).toBeDefined();
     } finally {
       globalThis.fetch = originalFetch;
     }
@@ -678,5 +682,133 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(swRes.body).toContain('ahoy-market-shell-v1');
     expect(swRes.body).toContain('/icon-192.png');
     expect(swRes.body).toContain('/icon-512.png');
+  });
+
+  it('prevents piracy by stripping private full_audio_url from public catalog responses', async () => {
+    // 1. Check /api/releases
+    const relRes = await app.inject({ method: 'GET', url: '/api/releases' });
+    expect(relRes.statusCode).toBe(200);
+    const relData = relRes.json();
+    for (const release of relData.releases) {
+      for (const track of release.tracks) {
+        expect(track.full_audio_url).toBeUndefined();
+        expect(track.preview_url).toBeDefined();
+      }
+    }
+
+    // 2. Check /api/market/latest
+    const latestRes = await app.inject({ method: 'GET', url: '/api/market/latest' });
+    expect(latestRes.statusCode).toBe(200);
+    const latestData = latestRes.json();
+    for (const release of latestData.releases) {
+      for (const track of release.tracks) {
+        expect(track.full_audio_url).toBeUndefined();
+      }
+    }
+  });
+
+  it('inscribes cryptographic forensic provenance and validates signed download tokens', async () => {
+    const patronId = 'ahoy_watermark_patron';
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: patronId, name: 'Watermark Patron' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session')!;
+
+    // Buy release
+    await app.inject({
+      method: 'POST',
+      url: '/api/checkout/purchase',
+      cookies: { ahoy_market_session: cookie.value },
+      payload: { release_id: 'rel_samuel_witch_1' },
+    });
+
+    // 1. Request short-lived download token
+    const tokenRes = await app.inject({
+      method: 'GET',
+      url: '/api/me/download-token/trk_seen_better_days',
+      cookies: { ahoy_market_session: cookie.value },
+    });
+    expect(tokenRes.statusCode).toBe(200);
+    const tokenData = tokenRes.json();
+    expect(tokenData.download_token).toBeDefined();
+    expect(tokenData.expires_in_seconds).toBe(900);
+
+    // 2. Download using signed token without active session cookie
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () => new Response('sample-master-audio-bytes', { status: 200 });
+    try {
+      const dlRes = await app.inject({
+        method: 'GET',
+        url: `/api/download/trk_seen_better_days?token=${encodeURIComponent(tokenData.download_token)}`,
+      });
+      expect(dlRes.statusCode).toBe(200);
+      expect(dlRes.headers['x-ahoy-inscribed-to']).toBe(patronId);
+      expect(dlRes.headers['x-ahoy-ledger-ref']).toBeDefined();
+      expect(dlRes.headers['x-ahoy-forensic-signature']).toBeDefined();
+
+      // Verify forensic extraction from inscribed audio payload
+      const receipt = extractAudioProvenance(Buffer.from(dlRes.rawPayload));
+      expect(receipt).not.toBeNull();
+      expect(receipt?.owner_ahoy_id).toBe(patronId);
+      expect(receipt?.track_id).toBe('trk_seen_better_days');
+      expect(receipt?.standard).toBe('AHOY-SOVEREIGN-PROVENANCE-v1');
+      expect(receipt?.forensic_signature).toBe(dlRes.headers['x-ahoy-forensic-signature']);
+
+      // 3. Reject tampered token
+      const tamperedRes = await app.inject({
+        method: 'GET',
+        url: `/api/download/trk_seen_better_days?token=${encodeURIComponent(tokenData.download_token + 'fake')}`,
+      });
+      expect(tamperedRes.statusCode).toBe(401);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it('enforces anti-leech rate limiting on master file downloads', async () => {
+    antiLeechLimiter.reset();
+    const patronId = 'ahoy_leech_tester';
+    const loginRes = await app.inject({
+      method: 'POST',
+      url: '/api/auth/dev-login',
+      payload: { ahoy_id: patronId, name: 'Leech Tester' },
+    });
+    const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session')!;
+
+    await app.inject({
+      method: 'POST',
+      url: '/api/checkout/purchase',
+      cookies: { ahoy_market_session: cookie.value },
+      payload: { release_id: 'rel_samuel_witch_1' },
+    });
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () => new Response('audio-data', { status: 200 });
+    try {
+      // Simulate 20 downloads (max allowed in 5 min)
+      for (let i = 0; i < 20; i++) {
+        const res = await app.inject({
+          method: 'GET',
+          url: '/api/download/trk_seen_better_days',
+          cookies: { ahoy_market_session: cookie.value },
+        });
+        expect(res.statusCode).toBe(200);
+      }
+
+      // 21st download should be blocked with 429
+      const blockedRes = await app.inject({
+        method: 'GET',
+        url: '/api/download/trk_seen_better_days',
+        cookies: { ahoy_market_session: cookie.value },
+      });
+      expect(blockedRes.statusCode).toBe(429);
+      expect(blockedRes.json().error).toBe('rate_limit_exceeded');
+      expect(blockedRes.headers['retry-after']).toBeDefined();
+    } finally {
+      globalThis.fetch = originalFetch;
+      antiLeechLimiter.reset();
+    }
   });
 });
