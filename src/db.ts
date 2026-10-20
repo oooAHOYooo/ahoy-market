@@ -111,6 +111,8 @@ export class MarketStore {
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('foreign_keys = ON');
     this.db.pragma('synchronous = NORMAL');
+    this.db.pragma('cache_size = -64000');
+    this.db.pragma('temp_store = MEMORY');
     this.initTables();
     this.seedDefaultCatalog();
   }
@@ -217,6 +219,11 @@ export class MarketStore {
       CREATE INDEX IF NOT EXISTS ix_boosts_artist_slug ON boosts(artist_slug);
       CREATE INDEX IF NOT EXISTS ix_sessions_session_token ON sessions(session_token);
       CREATE INDEX IF NOT EXISTS ix_tracks_release_id ON tracks(release_id);
+      CREATE INDEX IF NOT EXISTS ix_releases_artist_slug ON releases(artist_slug);
+      CREATE INDEX IF NOT EXISTS ix_releases_created_at ON releases(created_at DESC);
+      CREATE INDEX IF NOT EXISTS ix_tracks_release_track ON tracks(release_id, track_number);
+      CREATE INDEX IF NOT EXISTS ix_entitlements_lookup ON entitlements(ahoy_id, status, granted_at DESC);
+      CREATE INDEX IF NOT EXISTS ix_boosts_artist_amount ON boosts(artist_slug, amount_cents);
     `);
 
     // Ensure physical order fulfillment columns exist in purchases table
@@ -420,6 +427,10 @@ export class MarketStore {
     });
 
     tx();
+  }
+
+  getPublicArtists(): Artist[] {
+    return this.db.prepare('SELECT * FROM artists ORDER BY name ASC').all() as Artist[];
   }
 
   getArtists(): (Artist & { total_boost_cents: number; boost_count: number })[] {

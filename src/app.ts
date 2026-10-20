@@ -66,11 +66,19 @@ export function buildApp(storeOption?: MarketStore): FastifyInstance {
     secret: config.cookieSecret,
   });
 
-  // Serve static files from public/
+  // Serve static files from public/ with browser asset caching
   const publicDir = path.resolve(__dirname, '../public');
   app.register(fastifyStatic, {
     root: publicDir,
     prefix: '/',
+    cacheControl: false,
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+      }
+    },
   });
 
   // Health check

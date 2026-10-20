@@ -3198,6 +3198,7 @@
         return;
       }
 
+      const fragment = document.createDocumentFragment();
       releases.forEach(r => {
         const track = r.tracks[0];
         const card = document.createElement('article');
@@ -3209,7 +3210,7 @@
 
         card.innerHTML = `
           <div class="card-art-box">
-            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy" decoding="async">
             <span class="card-format-tag">${r.type}</span>
             <button class="card-quick-play" aria-label="Hold to hear a 3 second preview of ${escapeHtml(r.title)}" onpointerdown="startPreviewHold('${r.id}', '${escapeJsAttr(r.title)}', '${escapeJsAttr(r.artist)}', '${r.artwork_url}', '${track.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${r.id}', '${escapeJsAttr(r.title)}', '${escapeJsAttr(r.artist)}', '${r.artwork_url}', '${track.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)">
               HOLD 3 SEC
@@ -3229,21 +3230,23 @@
             </div>
           </div>
         `;
-        grid.appendChild(card);
+        fragment.appendChild(card);
       });
+      grid.appendChild(fragment);
     }
 
     function renderAlbumsView() {
       const grid = document.getElementById('albums-grid');
       if (!grid) return;
       grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
       catalogReleases.forEach(r => {
         const card = document.createElement('article');
         card.className = `release-card ${inspectingRelease?.id === r.id ? 'selected' : ''}`;
         card.onclick = () => inspectRelease(r.id);
         card.innerHTML = `
           <div class="card-art-box">
-            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy" decoding="async">
             <span class="card-format-tag">${r.tracks.length} Tracks</span>
           </div>
           <div class="card-meta">
@@ -3259,8 +3262,9 @@
             </div>
           </div>
         `;
-        grid.appendChild(card);
+        fragment.appendChild(card);
       });
+      grid.appendChild(fragment);
     }
 
     function renderTracksTable() {
@@ -3317,6 +3321,7 @@
       const grid = document.getElementById('cds-grid');
       if (!grid) return;
       grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
       catalogReleases.forEach(r => {
         const card = document.createElement('article');
         card.className = 'release-card';
@@ -3325,7 +3330,7 @@
         };
         card.innerHTML = `
           <div class="card-art-box">
-            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy" decoding="async">
             <span class="card-format-tag">AUDIO CD</span>
           </div>
           <div class="card-meta">
@@ -3341,14 +3346,16 @@
             </div>
           </div>
         `;
-        grid.appendChild(card);
+        fragment.appendChild(card);
       });
+      grid.appendChild(fragment);
     }
 
     function renderCardsView() {
       const grid = document.getElementById('cards-grid');
       if (!grid) return;
       grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
       catalogReleases.forEach(r => {
         const card = document.createElement('article');
         card.className = 'release-card';
@@ -3358,7 +3365,7 @@
         };
         card.innerHTML = `
           <div class="card-art-box">
-            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}">
+            <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy" decoding="async">
             <span class="card-format-tag" style="color: var(--coral);">USB ALBUM</span>
           </div>
           <div class="card-meta">
@@ -3374,8 +3381,9 @@
             </div>
           </div>
         `;
-        grid.appendChild(card);
+        fragment.appendChild(card);
       });
+      grid.appendChild(fragment);
     }
 
     // INSPECTOR CONTROL
@@ -3666,16 +3674,17 @@
       const grid = document.getElementById('artist-grid');
       if (!grid) return;
       grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
 
       artists.forEach(a => {
         const card = document.createElement('article');
         card.className = 'artist-card';
         card.innerHTML = `
           <div class="artist-banner">
-            <img src="${a.banner_url}" alt="${escapeHtml(a.name)}">
+            <img src="${a.banner_url}" alt="${escapeHtml(a.name)}" loading="lazy" decoding="async">
           </div>
           <div class="artist-header-row">
-            <img src="${a.avatar_url}" class="artist-avatar" alt="${escapeHtml(a.name)}">
+            <img src="${a.avatar_url}" class="artist-avatar" alt="${escapeHtml(a.name)}" loading="lazy" decoding="async">
             <div>
               <h3 style="font-size: 0.92rem; font-weight: 700;">${escapeHtml(a.name)}</h3>
               <span style="font-family: var(--font-mono); font-size: 0.64rem; color: var(--coral);">${escapeHtml(a.genre)}</span>
@@ -3688,8 +3697,9 @@
             </button>
           </div>
         `;
-        grid.appendChild(card);
+        fragment.appendChild(card);
       });
+      grid.appendChild(fragment);
     }
 
     function openTipForInspectedArtist() {
@@ -4219,6 +4229,7 @@
       const countBadge = document.getElementById('cd-pool-count');
       if (countBadge) countBadge.textContent = `${list.length} available`;
 
+      const fragment = document.createDocumentFragment();
       list.forEach(t => {
         const isAdded = burnedCdTracks.some(bt => bt.id === t.id);
         const card = document.createElement('div');
@@ -4233,7 +4244,7 @@
 
         card.innerHTML = `
           <span class="track-drag-handle" title="Drag onto CD">⋮⋮</span>
-          <img src="${t.artwork_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=80&q=80'}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;" alt="">
+          <img src="${t.artwork_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=80&q=80'}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;" alt="" loading="lazy" decoding="async">
           <div style="flex: 1; min-width: 0; text-align: left;">
             <div style="font-weight: 700; font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(t.title)}</div>
             <div style="font-size: 0.65rem; color: var(--text-muted);">${escapeHtml(t.artist)} • ${durationMin}</div>
@@ -4246,8 +4257,9 @@
           </button>
         `;
 
-        container.appendChild(card);
+        fragment.appendChild(card);
       });
+      container.appendChild(fragment);
     }
 
     function toggleTrackOnCd(trackId) {

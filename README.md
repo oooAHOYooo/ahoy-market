@@ -99,3 +99,16 @@ The marketplace incorporates several layers of defense to protect user identity,
   Audio download filenames strip newline characters (`\r`, `\n`) and invalid filesystem characters before formatting `Content-Disposition` attachment headers.
 - **Environment & Secret Safeguards:**
   In production (`NODE_ENV=production`), missing `COOKIE_SECRET` triggers runtime security warnings, and development-only bypasses (`/api/auth/dev-login`, direct test card checkout, unauthenticated boost query inspections) are strictly locked down.
+
+## Performance Optimizations
+
+- **SQLite In-Memory Caching & Indexing:**
+  - WAL journal mode with 64 MB page cache (`PRAGMA cache_size = -64000`) and in-memory temporary storage (`PRAGMA temp_store = MEMORY`).
+  - Added indexes for release timestamps (`ix_releases_created_at`), artist releases (`ix_releases_artist_slug`), track sequence (`ix_tracks_release_track`), active entitlement lookups (`ix_entitlements_lookup`), and boost amounts (`ix_boosts_artist_amount`).
+  - Catalog and market snapshot queries use `getPublicArtists()` to perform a direct indexed table query, skipping redundant aggregation joins over private patron records.
+- **Client-Side DocumentFragment Batching & Reflow Prevention:**
+  Card list rendering (`renderFeatured`, `renderAlbumsView`, `renderCdsView`, `renderCardsView`, `renderArtists`, `renderCdPoolTracks`) builds DOM trees in memory with `DocumentFragment` before attaching to the document, eliminating repeated layout recalculations and browser paints.
+- **Asynchronous Image Decoding & Lazy Loading:**
+  All artwork and avatar `<img>` tags declare `loading="lazy"` and `decoding="async"`, preventing offscreen image decoding from blocking the main UI thread during scrolling.
+- **Differentiated Static Asset Caching:**
+  Static assets (wordmarks, images, favicons) are served with `Cache-Control: public, max-age=86400, stale-while-revalidate=604800`, while `index.html` uses `Cache-Control: no-cache` to ensure browser clients always display the newest releases without stale client states.

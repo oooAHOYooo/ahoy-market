@@ -77,7 +77,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   app.get('/api/market/latest', async (request: FastifyRequest) => {
     const auth = getAuthUser(request);
     const releases = store.getReleasesWithTracks();
-    const artists = store.getArtists().map(({ total_boost_cents: _total, boost_count: _count, ...artist }) => artist);
+    const artists = store.getPublicArtists();
     const leaderboard = store.getGlobalBoostersLeaderboard(10)
       .map(({ total_cents: _total, boost_count: _count, rank: _rank, ...supporter }) => supporter)
       .sort((a, b) => a.supporter_name.localeCompare(b.supporter_name));
@@ -109,7 +109,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
   // GET /api/artists -> Public artist catalog; supporter totals stay private
   app.get('/api/artists', async () => {
-    const artists = store.getArtists().map(({ total_boost_cents: _total, boost_count: _count, ...artist }) => artist);
+    const artists = store.getPublicArtists();
     return { artists };
   });
 

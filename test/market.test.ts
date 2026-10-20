@@ -575,4 +575,14 @@ describe('AHOY Market API & Entitlement Flow', () => {
     });
     expect(evilRes.headers['access-control-allow-origin']).toBeUndefined();
   });
+
+  it('serves static assets with appropriate caching headers', async () => {
+    const assetRes = await app.inject({ method: 'GET', url: '/ahoy-wordmark.png' });
+    expect(assetRes.statusCode).toBe(200);
+    expect(assetRes.headers['cache-control']).toContain('public, max-age=86400');
+
+    const htmlRes = await app.inject({ method: 'GET', url: '/' });
+    expect(htmlRes.statusCode).toBe(200);
+    expect(htmlRes.headers['cache-control']).toBe('no-cache');
+  });
 });
