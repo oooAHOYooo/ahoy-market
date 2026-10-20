@@ -586,4 +586,63 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(htmlRes.statusCode).toBe(200);
     expect(htmlRes.headers['cache-control']).toBe('no-cache');
   });
+
+  it('generates AWS SigV4 pre-signed URLs with 15-minute expiration when storage credentials are configured', async () => {
+    const originalKey = config.s3AccessKeyId;
+    const originalSecret = config.s3SecretAccessKey;
+    const originalRegion = config.s3Region;
+    const originalExpires = config.s3UrlExpirationSeconds;
+
+    config.s3AccessKeyId = 'AKIAIOSFODNN7EXAMPLE';
+    config.s3SecretAccessKey = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
+    config.s3Region = 'us-east-2';
+    config.s3UrlExpirationSeconds = 900;
+
+    const patronId = 'ahoy_presigned_tester';
+    try {
+      // 1. Authenticate & grant entitlement
+      const loginRes = await app.inject({
+        method: 'POST',
+        url: '/api/auth/dev-login',
+        payload: { ahoy_id: patronId },
+      });
+      const cookie = loginRes.cookies.find(c => c.name === 'ahoy_market_session')!;
+
+      await app.inject({
+        method: 'POST',
+        url: '/api/checkout/purchase',
+        cookies: { ahoy_market_session: cookie.value },
+        payload: { release_id: 'rel_samuel_witch_1' },
+      });
+
+      // 2. Query /api/stream/:trackId -> Should redirect to AWS SigV4 pre-signed URL
+      const streamRes = await app.inject({
+        method: 'GET',
+        url: `/api/stream/trk_seen_better_days?ahoy_id=${encodeURIComponent(patronId)}`,
+      });
+      expect(streamRes.statusCode).toBe(302);
+      const redirectUrl = new URL(streamRes.headers.location as string);
+      expect(redirectUrl.searchParams.get('X-Amz-Algorithm')).toBe('AWS4-HMAC-SHA256');
+      expect(redirectUrl.searchParams.get('X-Amz-Credential')).toContain('AKIAIOSFODNN7EXAMPLE');
+      expect(redirectUrl.searchParams.get('X-Amz-Credential')).toContain('us-east-2/s3/aws4_request');
+      expect(redirectUrl.searchParams.get('X-Amz-Expires')).toBe('900');
+      expect(redirectUrl.searchParams.get('X-Amz-Signature')).toBeDefined();
+      expect(redirectUrl.searchParams.get('X-Amz-Signature')!.length).toBe(64);
+
+      // 3. Query /api/entitlements -> direct_audio_url should contain pre-signed signature
+      const entRes = await app.inject({
+        method: 'GET',
+        url: `/api/entitlements?ahoy_id=${encodeURIComponent(patronId)}`,
+      });
+      expect(entRes.statusCode).toBe(200);
+      const entData = entRes.json();
+      expect(entData.tracks[0].direct_audio_url).toContain('X-Amz-Algorithm=AWS4-HMAC-SHA256');
+      expect(entData.tracks[0].direct_audio_url).toContain('X-Amz-Signature=');
+    } finally {
+      config.s3AccessKeyId = originalKey;
+      config.s3SecretAccessKey = originalSecret;
+      config.s3Region = originalRegion;
+      config.s3UrlExpirationSeconds = originalExpires;
+    }
+  });
 });

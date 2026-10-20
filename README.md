@@ -58,12 +58,26 @@ Configure these environment variables on the service:
 | `AHOY_REDIRECT_URI` | Registered `https://.../api/auth/callback` URL |
 | `DATABASE_PATH` | SQLite path on a persistent disk or volume |
 | `COOKIE_SECRET` | Random private cookie signing secret |
+| `AWS_ACCESS_KEY_ID` | (Optional) AWS / R2 / S3 access key ID for private audio pre-signing |
+| `AWS_SECRET_ACCESS_KEY` | (Optional) AWS / R2 / S3 secret access key |
+| `AWS_REGION` | (Optional) AWS / S3 region (defaults to `us-east-2`) |
+| `AWS_S3_BUCKET` | (Optional) Private audio master storage bucket |
+| `S3_ENDPOINT` | (Optional) Custom endpoint for Cloudflare R2 / MinIO storage |
+| `S3_URL_EXPIRATION_SECONDS`| (Optional) Expiration window for pre-signed URLs (defaults to 900s / 15m) |
+| `CLOUDFRONT_DOMAIN` | (Optional) CloudFront distribution domain for CDN signed URLs |
+| `CLOUDFRONT_KEY_ID` | (Optional) CloudFront public key ID |
+| `CLOUDFRONT_PRIVATE_KEY`| (Optional) CloudFront RSA private key in PEM format |
 
 Create a Stripe webhook destination at `https://<market-host>/api/stripe/webhook` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Test with Stripe test keys and a real AHOY ID login before switching to live keys. An ephemeral container filesystem loses pending orders and entitlements after restart, so mount persistent storage before accepting live payments.
 
 For the first paid release, configure the production URL and registered AHOY ID callback, mount a persistent directory for `DATABASE_PATH`, set the two Stripe secrets, and verify a test card purchase reaches My Library and downloads an MP3. The buyer return page checks the pending order until the signed webhook confirms it. The market currently sells digital music only; physical editions and boosts have no live checkout.
 
-The current seeded catalog uses public S3 MP3 URLs for both previews and purchased audio. The checkout records ownership in the market ledger, but it does not make the audio file private. Separate preview assets and private full files with short-lived authorized downloads are still needed for exclusive paid access. Physical editions and artist boosts do not have paid checkout yet; their direct purchase endpoints are disabled in production.
+### Private Audio Vault & Pre-Signed URLs
+
+Purchased master audio files can be placed in a private AWS S3, Cloudflare R2, or CloudFront distribution with public access blocked:
+- **Short-Lived Ephemeral Links:** When an entitled user requests playback or a download (`/api/stream/:trackId`, `/api/download/:trackId`, or `/api/entitlements`), the server verifies entitlement in the local SQLite ledger and signs an ephemeral AWS SigV4 pre-signed URL or CloudFront signed URL valid for 15 minutes (`X-Amz-Expires=900`).
+- **Unentitled Protection:** Users without an active entitlement are redirected strictly to public 30-second preview clips and cannot acquire pre-signed links.
+- **Graceful Fallback:** If storage credentials are omitted (e.g. in local development or test runners), the system falls back to the database-cataloged URLs without breaking existing workflows.
 
 ## Security Architecture & Hardening
 

@@ -16,6 +16,17 @@ export const config = {
   isProduction: process.env.NODE_ENV === 'production',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+
+  // Audio Vault & Pre-Signing (AWS S3 / Cloudflare R2 / CloudFront)
+  s3Bucket: process.env.AWS_S3_BUCKET || process.env.S3_BUCKET || '',
+  s3Region: process.env.AWS_REGION || process.env.S3_REGION || 'us-east-2',
+  s3AccessKeyId: process.env.AWS_ACCESS_KEY_ID || process.env.S3_ACCESS_KEY_ID || '',
+  s3SecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || process.env.S3_SECRET_ACCESS_KEY || '',
+  s3Endpoint: (process.env.S3_ENDPOINT || '').replace(/\/$/, ''),
+  s3UrlExpirationSeconds: parseInt(process.env.S3_URL_EXPIRATION_SECONDS || '900', 10), // 15 minutes default
+  cloudFrontDomain: (process.env.CLOUDFRONT_DOMAIN || '').replace(/\/$/, '').replace(/^https?:\/\//, ''),
+  cloudFrontKeyId: process.env.CLOUDFRONT_KEY_ID || '',
+  cloudFrontPrivateKey: (process.env.CLOUDFRONT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };
 
 if (config.isProduction && !process.env.COOKIE_SECRET) {

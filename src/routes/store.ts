@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyPluginAsync, FastifyRequest, FastifyReply } fro
 import { z } from 'zod';
 import { MarketStore, UserSession } from '../db.js';
 import { config } from '../config.js';
+import { getAuthorizedAudioUrl } from '../storage.js';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Readable } from 'node:stream';
 
@@ -428,7 +429,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
         artist: e.artist,
         artwork_url: e.artwork_url,
         stream_url: `${config.publicBaseUrl}/api/stream/${e.track_id}?ahoy_id=${encodeURIComponent(effectiveAhoyId)}`,
-        direct_audio_url: e.full_audio_url,
+        direct_audio_url: getAuthorizedAudioUrl(e.full_audio_url),
         duration_seconds: e.duration_seconds,
         unlocked_at: e.granted_at,
         source: 'market.ahoy.ooo',
@@ -449,7 +450,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     const isEntitled = effectiveAhoyId ? store.hasEntitlement(effectiveAhoyId, trackId) : false;
 
     if (isEntitled) {
-      return reply.redirect(track.full_audio_url);
+      return reply.redirect(getAuthorizedAudioUrl(track.full_audio_url));
     }
 
     // If not entitled, fallback to preview
@@ -476,9 +477,10 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
     // Serve the file from this origin so the browser receives attachment headers.
     // A redirect to the audio host can discard Content-Disposition and open a player instead.
+    const downloadUrl = getAuthorizedAudioUrl(track.full_audio_url);
     let audioResponse: Response;
     try {
-      audioResponse = await fetch(track.full_audio_url, { signal: AbortSignal.timeout(30_000) });
+      audioResponse = await fetch(downloadUrl, { signal: AbortSignal.timeout(30_000) });
     } catch {
       return reply.code(502).send({ error: 'download_unavailable' });
     }
