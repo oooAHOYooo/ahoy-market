@@ -109,6 +109,8 @@ export class MarketStore {
   constructor(dbPath: string = ':memory:') {
     this.db = new Database(dbPath);
     this.db.pragma('journal_mode = WAL');
+    this.db.pragma('foreign_keys = ON');
+    this.db.pragma('synchronous = NORMAL');
     this.initTables();
     this.seedDefaultCatalog();
   }

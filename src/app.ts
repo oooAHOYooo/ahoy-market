@@ -26,9 +26,40 @@ export function buildApp(storeOption?: MarketStore): FastifyInstance {
   });
 
   // Plugins
+  const allowedOrigins = new Set([
+    config.publicBaseUrl,
+    config.playerUrl,
+    config.streamerUrl,
+    config.ahoyIdUrl,
+  ]);
+
   app.register(cors, {
-    origin: true,
+    origin: (origin, cb) => {
+      // Allow requests with no origin (e.g. server-to-server, curl, mobile native)
+      if (!origin) return cb(null, true);
+      if (allowedOrigins.has(origin)) return cb(null, true);
+      // In development / test mode, allow loopback origins
+      if (!config.isProduction) {
+        try {
+          const parsed = new URL(origin);
+          if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+            return cb(null, true);
+          }
+        } catch {
+          // Fall through to reject
+        }
+      }
+      return cb(null, false);
+    },
     credentials: true,
+  });
+
+  // Standard HTTP security response headers
+  app.addHook('onSend', async (_request, reply) => {
+    reply.header('X-Content-Type-Options', 'nosniff');
+    reply.header('X-Frame-Options', 'SAMEORIGIN');
+    reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+    reply.header('X-XSS-Protection', '0');
   });
 
   app.register(cookie, {

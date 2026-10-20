@@ -15,4 +15,17 @@ async function start() {
   }
 }
 
+for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+  process.on(signal, async () => {
+    console.log(`\n🌊 Received ${signal}, closing server gracefully...`);
+    try {
+      await app.close();
+      process.exit(0);
+    } catch (err) {
+      console.error('Error during shutdown:', err);
+      process.exit(1);
+    }
+  });
+}
+
 start();

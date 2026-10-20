@@ -547,4 +547,32 @@ describe('AHOY Market API & Entitlement Flow', () => {
     expect(friendEnt.statusCode).toBe(200);
     expect(friendEnt.json().count).toBe(2);
   });
+
+  it('sets standard defensive HTTP security headers on responses', async () => {
+    const res = await app.inject({ method: 'GET', url: '/health' });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    expect(res.headers['x-xss-protection']).toBe('0');
+  });
+
+  it('enforces scoped CORS policy and blocks untrusted external origins', async () => {
+    // 1. Allowed origin (Player)
+    const allowedRes = await app.inject({
+      method: 'GET',
+      url: '/api/releases',
+      headers: { origin: config.playerUrl },
+    });
+    expect(allowedRes.headers['access-control-allow-origin']).toBe(config.playerUrl);
+    expect(allowedRes.headers['access-control-allow-credentials']).toBe('true');
+
+    // 2. Untrusted origin should NOT be reflected in access-control-allow-origin
+    const evilRes = await app.inject({
+      method: 'GET',
+      url: '/api/releases',
+      headers: { origin: 'https://evil-pirate-site.com' },
+    });
+    expect(evilRes.headers['access-control-allow-origin']).toBeUndefined();
+  });
 });

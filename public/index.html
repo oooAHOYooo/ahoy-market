@@ -3211,7 +3211,7 @@
           <div class="card-art-box">
             <img src="${r.artwork_url}" alt="${escapeHtml(r.title)}" loading="lazy">
             <span class="card-format-tag">${r.type}</span>
-            <button class="card-quick-play" aria-label="Hold to hear a 3 second preview of ${escapeHtml(r.title)}" onpointerdown="startPreviewHold('${r.id}', '${escapeHtml(r.title)}', '${escapeHtml(r.artist)}', '${r.artwork_url}', '${track.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${r.id}', '${escapeHtml(r.title)}', '${escapeHtml(r.artist)}', '${r.artwork_url}', '${track.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)">
+            <button class="card-quick-play" aria-label="Hold to hear a 3 second preview of ${escapeHtml(r.title)}" onpointerdown="startPreviewHold('${r.id}', '${escapeJsAttr(r.title)}', '${escapeJsAttr(r.artist)}', '${r.artwork_url}', '${track.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${r.id}', '${escapeJsAttr(r.title)}', '${escapeJsAttr(r.artist)}', '${r.artwork_url}', '${track.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)">
               HOLD 3 SEC
             </button>
             <div class="preview-countdown" aria-hidden="true"><div class="preview-countdown-ring"><span class="preview-countdown-number">3</span></div></div>
@@ -3297,7 +3297,7 @@
             <td style="font-family: var(--font-mono); color: var(--coral); font-weight: 700;">$${(t.price_cents / 100).toFixed(2)}</td>
             <td>
               <div style="display: flex; gap: 0.35rem;" onclick="event.stopPropagation();">
-                <button class="btn btn-secondary" style="padding: 0.22rem 0.5rem; font-size: 0.66rem;" onpointerdown="startPreviewHold('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)">
+                <button class="btn btn-secondary" style="padding: 0.22rem 0.5rem; font-size: 0.66rem;" onpointerdown="startPreviewHold('${t.id}', '${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${t.id}', '${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)">
                   Play
                 </button>
                 <button class="btn btn-coral" style="padding: 0.22rem 0.55rem; font-size: 0.66rem;" onclick="inspectAndDirectBuy('${t.release_id}')">
@@ -3854,7 +3854,7 @@
             <td style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
             <td>
               <div style="display: flex; gap: 0.35rem;">
-                <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}', this)">
+                <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}', this)">
                   Play
                 </button>
                 <a href="/api/download/${encodeURIComponent(t.track_id)}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
@@ -4041,7 +4041,22 @@
     }
 
     function escapeHtml(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/`/g, '&#96;');
+    }
+
+    function escapeJsAttr(str) {
+      return String(str || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     // ==========================================
@@ -4223,7 +4238,7 @@
             <div style="font-weight: 700; font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(t.title)}</div>
             <div style="font-size: 0.65rem; color: var(--text-muted);">${escapeHtml(t.artist)} • ${durationMin}</div>
           </div>
-          <button class="btn btn-secondary" style="padding: 0.18rem 0.45rem; font-size: 0.65rem;" onpointerdown="startPreviewHold('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${t.id}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)" title="Hold for a 3 second preview">
+          <button class="btn btn-secondary" style="padding: 0.18rem 0.45rem; font-size: 0.65rem;" onpointerdown="startPreviewHold('${t.id}', '${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onpointerup="endPreviewHold(this)" onpointerleave="endPreviewHold(this)" onpointercancel="endPreviewHold(this)" onkeydown="if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) startPreviewHold('${t.id}', '${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.preview_url}', this, event)" onkeyup="if (event.key === ' ' || event.key === 'Enter') endPreviewHold(this)" title="Hold for a 3 second preview">
             ▶
           </button>
           <button class="btn ${isAdded ? 'btn-secondary' : 'btn-coral'}" style="padding: 0.2rem 0.55rem; font-size: 0.65rem;" onclick="toggleTrackOnCd('${t.id}')">

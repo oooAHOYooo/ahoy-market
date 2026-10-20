@@ -17,3 +17,7 @@ export const config = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
 };
+
+if (config.isProduction && !process.env.COOKIE_SECRET) {
+  console.warn('⚠️ [SECURITY] COOKIE_SECRET is unset in production. Please set COOKIE_SECRET in your environment.');
+}

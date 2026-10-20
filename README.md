@@ -64,3 +64,38 @@ Create a Stripe webhook destination at `https://<market-host>/api/stripe/webhook
 For the first paid release, configure the production URL and registered AHOY ID callback, mount a persistent directory for `DATABASE_PATH`, set the two Stripe secrets, and verify a test card purchase reaches My Library and downloads an MP3. The buyer return page checks the pending order until the signed webhook confirms it. The market currently sells digital music only; physical editions and boosts have no live checkout.
 
 The current seeded catalog uses public S3 MP3 URLs for both previews and purchased audio. The checkout records ownership in the market ledger, but it does not make the audio file private. Separate preview assets and private full files with short-lived authorized downloads are still needed for exclusive paid access. Physical editions and artist boosts do not have paid checkout yet; their direct purchase endpoints are disabled in production.
+
+## Security Architecture & Hardening
+
+The marketplace incorporates several layers of defense to protect user identity, payment integrity, and sovereign entitlements:
+
+- **Scoped CORS with Credentials:**
+  Cross-origin requests with credentials (`cookies`, `Authorization`) are restricted to verified origins (`PUBLIC_BASE_URL`, `AHOY_PLAYER_URL`, `AHOY_STREAMER_URL`, `AHOY_ID_URL`, plus loopback interfaces during local development). Untrusted external websites are prohibited from reading authenticated session data or initiating orders on behalf of users.
+- **Defensive HTTP Response Headers:**
+  Standard defense-in-depth headers are injected into all HTTP responses:
+  - `X-Content-Type-Options: nosniff`: Mitigates MIME-type confusion and content sniffing.
+  - `X-Frame-Options: SAMEORIGIN`: Prevents clickjacking and unauthorized embedding in external iframes.
+  - `Referrer-Policy: strict-origin-when-cross-origin`: Restricts sensitive path/token leakage via referrers to external origins.
+  - `X-XSS-Protection: 0`: Modern secure setting disabling legacy buggy browser XSS filters in favor of robust parsing.
+- **Dual-Layer Contextual HTML & JS Escaping:**
+  The frontend UI uses strict context-aware escaping:
+  - `escapeHtml()`: Escapes `&`, `<`, `>`, `"`, `'`, and `` ` `` to HTML entities (`&amp;`, `&lt;`, `&gt;`, `&quot;`, `&#39;`, `&#96;`).
+  - `escapeJsAttr()`: Encodes backslashes and single quotes (`\'`) when data attributes or JS parameters are passed inside inline HTML event handlers, preventing attribute breakouts and script injection even with titles containing apostrophes.
+- **Upstream Network Request Timeouts:**
+  All server-side outbound `fetch()` requests (Stripe Checkout creation, AHOY ID token exchange, userinfo queries, and audio downloads) enforce strict `AbortSignal.timeout(10_000)` (or 30s for large audio proxying), preventing worker thread socket starvation and denial-of-service under slow-loris or upstream outage conditions.
+- **Bounded In-Memory PKCE State Cache:**
+  The OAuth PKCE cache evicts entries older than 10 minutes and enforces an upper bound of 1,000 active states to mitigate memory-exhaustion attacks.
+- **Replay-Resistant & Constant-Time Webhook Verification:**
+  Stripe webhook events are verified using HMAC-SHA256 signatures with constant-time equality comparisons (`crypto.timingSafeEqual`) and a strict 300-second timestamp freshness tolerance to eliminate timing attacks and replay exploits.
+- **Safe Database Queries & Durability:**
+  All SQL queries in `better-sqlite3` use parameterized prepared statements; no string concatenation is used for database inputs. Foreign key constraints (`PRAGMA foreign_keys = ON`) and WAL mode with synchronous normalization (`PRAGMA synchronous = NORMAL`) are enforced at connection initialization.
+- **Graceful Shutdown & Signal Handling:**
+  The server process intercepts `SIGINT` and `SIGTERM` signals to cleanly shut down active Fastify HTTP connections and close SQLite database handles, flushing WAL journals to prevent database corruption during container restarts or deployments.
+- **Container Hardening:**
+  The production `Dockerfile` enforces the principle of least privilege, running as the unprivileged `node` user rather than `root`.
+- **Query Parameter Bounding:**
+  Endpoints accepting pagination or count limits (e.g., `/api/artists/:slug/boosts`, `/api/leaderboard/boosters`) enforce strict numeric clamping (1 to 100) to prevent denial-of-service from unbounded queries.
+- **CRLF & Header Injection Protection:**
+  Audio download filenames strip newline characters (`\r`, `\n`) and invalid filesystem characters before formatting `Content-Disposition` attachment headers.
+- **Environment & Secret Safeguards:**
+  In production (`NODE_ENV=production`), missing `COOKIE_SECRET` triggers runtime security warnings, and development-only bypasses (`/api/auth/dev-login`, direct test card checkout, unauthenticated boost query inspections) are strictly locked down.

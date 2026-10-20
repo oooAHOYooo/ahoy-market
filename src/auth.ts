@@ -71,10 +71,14 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
       createdAt: Date.now(),
     });
 
-    // Cleanup old cache entries
+    // Cleanup old cache entries and enforce maximum cache size
     const now = Date.now();
     for (const [k, v] of pkceCache.entries()) {
       if (now - v.createdAt > 600_000) pkceCache.delete(k);
+    }
+    if (pkceCache.size > 1000) {
+      const oldestKeys = Array.from(pkceCache.keys()).slice(0, pkceCache.size - 1000);
+      for (const k of oldestKeys) pkceCache.delete(k);
     }
 
     const authUrl = new URL(`${config.ahoyIdUrl}/oauth/authorize`);
@@ -123,6 +127,7 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
       // Exchange code for token with AHOY ID
       const tokenResponse = await fetch(`${config.ahoyIdUrl}/api/v1/oauth/token`, {
         method: 'POST',
+        signal: AbortSignal.timeout(10_000),
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           grant_type: 'authorization_code',
@@ -149,6 +154,7 @@ export const authRoutes = (store: MarketStore): FastifyPluginAsync => async (app
 
       if (!ahoyId && accessToken) {
         const userinfoRes = await fetch(`${config.ahoyIdUrl}/api/v1/oauth/userinfo`, {
+          signal: AbortSignal.timeout(10_000),
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         if (userinfoRes.ok) {

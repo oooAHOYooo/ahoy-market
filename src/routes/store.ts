@@ -123,7 +123,8 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
   // GET /api/artists/:slug/boosts -> Get recent boosts for an artist
   app.get('/api/artists/:slug/boosts', async (request: FastifyRequest<{ Params: { slug: string }; Querystring: { limit?: string } }>, reply: FastifyReply) => {
-    const limit = parseInt(request.query.limit || '20', 10);
+    const parsedLimit = parseInt(request.query.limit || '20', 10);
+    const limit = Math.min(Math.max(Number.isFinite(parsedLimit) ? parsedLimit : 20, 1), 100);
     const boosts = store.getArtistBoosts(request.params.slug, limit);
     return {
       artist_slug: request.params.slug,
@@ -181,7 +182,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   app.get('/api/me/boost-stats', async (request: FastifyRequest<{ Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
     const auth = getAuthUser(request);
     const queryAhoyId = request.query.ahoy_id;
-    const effectiveAhoyId = queryAhoyId || auth?.ahoy_id;
+    const effectiveAhoyId = auth?.ahoy_id || (!config.isProduction ? queryAhoyId : undefined);
 
     if (!effectiveAhoyId) {
       return reply.code(401).send({ error: 'authentication_required' });
@@ -193,7 +194,8 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
 
   // GET /api/leaderboard/boosters -> Global top patrons leaderboard
   app.get('/api/leaderboard/boosters', async (request: FastifyRequest<{ Querystring: { limit?: string } }>) => {
-    const limit = parseInt(request.query.limit || '10', 10);
+    const parsedLimit = parseInt(request.query.limit || '10', 10);
+    const limit = Math.min(Math.max(Number.isFinite(parsedLimit) ? parsedLimit : 10, 1), 100);
     const leaderboard = store.getGlobalBoostersLeaderboard(limit)
       .map(({ total_cents: _total, boost_count: _count, rank: _rank, ...supporter }) => supporter);
     leaderboard.sort((a, b) => a.supporter_name.localeCompare(b.supporter_name));
@@ -289,6 +291,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     try {
       stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
         method: 'POST',
+        signal: AbortSignal.timeout(10_000),
         headers: { Authorization: `Bearer ${config.stripeSecretKey}`, 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params,
       });
@@ -480,7 +483,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
       return reply.code(502).send({ error: 'download_unavailable' });
     }
     if (!audioResponse.ok || !audioResponse.body) return reply.code(502).send({ error: 'download_unavailable' });
-    const filename = `${track.artist} - ${track.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-');
+    const filename = `${track.artist} - ${track.title}.mp3`.replace(/[/\\?%*:|"<>]/g, '-').replace(/[\r\n]/g, '');
     const asciiFilename = filename.replace(/[^\x20-\x7e]/g, '_');
     reply.header('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
     reply.header('Content-Type', 'audio/mpeg');
