@@ -126,3 +126,15 @@ The marketplace incorporates several layers of defense to protect user identity,
   All artwork and avatar `<img>` tags declare `loading="lazy"` and `decoding="async"`, preventing offscreen image decoding from blocking the main UI thread during scrolling.
 - **Differentiated Static Asset Caching:**
   Static assets (wordmarks, images, favicons) are served with `Cache-Control: public, max-age=86400, stale-while-revalidate=604800`, while `index.html` uses `Cache-Control: no-cache` to ensure browser clients always display the newest releases without stale client states.
+
+## Progressive Web App (PWA) & Offline Sovereign Vault
+
+AHOY Store is a full Progressive Web App installable as a standalone application on macOS, iOS, Android, and Windows:
+
+- **Web App Manifest (`/manifest.json`):**
+  Declares standalone display mode, brand taskie palette (`theme_color: #F04478`), orientation handling, and app shortcuts.
+- **Service Worker (`/sw.js`):**
+  - **App Shell Cache (`ahoy-market-shell-v1`):** Caches the frontend shell (`/index.html`, `/manifest.json`, wordmarks, stylesheets, Google fonts) so the application opens instantly even with no internet connection.
+  - **Offline Audio Vault (`ahoy-vault-audio-v1`):** Intercepts playback and download requests to serve saved audio files directly from the local browser Cache Storage when offline.
+- **Sovereign Local Vaulting:**
+  In **My Library**, patrons can click **"📥 Vault"** on any owned song to download and store the master MP3 locally. When offline (e.g. sailing, flying, or off-grid), an offline indicator appears, the library remains populated, and clicking **"Play"** streams directly from the locally stored audio blob with zero network requirements.

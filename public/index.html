@@ -8,6 +8,13 @@
   <meta name="theme-color" content="#F04478">
   <link rel="icon" type="image/png" href="/ahoy-wordmark.png">
 
+  <!-- Progressive Web App (PWA) -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AHOY Store">
+  <link rel="apple-touch-icon" href="/ahoy-wordmark.png">
+
   <!-- Open Graph / Social Sharing -->
   <meta property="og:title" content="AHOY Store — Sovereign Music &amp; Custom Pressings">
   <meta property="og:description" content="Sovereign digital music and custom physical pressings from the AHOY indie media ecosystem. Direct artist support with AHOY ID.">
@@ -2109,6 +2116,11 @@
     <!-- ========================================== -->
     <main class="dashboard-center">
 
+      <div id="offline-banner" style="display:none; margin-bottom:1rem; padding:.65rem 1rem; border:1px solid var(--mint); border-radius:12px; background:var(--mint-soft); color:var(--text); font-size:.76rem; align-items:center; justify-content:space-between;">
+        <span>🌊 <strong>Offline Mode:</strong> Connected to your Local Sovereign Vault. Playing offline music.</span>
+        <button class="btn btn-mint" style="padding:0.2rem 0.6rem; font-size:0.68rem;" onclick="switchView('library')">Open Library</button>
+      </div>
+
       <div id="wireframe-banner" style="display:none; margin-bottom:1rem; padding:.85rem 1rem; border:1px dashed var(--coral); border-radius:12px; background:var(--coral-soft); color:var(--text); font-size:.76rem;">
         <strong>Design wireframe</strong> · Sample content for layout review. Sign in, tips, and checkout are inactive in this preview.
         <div class="wireframe-tabs" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem">
@@ -2910,6 +2922,7 @@
 
     async function init() {
       initTheme();
+      initPwa();
       updateCustomizationDrawer();
       // Fetch latest market snapshot in 1 single round trip
       if (wireframePreview) showWireframePreview();
@@ -3004,6 +3017,100 @@
       applyTheme(isDark ? 'light' : 'dark');
     }
 
+    // ==========================================
+    // PWA & OFFLINE SOVEREIGN VAULT
+    // ==========================================
+    const VAULT_CACHE_NAME = 'ahoy-vault-audio-v1';
+
+    function initPwa() {
+      updateNetworkStatus();
+      if ('serviceWorker' in navigator && (window.location.protocol.startsWith('http') || window.location.protocol.startsWith('https'))) {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('🌊 [AHOY PWA] Service worker registered:', reg.scope);
+        }).catch((err) => {
+          console.warn('⚠️ [AHOY PWA] Service worker registration error:', err);
+        });
+      }
+    }
+
+    function updateNetworkStatus() {
+      const banner = document.getElementById('offline-banner');
+      if (banner) {
+        banner.style.display = navigator.onLine ? 'none' : 'flex';
+      }
+    }
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+
+    async function isTrackInVault(trackId, audioUrl) {
+      if (!('caches' in window)) return false;
+      try {
+        const cache = await caches.open(VAULT_CACHE_NAME);
+        const matchDownload = await cache.match(`/api/download/${encodeURIComponent(trackId)}`);
+        if (matchDownload) return true;
+        if (audioUrl) {
+          const matchAudio = await cache.match(audioUrl);
+          if (matchAudio) return true;
+        }
+      } catch {}
+      return false;
+    }
+
+    async function toggleVaultTrack(trackId, title, audioUrl) {
+      if (!('caches' in window)) {
+        alert('Offline vaulting requires Cache Storage support in your browser.');
+        return;
+      }
+      const btn = document.getElementById(`vault-btn-${trackId}`);
+      try {
+        const cache = await caches.open(VAULT_CACHE_NAME);
+        const alreadyVaulted = await isTrackInVault(trackId, audioUrl);
+        if (alreadyVaulted) {
+          await cache.delete(`/api/download/${encodeURIComponent(trackId)}`);
+          if (audioUrl) await cache.delete(audioUrl);
+          if (btn) {
+            btn.className = 'btn btn-secondary';
+            btn.innerHTML = '📥 Vault (Offline)';
+            btn.title = 'Store MP3 locally in offline vault';
+          }
+        } else {
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Vaulting…';
+          }
+          const downloadUrl = `/api/download/${encodeURIComponent(trackId)}`;
+          const res = await fetch(downloadUrl);
+          if (!res.ok) {
+            throw new Error(`Failed to download audio for vault (HTTP ${res.status})`);
+          }
+          const blob = await res.blob();
+          const responseToCache = new Response(blob, {
+            headers: {
+              'Content-Type': 'audio/mpeg',
+              'Cache-Control': 'public, max-age=31536000',
+            },
+          });
+          await cache.put(downloadUrl, responseToCache.clone());
+          if (audioUrl) {
+            await cache.put(audioUrl, responseToCache);
+          }
+          if (btn) {
+            btn.disabled = false;
+            btn.className = 'btn btn-mint';
+            btn.innerHTML = '✓ Vaulted';
+            btn.title = 'Saved locally in offline vault';
+          }
+        }
+      } catch (err) {
+        console.error('Vault toggle error:', err);
+        alert('Could not vault track for offline playback: ' + err.message);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '📥 Vault (Offline)';
+        }
+      }
+    }
+
     // UNIFIED LATEST MARKET STATE FETCHER
     async function fetchLatest() {
       try {
@@ -3027,13 +3134,21 @@
         }
         return data;
       } catch (err) {
-        console.error('fetchLatest error, falling back to parallel fetch:', err);
-        await Promise.all([
-          checkAuth(),
-          loadReleases(),
-          loadArtists(),
-          loadLeaderboard(),
-        ]);
+        console.warn('fetchLatest error, checking offline cache:', err);
+        try {
+          const cachedLib = JSON.parse(localStorage.getItem('ahoy_library_cache') || '{}');
+          if (cachedLib.tracks && cachedLib.tracks.length) {
+            renderLibraryData(cachedLib.tracks, cachedLib.ahoyId);
+          }
+        } catch {}
+        if (navigator.onLine) {
+          await Promise.all([
+            checkAuth(),
+            loadReleases(),
+            loadArtists(),
+            loadLeaderboard(),
+          ]);
+        }
       }
     }
 
@@ -3844,6 +3959,12 @@
 
     // PURCHASED LIBRARY
     function renderLibraryData(tracks, ahoyId) {
+      if (tracks && tracks.length) {
+        try {
+          localStorage.setItem('ahoy_library_cache', JSON.stringify({ tracks, ahoyId }));
+        } catch {}
+      }
+
       const libraryCountBadge = document.getElementById('library-count-badge');
       if (libraryCountBadge) libraryCountBadge.textContent = `${tracks.length} tracks`;
       const badgeLibraryCount = document.getElementById('badge-library-count');
@@ -3884,12 +4005,15 @@
             <td style="color: var(--text-muted);">${escapeHtml(t.artist)}</td>
             <td style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--font-mono);">${new Date(t.granted_at).toLocaleDateString()}</td>
             <td>
-              <div style="display: flex; gap: 0.35rem;">
-                <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}', this)">
+              <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-coral" style="padding: 0.22rem 0.5rem; font-size: 0.68rem;" onclick="playTrack('${escapeJsAttr(t.title)}', '${escapeJsAttr(t.artist)}', '${t.artwork_url}', '${t.full_audio_url}', this, '${t.track_id}')">
                   Play
                 </button>
+                <button id="vault-btn-${t.track_id}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem;" onclick="toggleVaultTrack('${t.track_id}', '${escapeJsAttr(t.title)}', '${t.full_audio_url}')" title="Save MP3 locally in offline vault">
+                  📥 Vault
+                </button>
                 <a href="/api/download/${encodeURIComponent(t.track_id)}" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;" download>
-                  Download MP3
+                  Download
                 </a>
                 <a href="https://player.ahoy.ooo?ahoy_id=${encodeURIComponent(ahoyId || currentUser?.user?.ahoy_id || '')}" target="_blank" class="btn btn-secondary" style="padding: 0.22rem 0.45rem; font-size: 0.68rem; text-decoration: none;">
                   Player
@@ -3902,6 +4026,17 @@
 
       html += `</tbody></table>`;
       container.innerHTML = html;
+
+      // Check offline vault cache asynchronously to mark stored tracks
+      tracks.forEach(async (t) => {
+        const inVault = await isTrackInVault(t.track_id, t.full_audio_url);
+        const btn = document.getElementById(`vault-btn-${t.track_id}`);
+        if (btn && inVault) {
+          btn.className = 'btn btn-mint';
+          btn.innerHTML = '✓ Vaulted';
+          btn.title = 'Saved locally in offline vault. Ready to play offline.';
+        }
+      });
     }
 
     async function loadLibrary() {
@@ -4055,14 +4190,28 @@
       }, 1600);
     }
 
-    function playTrack(title, artist, art, url, sourceElement) {
-      if (audioElement.src === url && !audioElement.paused) {
+    async function playTrack(title, artist, art, url, sourceElement, trackId) {
+      if (audioElement.src && !audioElement.paused && activeTrackButton === sourceElement) {
         audioElement.pause();
         resetActiveTrackButton();
         return;
       }
       stopPreviewRound();
-      audioElement.src = url;
+
+      let playUrl = url;
+      // Retrieve from offline vault if cached locally
+      if ('caches' in window) {
+        try {
+          const cache = await caches.open(VAULT_CACHE_NAME);
+          const cachedMatch = (trackId && await cache.match(`/api/download/${encodeURIComponent(trackId)}`)) || (url && await cache.match(url));
+          if (cachedMatch) {
+            const blob = await cachedMatch.blob();
+            playUrl = URL.createObjectURL(blob);
+          }
+        } catch {}
+      }
+
+      audioElement.src = playUrl;
       activeTrackButton = sourceElement;
       audioElement.play().then(() => { sourceElement.textContent = 'Pause'; }).catch(() => {
         sourceElement.textContent = 'Unavailable';

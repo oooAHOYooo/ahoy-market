@@ -1,0 +1,20 @@
+{
+  "name": "AHOY Store — Sovereign Music & Custom Pressings",
+  "short_name": "AHOY Store",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F6F7FF",
+  "theme_color": "#F04478",
+  "description": "Sovereign digital music, Lossless USB albums, and custom burned mixtapes from the AHOY indie media ecosystem.",
+  "categories": ["music", "entertainment", "shopping"],
+  "icons": [
+    {
+      "src": "/ahoy-wordmark.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

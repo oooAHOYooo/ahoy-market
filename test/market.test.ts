@@ -645,4 +645,25 @@ describe('AHOY Market API & Entitlement Flow', () => {
       config.s3UrlExpirationSeconds = originalExpires;
     }
   });
+
+  it('serves valid PWA web manifest and service worker with no-cache headers', async () => {
+    // 1. Verify /manifest.json
+    const manifestRes = await app.inject({ method: 'GET', url: '/manifest.json' });
+    expect(manifestRes.statusCode).toBe(200);
+    expect(manifestRes.headers['cache-control']).toBe('no-cache');
+    const manifest = manifestRes.json();
+    expect(manifest.name).toContain('AHOY Store');
+    expect(manifest.display).toBe('standalone');
+    expect(manifest.start_url).toBe('/');
+    expect(manifest.theme_color).toBe('#F04478');
+    expect(manifest.icons.length).toBeGreaterThan(0);
+
+    // 2. Verify /sw.js
+    const swRes = await app.inject({ method: 'GET', url: '/sw.js' });
+    expect(swRes.statusCode).toBe(200);
+    expect(swRes.headers['content-type']).toContain('javascript');
+    expect(swRes.headers['cache-control']).toBe('no-cache');
+    expect(swRes.body).toContain('ahoy-vault-audio-v1');
+    expect(swRes.body).toContain('ahoy-market-shell-v1');
+  });
 });
