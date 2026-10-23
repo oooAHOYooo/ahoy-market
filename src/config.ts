@@ -29,6 +29,8 @@ export const config = {
   cloudFrontPrivateKey: (process.env.CLOUDFRONT_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };
 
-if (config.isProduction && !process.env.COOKIE_SECRET) {
-  console.warn('⚠️ [SECURITY] COOKIE_SECRET is unset in production. Please set COOKIE_SECRET in your environment.');
+if (config.isProduction && (!process.env.COOKIE_SECRET || process.env.COOKIE_SECRET.length < 32 ||
+    process.env.COOKIE_SECRET === 'ahoy-market-session-secret-key-32chars-min' ||
+    process.env.COOKIE_SECRET === 'replace-with-a-long-random-secret')) {
+  throw new Error('Production requires a private COOKIE_SECRET of at least 32 characters.');
 }

@@ -20,6 +20,29 @@ describe('AHOY Market API & Entitlement Flow', () => {
     await app.close();
   });
 
+  it('requires the authenticated owner for production entitlement lookups', async () => {
+    const login = await app.inject({ method: 'POST', url: '/api/auth/dev-login', payload: { ahoy_id: 'ahoy_owner' } });
+    const session = login.cookies.find(c => c.name === 'ahoy_market_session')!;
+    const originalProduction = config.isProduction;
+    config.isProduction = true;
+    try {
+      const anonymous = await app.inject({ method: 'GET', url: '/api/entitlements?ahoy_id=ahoy_owner' });
+      expect(anonymous.statusCode).toBe(401);
+      const forgedHeader = await app.inject({ method: 'GET', url: '/api/entitlements?ahoy_id=ahoy_owner', headers: { 'x-ahoy-id': 'ahoy_owner' } });
+      expect(forgedHeader.statusCode).toBe(401);
+      const otherOwner = await app.inject({ method: 'GET', url: '/api/entitlements?ahoy_id=ahoy_someone_else', cookies: { ahoy_market_session: session.value } });
+      expect(otherOwner.statusCode).toBe(403);
+      for (const url of ['/api/entitlements', '/api/entitlements?ahoy_id=ahoy_owner']) {
+        const ownLibrary = await app.inject({ method: 'GET', url, cookies: { ahoy_market_session: session.value } });
+        expect(ownLibrary.statusCode).toBe(200);
+        expect(ownLibrary.json().ahoy_id).toBe('ahoy_owner');
+        expect(ownLibrary.headers['cache-control']).toBe('private, no-store');
+      }
+    } finally {
+      config.isProduction = originalProduction;
+    }
+  });
+
   it('serves health endpoint', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' });
     expect(res.statusCode).toBe(200);

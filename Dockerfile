@@ -1,9 +1,10 @@
-FROM node:22-bookworm-slim AS builder
+FROM node:22.23.4-bookworm-slim AS builder
 
 WORKDIR /app
 
 # Install build dependencies for native modules (better-sqlite3)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
     python3 \
     make \
     g++ \
@@ -16,7 +17,7 @@ COPY src/ ./src/
 COPY public/ ./public/
 RUN npm run build
 
-FROM node:22-bookworm-slim AS runner
+FROM node:22.23.4-bookworm-slim AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -24,6 +25,7 @@ ENV HOST=0.0.0.0
 
 # Install runtime dependencies for native modules (better-sqlite3)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
     python3 \
     make \
     g++ \

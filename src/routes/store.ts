@@ -442,12 +442,18 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     };
   });
 
-  // GET /api/entitlements -> Public/Player Entitlements query
-  // Player at player.ahoy.ooo calls this with `?ahoy_id=...` or `x-ahoy-id`
+  // Production callers must authenticate as the owner of the requested library.
   app.get('/api/entitlements', async (request: FastifyRequest<{ Querystring: { ahoy_id?: string } }>, reply: FastifyReply) => {
     const queryAhoyId = request.query.ahoy_id;
     const auth = getAuthUser(request);
-    const effectiveAhoyId = queryAhoyId || auth?.ahoy_id;
+    if (config.isProduction && !auth) {
+      return reply.code(401).send({ error: 'authentication_required' });
+    }
+    if (config.isProduction && queryAhoyId && queryAhoyId !== auth?.ahoy_id) {
+      return reply.code(403).send({ error: 'forbidden' });
+    }
+    reply.header('Cache-Control', 'private, no-store');
+    const effectiveAhoyId = config.isProduction ? auth?.ahoy_id : queryAhoyId || auth?.ahoy_id;
 
     if (!effectiveAhoyId) {
       return reply.code(400).send({

@@ -38,7 +38,7 @@ npm run dev
 
 Visit `http://127.0.0.1:3020`.
 
-Use Node 22 for local development. Run `npm run build` and `npm test` before release; the tests use the native `better-sqlite3` module and require dependencies installed for the active Node version.
+Use Node 22.23.4 or a later Node 22 patch for local development. Run `npm run build` and `npm test` before release; the tests use the native `better-sqlite3` module and require dependencies installed for the active Node version.
 
 AHOY ID registers separate market clients with `openid profile` scopes: `app.ahoy.market.local` for `http://127.0.0.1:3020/api/auth/callback`, and `app.ahoy.market` for `https://market.ahoy.ooo/api/auth/callback`. Apply the AHOY ID market-client migration before real sign-in. The local development login helper exercises only the market session flow.
 
@@ -112,7 +112,7 @@ The marketplace incorporates several layers of defense to protect user identity,
 - **CRLF & Header Injection Protection:**
   Audio download filenames strip newline characters (`\r`, `\n`) and invalid filesystem characters before formatting `Content-Disposition` attachment headers.
 - **Environment & Secret Safeguards:**
-  In production (`NODE_ENV=production`), missing `COOKIE_SECRET` triggers runtime security warnings, and development-only bypasses (`/api/auth/dev-login`, direct test card checkout, unauthenticated boost query inspections) are strictly locked down.
+  In production (`NODE_ENV=production`), missing, short, or known placeholder `COOKIE_SECRET` values prevent startup, and development-only bypasses (`/api/auth/dev-login`, direct test card checkout, unauthenticated boost query inspections) are strictly locked down.
 
 ## Performance Optimizations
 
@@ -173,3 +173,13 @@ AHOY Market adheres to a **sovereign music philosophy**: music files are DRM-fre
 - Master audio files reside in private cloud storage with public access blocked.
 - Master stream and download URLs resolve through AWS SigV4 pre-signed URLs or CloudFront signed cookies with a 15-minute expiration window (`X-Amz-Expires=900`).
 
+
+## October 2026 security rebuild
+
+The native-runtime version file and both Docker stages select Node 22.23.4. Docker stages explicitly install the distribution CA certificate package. Rebuild with a fresh base image and no cached package-install layers after certificate advisories (`docker build --pull --no-cache .`).
+
+On Render, check which branch and runtime the service actually deploys. For a native Node service, remove any older `NODE_VERSION` dashboard override or set it to 22.23.4; that override takes precedence over `.node-version`. Redeploy with the build cache cleared, then confirm `node --version` in the deployed shell. For Docker, confirm the fresh image contains the updated CA package as well. Source changes alone do not patch an existing running container.
+
+Production `/api/entitlements` requires a market session cookie or market session Bearer token for the requested owner. A supplied `ahoy_id` or `x-ahoy-id` alone is not authentication. Player clients must authenticate before retrieving a library. Set a private random `COOKIE_SECRET` of at least 32 characters before deploying.
+
+Seed catalog entries currently reuse the full audio URL as the public preview URL. Create separate preview clips and move master files into private storage before relying on paid-audio access protection; database URL stripping and signed links cannot protect an already public master.

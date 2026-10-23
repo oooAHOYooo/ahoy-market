@@ -74,9 +74,9 @@ export function buildApp(storeOption?: MarketStore): FastifyInstance {
     cacheControl: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.html') || filePath.endsWith('sw.js') || filePath.endsWith('manifest.json')) {
-        res.setHeader('Cache-Control', 'no-cache');
+        res.header('Cache-Control', 'no-cache');
       } else {
-        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+        res.header('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
       }
     },
   });
