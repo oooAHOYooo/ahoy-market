@@ -885,18 +885,22 @@ export class MarketStore {
     return order?.status || null;
   }
 
-  completeStripeCheckout(session: { id: string; payment_status?: string; amount_total?: number; currency?: string }) {
+  completeStripeCheckout(session: { id: string; payment_status?: string; amount_total?: number; currency?: string; customer_email?: string | null }) {
     if (session.payment_status !== 'paid' || session.currency !== 'usd') return false;
     const tx = this.db.transaction(() => {
       const order = this.db.prepare(`SELECT * FROM stripe_checkout_orders WHERE session_id = ?`).get(session.id) as
         { ahoy_id: string; email: string | null; release_id: string; track_id: string | null; amount_cents: number; status: string } | undefined;
       if (!order || order.status !== 'pending' || order.amount_cents !== session.amount_total) return false;
+      const email = order.email || session.customer_email || null;
       this.recordPurchase({
-        ahoy_id: order.ahoy_id, email: order.email, release_id: order.release_id,
+        ahoy_id: order.ahoy_id, email, release_id: order.release_id,
         track_id: order.track_id, amount_cents: order.amount_cents,
         payment_method: 'stripe', payment_ref: session.id, format: 'digital_master',
       });
-      this.db.prepare(`UPDATE stripe_checkout_orders SET status = 'completed' WHERE session_id = ?`).run(session.id);
+      this.db.prepare(`UPDATE stripe_checkout_orders SET status = 'completed', email = ? WHERE session_id = ?`).run(email, session.id);
+      if (email) {
+        this.db.prepare(`UPDATE sessions SET email = ? WHERE ahoy_id = ? AND (email IS NULL OR email = '')`).run(email, order.ahoy_id);
+      }
       return true;
     });
     return tx();

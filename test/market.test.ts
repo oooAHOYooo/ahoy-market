@@ -122,6 +122,40 @@ describe('AHOY Market API & Entitlement Flow', () => {
     }
   });
 
+  it('allows guest express Stripe checkout without forced OAuth sign-in wall', async () => {
+    const originalKey = config.stripeSecretKey;
+    const originalSecret = config.stripeWebhookSecret;
+    const originalFetch = globalThis.fetch;
+    config.stripeSecretKey = 'sk_test_guest';
+    config.stripeWebhookSecret = 'whsec_guest';
+    globalThis.fetch = async () => new Response(JSON.stringify({ id: 'cs_test_guest_1', url: 'https://checkout.stripe.com/guest-test' }), { status: 200 });
+    try {
+      // 1. Unauthenticated request to /api/checkout/stripe
+      const checkout = await app.inject({
+        method: 'POST',
+        url: '/api/checkout/stripe',
+        payload: { release_id: 'rel_samuel_witch_1' },
+      });
+      expect(checkout.statusCode).toBe(200);
+      expect(checkout.json().checkout_url).toBe('https://checkout.stripe.com/guest-test');
+      const cookie = checkout.cookies.find(c => c.name === 'ahoy_market_session');
+      expect(cookie).toBeDefined();
+
+      // 2. Status is pending for the guest session
+      const pending = await app.inject({
+        method: 'GET',
+        url: '/api/checkout/stripe/cs_test_guest_1',
+        cookies: { ahoy_market_session: cookie!.value },
+      });
+      expect(pending.statusCode).toBe(200);
+      expect(pending.json().status).toBe('pending');
+    } finally {
+      config.stripeSecretKey = originalKey;
+      config.stripeWebhookSecret = originalSecret;
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('lists catalog releases with tracks', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/releases' });
     expect(res.statusCode).toBe(200);

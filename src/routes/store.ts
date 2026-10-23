@@ -11,7 +11,7 @@ import {
   inscribeAudioProvenance,
   antiLeechLimiter,
 } from '../antiPiracy.js';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 
 const purchaseInput = z.object({
   release_id: z.string().min(1),
@@ -283,9 +283,32 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
   });
 
   // Digital purchases are priced on the server and remain pending until Stripe confirms payment.
+  // Supports both authenticated users and 1-click guest express checkout without forced OAuth walls.
   app.post('/api/checkout/stripe', async (request: FastifyRequest, reply: FastifyReply) => {
-    const auth = getAuthUser(request);
-    if (!auth) return reply.code(401).send({ error: 'authentication_required' });
+    let auth = getAuthUser(request);
+    if (!auth) {
+      // Guest express checkout: automatically generate a guest session so purchases are retained
+      const guestId = `ahoy_guest_${randomBytes(6).toString('hex')}`;
+      const session = store.saveSession({
+        ahoy_id: guestId,
+        email: null,
+        name: 'Guest Customer',
+        expiresInDays: 30,
+      });
+      reply.setCookie('ahoy_market_session', session.session_token, {
+        path: '/',
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'lax',
+        maxAge: 30 * 86400,
+      });
+      auth = {
+        ahoy_id: guestId,
+        email: null,
+        name: 'Guest Customer',
+      };
+    }
+    const customer = auth;
     if (!config.stripeSecretKey || !config.stripeWebhookSecret) return reply.code(503).send({ error: 'stripe_not_configured' });
     const parsed = z.object({ release_id: z.string().min(1), track_id: z.string().optional() }).safeParse(request.body);
     if (!parsed.success) return reply.code(400).send({ error: 'invalid_checkout_payload' });
@@ -301,11 +324,11 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
       cancel_url: `${config.publicBaseUrl}/?checkout=cancelled`,
       'line_items[0][price_data][currency]': 'usd',
       'line_items[0][price_data][unit_amount]': String(amount),
-      'line_items[0][price_data][product_data][name]': `${release.artist} — ${track?.title || release.title} (digital)`,
+      'line_items[0][price_data][product_data][name]': `${release.artist} — ${track?.title || release.title} (digital MP3)`,
       'line_items[0][quantity]': '1',
-      client_reference_id: auth.ahoy_id,
+      client_reference_id: customer.ahoy_id,
     });
-    if (auth.email) params.set('customer_email', auth.email);
+    if (customer.email) params.set('customer_email', customer.email);
     let stripeResponse: Response;
     try {
       stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
@@ -318,7 +341,7 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     if (!stripeResponse.ok) return reply.code(502).send({ error: 'stripe_checkout_failed' });
     const session = await stripeResponse.json() as { id?: string; url?: string };
     if (!session.id || !session.url) return reply.code(502).send({ error: 'stripe_checkout_failed' });
-    store.saveStripeCheckout({ session_id: session.id, ahoy_id: auth.ahoy_id, email: auth.email,
+    store.saveStripeCheckout({ session_id: session.id, ahoy_id: customer.ahoy_id, email: customer.email,
       release_id: release.id, track_id: track?.id, amount_cents: amount });
     return { checkout_url: session.url };
   });
@@ -341,11 +364,16 @@ export const storeRoutes = (store: MarketStore): FastifyPluginAsync => async (ap
     const expected = createHmac('sha256', config.stripeWebhookSecret).update(`${timestamp}.${raw.toString('utf8')}`).digest('hex');
     const candidate = Buffer.from(parts.v1 || '', 'hex');
     if (candidate.length !== 32 || !timingSafeEqual(candidate, Buffer.from(expected, 'hex'))) return reply.code(400).send({ error: 'invalid_signature' });
-    const event = request.body as { type?: string; data?: { object?: { id?: string; payment_status?: string; amount_total?: number; currency?: string } } };
+    const event = request.body as { type?: string; data?: { object?: { id?: string; payment_status?: string; amount_total?: number; currency?: string; customer_details?: { email?: string } | null; customer_email?: string | null } } };
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       const session = event.data?.object;
-      if (session?.id) store.completeStripeCheckout({ id: session.id, payment_status: session.payment_status,
-        amount_total: session.amount_total, currency: session.currency });
+      if (session?.id) store.completeStripeCheckout({
+        id: session.id,
+        payment_status: session.payment_status,
+        amount_total: session.amount_total,
+        currency: session.currency,
+        customer_email: session.customer_details?.email || session.customer_email || null,
+      });
     }
     return { received: true };
   });
